@@ -1,0 +1,9 @@
+# Remove files that have no extension
+*
+!/**/
+!*.*
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+/uploads
