@@ -1,5 +1,9 @@
 # Causal Reasoning (WIP)
 
+This project was carried out with the support of Itaú Unibanco S.A., through the Itaú Scholarship Program (PBI).
+
+This project was based on the work of João Arroyo and João Gabriel on link... TODO
+
 ## Sofwtare Engineering Best Practices
 
 <a name="flake8"></a>
