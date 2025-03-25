@@ -10,7 +10,6 @@ from causal_usp_icti.utils.parser import (
     parse_state,
     parse_target,
     parse_default_input,
-    parse_file,
 )
 from causal_usp_icti.linear_algorithm.opt_problem_builder import OptProblemBuilder
 
@@ -106,11 +105,8 @@ class CausalModel:
         )
 
 
-def get_graph(str_graph: str = None, unobservables: list[str] = None, file = None):
-    if file is not None:
-        auxTuple = parse_file(file)    
-    else:
-        auxTuple = parse_default_input(versao_str=str_graph, latent=unobservables)
+def get_graph(str_graph: str = None, unobservables: list[str] = None):
+    auxTuple = parse_default_input(versao_str=str_graph, latent=unobservables)
 
     numberOfNodes, labelToIndex, indexToLabel, adj, cardinalities, parents = auxTuple
 

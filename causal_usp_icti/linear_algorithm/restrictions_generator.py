@@ -3,10 +3,9 @@ import os
 
 import pandas as pd
 
-from causal_usp_icti.graph.graph import Graph, get_graph
+from causal_usp_icti.graph.graph import Graph
 from causal_usp_icti.utils.mechanisms_generator import MechanismGenerator
 from causal_usp_icti.utils.probabilities_helper import ProbabilitiesHelper
-from causal_usp_icti.utils._enum import DirectoriesPath
 
 
 class ObjFunctionGenerator:
@@ -309,84 +308,3 @@ class ObjFunctionGenerator:
             objFunctionCoefficients.append(mechanismCoefficient)
 
         return objFunctionCoefficients
-
-    def test(input_path, csv_path):
-        """
-        used for the development of the class. Uses the itau graph itau.txt.
-        """
-        graph = get_graph(input_path)
-        if False:
-            print("debug graph parsed by terminal:")
-
-            for i in range(graph.numberOfNodes):
-                print(f"node index {i} - node name: {graph.indexToLabel[i]}")
-                print(f"children: {graph.graphNodes[i].children}")
-                print(f"latentParent: {graph.graphNodes[i].latentParent}")
-                print(f"parents: {graph.graphNodes[i].parents}")
-            print("\n\n\n\n")
-
-        df = pd.read_csv(csv_path)
-
-        objFG = ObjFunctionGenerator(
-            graph=graph,
-            intervention=graph.labelToIndex["X"],
-            interventionValue=0,
-            target=graph.labelToIndex["Y"],
-            targetValue=1,
-            empiricalProbabilitiesVariables=[],
-            mechanismVariables=[],
-            conditionalProbabilitiesVariables={},
-            debugOrder=[],
-            dataFrame=df,
-        )
-        objFG.find_linear_good_set()
-        print(f"\n\n-------- Debug restrictions --------")
-        for node in objFG.debugOrder:
-            if node in objFG.empiricalProbabilitiesVariables:
-                print(f"P({objFG.graph.indexToLabel[node]})", end="")
-            elif node in objFG.mechanismVariables:
-                parents: str = ""
-                for parent in objFG.graph.graphNodes[node].parents:
-                    parents += f"{objFG.graph.indexToLabel[parent]}, "
-                print(f"P({objFG.graph.indexToLabel[node]}|{parents[:-2]})", end="")
-            else:
-                wset: str = ""
-                for condVar in objFG.conditionalProbabilities[node]:
-                    if condVar != objFG.intervention:
-                        wset += f"{objFG.graph.indexToLabel[condVar]}, "
-                print(
-                    f"P({objFG.graph.indexToLabel[node]}|{objFG.graph.indexToLabel[objFG.intervention]}, {wset[:-2]})",
-                    end="",
-                )
-
-            if node != objFG.debugOrder[-1]:
-                print(" * ", end="")
-
-        print("\n")
-
-        mechanisms = objFG.get_mechanisms_pruned()
-        objCoefficients = objFG.build_objective_function(mechanisms)
-        print("--- DEBUG OBJ FUNCTION ---")
-        for i, coeff in enumerate(objCoefficients):
-            print(f"c_{i} = {coeff}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Gets causal inference under Partial-Observability."
-    )
-    parser.add_argument(
-        "input_filename", help="The name of the input file in test_case/input directory"
-    )
-    parser.add_argument("csv_filename", help="The name of the csv")
-    args = parser.parse_args()
-
-    input_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        f"../../{DirectoriesPath.TEST_CASES_INPUTS.value}/{args.input_filename}.txt",
-    )
-    csv_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        f"../../{DirectoriesPath.CSV_PATH.value}/{args.csv_filename}.csv",
-    )
-    ObjFunctionGenerator.test(input_path, csv_path)

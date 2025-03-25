@@ -123,7 +123,13 @@ def main(dag: Graph):
 
 
 if __name__ == "__main__":
-    dag = get_graph(file=Examples.TXT_ITAU_EXAMPLE.value)  # use itau_simplified
+    itau_input = (
+        "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
+    )
+    itau_unobs = ["U1", "U2", "U3"]
+    itau_target = "Y"
+    itau_intervention = "X"
+    dag = get_graph(str_graph=itau_input, unobservables=itau_unobs)  # use itau_simplified
     start = tm.time()
     main(dag=dag)
     end = tm.time()
