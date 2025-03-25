@@ -1,0 +1,17 @@
+7
+8
+U1 0
+U2 0
+A 2
+W 2
+Z 2
+X 2
+Y 2
+U2 Y
+U2 X
+U2 A
+U1 Z
+U1 W
+W Z
+Z X
+X Y
