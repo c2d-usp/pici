@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "causal-usp-icti"
+version = "0.1.0"
+description = "Package for causal inference under partially observability"
+authors = ["danlawand <daniel.lawand@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.2.3"
+scipy = "^1.15.2"
+networkx = "^3.4.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
