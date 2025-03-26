@@ -4,9 +4,8 @@ import os
 import pandas as pd
 
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.utils.mechanisms_generator import MechanismGenerator
-from causal_reasoning.utils.probabilities_helper import ProbabilitiesHelper
-from causal_reasoning.utils._enum import DirectoriesPath
+from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
+from causal_reasoning.linear_algorithm.probabilities_helper import ProbabilitiesHelper
 
 
 class ObjFunctionGenerator:

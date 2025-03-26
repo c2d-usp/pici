@@ -48,72 +48,6 @@ def draw_graph(graph: nx.Graph, node_colors: list = None):
     )
 
 
-def str_to_joaos(
-    versao_str: str, latent: list[str], custom_cardinalities: dict = None
-) -> str:
-    """
-    Converts a string of edges like:
-      "U1 -> X, U1 -> Y, U2 -> Z, X -> Y, Z -> X"
-    into the a string that follows the pattern:
-      5 # Number of nodes \n
-      5 # Number of egdes \n
-      U1 0 # Node U1 has cardinality 0 \n
-      U2 0 # Node U2 has cardinality 0 \n
-      X 2 # Node X has cardinality 2 \n
-      Y 2 # Node Y has cardinality 2 \n
-      Z 2 # Node Z has cardinality 2 \n
-      U1 X # Edge U1 -> X \n
-      U1 Y # Edge U1 -> Y \n
-      U2 Z # Edge U2 -> Z \n
-      X Y # Edge X -> Y \n
-      Z X # Edge Z -> X
-    """
-    if custom_cardinalities is None:
-        custom_cardinalities = {}
-
-    edges_part = versao_str.split(",")
-    edges = []
-    node_order = []
-    node_set = set()
-
-    for part in edges_part:
-        part = part.strip()
-        left, right = part.split("->")
-        left = left.strip()
-        right = right.strip()
-
-        edges.append((left, right))
-
-        for n in (left, right):
-            if n not in node_set:
-                node_order.append(n)
-                node_set.add(n)
-
-    node_card = {}
-    for node in node_order:
-        if node in custom_cardinalities:
-            node_card[node] = custom_cardinalities[node]
-        else:
-            node_card[node] = 0 if node in latent else 2
-
-    u_nodes = [n for n in node_order if n in latent]
-    other_nodes = [n for n in node_order if n not in latent]
-    final_node_order = u_nodes + other_nodes
-
-    lines = []
-
-    lines.append(str(len(final_node_order)))
-    lines.append(str(len(edges)))
-
-    for node in final_node_order:
-        lines.append(f"{node} {node_card[node]}")
-
-    for left, right in edges:
-        lines.append(f"{left} {right}")
-
-    return "\n".join(lines)
-
-
 def get_tuple_edges(edges_str: str) -> List[Tuple[str, str]]:
     """
     Extracts the edges in tuple form from the edges string.
@@ -161,20 +95,6 @@ def generate_example(
 
     node_colors = define_colors(graph, latent, intervention, target)
     draw_graph(graph, node_colors)
-
-
-def get_joaos_input(
-    edges_str: str,
-    latent: list[str],
-    file_path: str = "",
-    custom_cardinalities: dict = None,
-):
-    joaos_str = str_to_joaos(edges_str, latent, custom_cardinalities)
-    if not file_path == "":
-        f = open(file_path, "w")
-        f.write(joaos_str)
-    else:
-        print(joaos_str)
 
 
 def tuple_generate_example(edges, custom_cardinalities: dict = None):
