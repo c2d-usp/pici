@@ -4,7 +4,58 @@ This project was carried out with the support of Itaú Unibanco S.A., through th
 
 This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries) 
 
+
+## Install Dependencies
+### Linux
+<a name="poetry"></a>
+#### Poetry
+We're using [poetry](https://python-poetry.org/docs/) as pyhton dependency management.
+
+- Install dependencies
+```bash
+poetry install
+```
+
+## How to run
+### Linux
+- Activate poetry virtual environment
+```bash
+eval $(poetry env activate)
+```
+
+```bash
+python script.py
+```
+
+Example:
+```bash
+python causal_reasoning/example/scipy_example.py
+```
+The output should be:
+```
+Using the complete objective function, the results are:
+Lower bound: -0.23 - Upper bound: -0.15
+
+Using the complete objective function, the result for the positive query is:
+Lower bound: 0.45 - Upper bound: 0.52
+Using the complete objective function, the result for the negative query is:
+Lower bound: 0.67 - Upper bound: 0.68
+
+With the first method, we obtain the interval: [-0.23,-0.15]
+With the second method, we obtain the interval: [-0.23,-0.15]
+```
+
+- To exit the poetry virtual environment run:
+
+```bash
+deactivate
+```
+<br>
+
 ## Sofwtare Engineering Best Practices
+
+There following tools are automatically installed with [poetry](#poetry).
+Therefore, you don't need to install them on your machine. 
 
 <a name="flake8"></a>
 ### Flake8 
@@ -25,17 +76,10 @@ Running this command will output any style violations or errors found in `your_s
 
 <br>
 
-
 <a name="black"></a>
 ### Black 
 This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.  
-Black is an code formatter that ensures consistency by enforcing a uniform style.  
-
-### **Installation**  
-To install Black, run:  
-```bash
-pip install black
-```
+Black is an code formatter that ensures consistency by enforcing a uniform style.
 
 Usage Example:
 
@@ -49,6 +93,7 @@ Running this command will change automatically.
 
 ### Imports
 
+<a name="isort"></a>
 #### Isort
 **isort** focuses specifically on the organization of import statements. It automatically sorts imports alphabetically and separates them into sections (standard library, third-party, and local imports), ensuring that your import statements are both orderly and compliant with best practices. This not only enhances readability but also helps prevent merge conflicts and import-related errors.
 
@@ -101,46 +146,4 @@ In this example, isort has organized the imports into three distinct sections:
 
 This separation improves readability and maintainability of your code by clearly distinguishing between different types of dependencies.
 
-## Install
-### Linux
-We're using [poetry](https://python-poetry.org/docs/) as pyhton dependency management.
-
-- Install dependencies
-```bash
-poetry install
-```
-
-## How to run
-### Linux
-- Activate poetry virtual environment
-```bash
-eval $(poetry env activate)
-```
-
-```bash
-poetry run python script.py
-```
-
-Example:
-```bash
-poetry run python causal_reasoning/example/scipy_example.py
-```
-The output should be:
-```
-Using the complete objective function, the results are:
-Lower bound: -0.23 - Upper bound: -0.15
-
-Using the complete objective function, the result for the positive query is:
-Lower bound: 0.45 - Upper bound: 0.52
-Using the complete objective function, the result for the negative query is:
-Lower bound: 0.67 - Upper bound: 0.68
-
-With the first method, we obtain the interval: [-0.23,-0.15]
-With the second method, we obtain the interval: [-0.23,-0.15]
-```
-
-- To exit the poetry virtual environment run:
-
-```bash
-deactivate
-```
+<br>
