@@ -94,6 +94,9 @@ class ObjFunctionGenerator:
                     if (parent not in current_targets) and parent != intervention:
                         current_targets.append(parent)
             else:
+                # TODO: Se aqui é apenas um caso de achar qual set é um d-separator
+                # Então, podemos iterar pelos sets e chamar o método paricular de 
+                # d-separação 
                 print(f"------- Case 3: Find d-separator set")
                 ancestors = self.graph.find_ancestors(node=current_target)
                 conditionableAncestors: list[int] = []
