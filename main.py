@@ -1,7 +1,7 @@
 import pandas as pd
 
-from causal_reasoning.utils._enum import Examples
 from causal_reasoning.causal_model import CausalModel
+from causal_reasoning.utils._enum import Examples
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
         target_value=1,
     )
     balke_model.inference_query()
-    print(f"{balke_model.are_d_separated(["Z"], ["Y"], ["X"])}")
+    print(f"{balke_model.are_d_separated({"Z"}, {"Y"}, {"X"})}")
 
     # itau_input = (
     #     "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"

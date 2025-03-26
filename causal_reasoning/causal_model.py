@@ -1,5 +1,6 @@
 import networkx as nx
 from pandas import DataFrame
+import matplotlib.pyplot as plt
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -23,7 +24,6 @@ class CausalModel:
         target: str | None = "",
         target_value: int | None = None,
     ) -> None:
-        self._data = data
         self.unobservables = parse_state(unobservables)
 
         self.interventions = interventions
@@ -104,11 +104,29 @@ class CausalModel:
 
     def are_d_separated(
         self,
-        set_nodes_1: list[str],
-        set_nodes_2: list[str],
-        conditioned_nodes: list[str],
+        set_nodes_X: list[str],
+        set_nodes_Y: list[str],
+        set_nodes_Z: list[str],
     ) -> bool:
-        return self.graph.check_dseparation(set_nodes_1, set_nodes_2, conditioned_nodes)
+        '''
+            Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+        '''
+        # TODO: Usando nx é muito mais fácil,
+        # porém não tem o conceito de não observável.
+        # É possível atribuir atributos aos nós
+        # nx.set_node_attributes(G, {3: "unobservable", 4: "unobservable"}, "status")
+
+        
+        # plt.figure(figsize=(6, 6))
+        # pos = nx.spring_layout(G)
+        # nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=2000, arrowsize=20)
+
+        # # Save the image
+        # plt.savefig("digraph.png", dpi=300, bbox_inches='tight')
+        # plt.show()
+        a = nx.is_d_separator(G, set_nodes_X, set_nodes_Y, set_nodes_Z)
+        print(f"A:::{a}")
+        return self.graph.check_dseparation(set_nodes_X, set_nodes_Y, set_nodes_Z)
 
 
 def get_graph(str_graph: str = None, unobservables: list[str] = None):

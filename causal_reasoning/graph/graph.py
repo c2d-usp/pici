@@ -18,7 +18,7 @@ class Graph:
         exogenous: list[int],
         endogenous: list[int],
         topologicalOrder: list[int],
-        DAG: nx.digraph,
+        DAG: nx.DiGraph,
         cComponentToUnob: dict[int, int],
         graphNodes: list[Node],
         moralGraphNodes: list[MoralNode],
