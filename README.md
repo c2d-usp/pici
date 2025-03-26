@@ -105,10 +105,6 @@ This separation improves readability and maintainability of your code by clearly
 ### Linux
 We're using [poetry](https://python-poetry.org/docs/) as pyhton dependency management.
 
-<!-- - Activate poetry virtual environment
-```bash
-poetry shell
-``` -->
 - Install dependencies
 ```bash
 poetry install
@@ -116,10 +112,10 @@ poetry install
 
 ## How to run
 ### Linux
-<!-- - Activate poetry virtual environment
+- Activate poetry virtual environment
 ```bash
-poetry shell
-``` -->
+eval $(poetry env activate)
+```
 
 ```bash
 poetry run python script.py
@@ -143,13 +139,8 @@ With the first method, we obtain the interval: [-0.23,-0.15]
 With the second method, we obtain the interval: [-0.23,-0.15]
 ```
 
-<!-- - To exit the poetry virtual environment run:
-
-```bash
-exit
-```
-or
+- To exit the poetry virtual environment run:
 
 ```bash
 deactivate
-``` -->
+```

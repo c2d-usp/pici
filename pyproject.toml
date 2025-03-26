@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "causal-usp-icti"
+name = "causal_reasoning"
 version = "0.1.0"
 description = "Package for causal inference under partially observability"
 authors = ["danlawand <daniel.lawand@gmail.com>"]
-license = "MIT"
+license = ""
 readme = "README.md"
 
 [tool.poetry.dependencies]
