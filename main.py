@@ -1,7 +1,7 @@
 import pandas as pd
 
-from causal_usp_icti.utils._enum import Examples
-from causal_usp_icti.causal_model import CausalModel
+from causal_reasoning.utils._enum import Examples
+from causal_reasoning.causal_model import CausalModel
 
 
 def main():

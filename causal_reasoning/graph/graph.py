@@ -1,6 +1,6 @@
 import networkx as nx
-from causal_usp_icti.graph.moral_node import MoralNode
-from causal_usp_icti.graph.node import Node
+from causal_reasoning.graph.moral_node import MoralNode
+from causal_reasoning.graph.node import Node
 
 
 class Graph:

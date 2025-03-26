@@ -2,16 +2,16 @@ import networkx as nx
 from typing import Optional
 from pandas import DataFrame
 
-from causal_usp_icti.utils.funcoes import get_tuple_edges
-from causal_usp_icti.graph.graph import Graph
-from causal_usp_icti.graph.node import Node
-from causal_usp_icti.utils.parser import (
+from causal_reasoning.utils.funcoes import get_tuple_edges
+from causal_reasoning.graph.graph import Graph
+from causal_reasoning.graph.node import Node
+from causal_reasoning.utils.parser import (
     parse_edges,
     parse_state,
     parse_target,
     parse_default_input,
 )
-from causal_usp_icti.linear_algorithm.opt_problem_builder import OptProblemBuilder
+from causal_reasoning.linear_algorithm.opt_problem_builder import OptProblemBuilder
 
 
 class CausalModel:

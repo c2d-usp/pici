@@ -3,10 +3,10 @@ import os
 
 import pandas as pd
 
-from causal_usp_icti.graph.graph import Graph
-from causal_usp_icti.utils.mechanisms_generator import MechanismGenerator
-from causal_usp_icti.utils.probabilities_helper import ProbabilitiesHelper
-from causal_usp_icti.utils._enum import DirectoriesPath
+from causal_reasoning.graph.graph import Graph
+from causal_reasoning.utils.mechanisms_generator import MechanismGenerator
+from causal_reasoning.utils.probabilities_helper import ProbabilitiesHelper
+from causal_reasoning.utils._enum import DirectoriesPath
 
 
 class ObjFunctionGenerator:

@@ -1,7 +1,7 @@
 import itertools
 from collections import namedtuple
 
-from causal_usp_icti.graph.node import Node
+from causal_reasoning.graph.node import Node
 
 dictAndIndex = namedtuple("dictAndIndex", ["mechanisms", "index"])
 
