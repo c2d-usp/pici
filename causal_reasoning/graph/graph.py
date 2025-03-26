@@ -148,3 +148,31 @@ class Graph:
         for adj in self.moralGraphNodes[node].adjacent:
             if not self.visited[adj]:
                 self.dfs_moral(node=adj)
+
+    def check_dseparation(
+        self, set_nodes_1: list[str], set_nodes_2: list[str], conditioned_nodes: list[str]
+    ) -> bool:
+        """
+        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
+        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
+        """
+        nodes1 = [self.labelToIndex[node] for node in set_nodes_1]
+        nodes2 = [self.labelToIndex[node] for node in set_nodes_2]
+        conditionedNodes = [self.labelToIndex[node] for node in conditioned_nodes]
+
+        self.build_moral(
+            consideredNodes=list(range(0, self.numberOfNodes)),
+            conditionedNodes=conditionedNodes,
+        )
+
+        self.visited = [False] * self.numberOfNodes
+        for node in nodes1:
+            if not self.visited[node]:
+                self.dfs_moral(node)
+
+        areDseparated = True
+        for node in nodes2:
+            if self.visited[node]:
+                areDseparated = False
+                break
+        return areDseparated

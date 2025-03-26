@@ -1,8 +1,6 @@
 import networkx as nx
-from typing import Optional
 from pandas import DataFrame
 
-from causal_reasoning.utils.funcoes import get_tuple_edges
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils.parser import (
@@ -103,6 +101,14 @@ class CausalModel:
             self.target,
             self.target_value,
         )
+
+    def are_d_separated(
+        self,
+        set_nodes_1: list[str],
+        set_nodes_2: list[str],
+        conditioned_nodes: list[str],
+    ) -> bool:
+        return self.graph.check_dseparation(set_nodes_1, set_nodes_2, conditioned_nodes)
 
 
 def get_graph(str_graph: str = None, unobservables: list[str] = None):
