@@ -36,23 +36,7 @@ def parse_edges(state):
 
 def parse_default_input(
     versao_str: str, latent: list[str]) -> str:
-    """
-    Converts a string of edges like:
-      "U1 -> X, U1 -> Y, U2 -> Z, X -> Y, Z -> X"
-    into the a string that follows the pattern:
-      5 # Number of nodes \n
-      5 # Number of egdes \n
-      U1 0 # Node U1 has cardinality 0 \n
-      U2 0 # Node U2 has cardinality 0 \n
-      X 2 # Node X has cardinality 2 \n
-      Y 2 # Node Y has cardinality 2 \n
-      Z 2 # Node Z has cardinality 2 \n
-      U1 X # Edge U1 -> X \n
-      U1 Y # Edge U1 -> Y \n
-      U2 Z # Edge U2 -> Z \n
-      X Y # Edge X -> Y \n
-      Z X # Edge Z -> X
-    """
+
     custom_cardinalities = {}
 
     edges_part = versao_str.split(",")
@@ -96,12 +80,12 @@ def parse_default_input(
         indexToLabel[index] = node
         cardinalities[index] = cardinality
 
-    adj: list[list[int]] = [[] for _ in range(numberOfNodes)]
+    adjacency_list: list[list[int]] = [[] for _ in range(numberOfNodes)]
     parents: list[list[int]] = [[] for _ in range(numberOfNodes)]
     for left, right in edges:
         uIndex = labelToIndex[left]
         vIndex = labelToIndex[right]
-        adj[uIndex].append(vIndex)
+        adjacency_list[uIndex].append(vIndex)
         parents[vIndex].append(uIndex)
 
-    return numberOfNodes, labelToIndex, indexToLabel, adj, cardinalities, parents
+    return numberOfNodes, labelToIndex, indexToLabel, adjacency_list, cardinalities, parents

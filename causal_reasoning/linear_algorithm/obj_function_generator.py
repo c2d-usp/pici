@@ -1,11 +1,8 @@
-import argparse
-import os
-
 import pandas as pd
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
-from causal_reasoning.linear_algorithm.probabilities_helper import ProbabilitiesHelper
+from causal_reasoning.linear_algorithm.probabilities_helper import find_probability, find_conditional_probability
 
 
 class ObjFunctionGenerator:
@@ -254,7 +251,7 @@ class ObjFunctionGenerator:
                         variable in self.empiricalProbabilitiesVariables
                     ):  # Case 1: coff *= P(V=value)
                         print("Case 1")
-                        variableProbability = ProbabilitiesHelper.find_probability(
+                        variableProbability = find_probability(
                             dataFrame=self.dataFrame,
                             indexToLabel=self.graph.indexToLabel,
                             variableRealizations={variable: variablesValues[variable]},
@@ -288,7 +285,7 @@ class ObjFunctionGenerator:
                             ]
 
                         conditionalProbability = (
-                            ProbabilitiesHelper.find_conditional_probability(
+                            find_conditional_probability(
                                 dataFrame=self.dataFrame,
                                 indexToLabel=self.graph.indexToLabel,
                                 targetRealization={variable: variablesValues[variable]},

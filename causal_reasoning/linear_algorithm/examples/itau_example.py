@@ -1,11 +1,10 @@
-import os
 import time as tm
 
 from scipy.optimize import linprog
 import pandas as pd
 
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
-from causal_reasoning.linear_algorithm.probabilities_helper import ProbabilitiesHelper
+from causal_reasoning.linear_algorithm.probabilities_helper import find_probability, find_conditional_probability
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.causal_model import get_graph
 from causal_reasoning.utils._enum import Examples
@@ -83,7 +82,7 @@ def main(dag: Graph):
         for d in range(2):
             dRlt[dag.labelToIndex["D"]] = d
             if mechanism[u]["3=" + str(x0) + ",4=" + str(d)] == y0:
-                coef += ProbabilitiesHelper.find_conditional_probability(
+                coef += find_conditional_probability(
                     dataFrame=df,
                     indexToLabel=dag.indexToLabel,
                     targetRealization=dRlt,
@@ -101,12 +100,12 @@ def main(dag: Graph):
                 xRlt[dag.labelToIndex["X"]] = x
                 dRlt[dag.labelToIndex["D"]] = d
                 b.append(
-                    ProbabilitiesHelper.find_conditional_probability(
+                    find_conditional_probability(
                         dataFrame=df,
                         indexToLabel=dag.indexToLabel,
                         targetRealization=yRlt,
                         conditionRealization=dxRlt) *
-                    ProbabilitiesHelper.find_probability(
+                    find_probability(
                         dataFrame=df,
                         indexToLabel=dag.indexToLabel,
                         variableRealizations=xRlt))

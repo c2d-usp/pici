@@ -1,11 +1,8 @@
-import os
-import argparse
-
 import pandas as pd
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
-from causal_reasoning.linear_algorithm.probabilities_helper import ProbabilitiesHelper
+from causal_reasoning.linear_algorithm.probabilities_helper import find_conditional_probability
 
 
 def create_dict_index(parents: list[int], rlt: list[int], indexerList: list[int]):
@@ -64,7 +61,7 @@ def generate_constraints(
                 dictTarget[key] = rlt[usedVars.index(key)]
                 for cVar in term[key]:
                     dictCond[cVar] = rlt[usedVars.index(cVar)]
-            prob *= ProbabilitiesHelper.find_conditional_probability(
+            prob *= find_conditional_probability(
                 dataFrame=data,
                 indexToLabel=dag.indexToLabel,
                 targetRealization=dictTarget,
