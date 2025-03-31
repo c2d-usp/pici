@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils.parser import (
-    parse_edges,
-    parse_state,
-    parse_target,
+    parse_to_int,
+    parse_to_int_list,
+    parse_to_string,
+    parse_to_string_list,
     parse_default_input,
 )
 from causal_reasoning.linear_algorithm.opt_problem_builder import OptProblemBuilder
@@ -19,20 +20,21 @@ class CausalModel:
         data: DataFrame,
         edges: str,
         unobservables: list[str] | str | None = [],
-        interventions: str | None = [],
-        interventions_value: int | None = [],
+        interventions: str | list[str] | None = [],
+        interventions_value: int | list[int] | None = [],
         target: str | None = "",
         target_value: int | None = None,
     ) -> None:
-        self.unobservables = parse_state(unobservables)
+        self.data = data
+        
+        self.unobservables = parse_to_string_list(unobservables)
 
-        self.interventions = interventions
-        self.interventions_value = interventions_value
+        self.interventions = parse_to_string_list(interventions)
+        self.interventions_value = parse_to_int_list(interventions_value)
 
         self.target = target
         self.target_value = target_value
 
-        self.data = data
 
         # TODO: Adicionar interventions no objeto Graph.
         # Quando for fazer a query, usar os valores dados,
@@ -92,6 +94,14 @@ class CausalModel:
         target: str | None = "",
         target_value: int | None = None,
     ):
+        if ( (interventions is None and self.interventions is None) \
+            or (interventions_value is None and self.interventions_value is None) \
+            or (target is None and self.target is None) \
+            or (target_value is None and self.target_value is None)
+        ):
+            # TODO: Rewrite the error message
+            raise Exception("Expect some value")
+            
         # TODO: Set interventions and target to CausalModel object
         OptProblemBuilder.builder_linear_problem(
             self.graph,
