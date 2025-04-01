@@ -36,7 +36,7 @@ class Graph:
         self.graphNodes = graphNodes
         self.moralGraphNodes = moralGraphNodes
 
-    def dfs(self, node: int):
+    def visit_nodes_in_same_cComponent(self, node: str):
         self.visited[node] = True
         self.currNodes.append(node)
         is_observable = self.cardinalities[node] > 1
@@ -44,24 +44,24 @@ class Graph:
         if not is_observable:
             for adj_node in self.adj[node]:
                 if not self.visited[adj_node]:
-                    self.dfs(adj_node)
+                    self.visit_nodes_in_same_cComponent(adj_node)
         else:
             for parent_node in self.parents[node]:
                 if (
                     not self.visited[parent_node]
                     and self.cardinalities[parent_node] < 1
                 ):
-                    self.dfs(parent_node)
+                    self.visit_nodes_in_same_cComponent(parent_node)
 
     def find_cComponents(self):
         for i in range(self.numberOfNodes):
             if not self.visited[i] and self.cardinalities[i] < 1:
                 self.currNodes.clear()
-                self.dfs(i)
+                self.visit_nodes_in_same_cComponent(i)
                 self.dagComponents.append(self.currNodes[:])
                 self.cComponentToUnob[len(self.dagComponents) - 1] = i
 
-    def base_dfs(self, node: int):
+    def base_dfs(self, node: str):
         self.visited[node] = True
         for adj_node in self.graphNodes[node].children:
             if not self.visited[adj_node]:
