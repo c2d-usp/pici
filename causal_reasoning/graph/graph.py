@@ -7,19 +7,20 @@ class Graph:
     def __init__(
         self,
         numberOfNodes: int,
-        currNodes: list[int],
+        currNodes: list[str],
         visited: list[bool],
-        cardinalities: dict[int, int],
-        parents: list[list[int]],
-        adj: list[list[int]],
-        dagComponents: list[list[int]],
-        exogenous: list[int],
-        endogenous: list[int],
-        topologicalOrder: list[int],
+        cardinalities: dict[str, int],
+        parents: dict[str, list[str]],
+        adj: dict[str, list[str]],
+        dagComponents: dict[str, list[str]],
+        exogenous: list[str],
+        endogenous: list[str],
+        topologicalOrder: list[str],
         DAG: nx.DiGraph,
-        cComponentToUnob: dict[int, int],
+        cComponentToUnob: dict[int, int], #??
         graphNodes: list[Node],
         moralGraphNodes: list[MoralNode],
+        node_set: set[str]
     ):
         self.numberOfNodes = numberOfNodes
         self.currNodes = currNodes
@@ -35,6 +36,7 @@ class Graph:
         self.cComponentToUnob = cComponentToUnob
         self.graphNodes = graphNodes
         self.moralGraphNodes = moralGraphNodes
+        self.node_set = node_set
 
     def visit_nodes_in_same_cComponent(self, node: str):
         self.visited[node] = True
@@ -54,12 +56,12 @@ class Graph:
                     self.visit_nodes_in_same_cComponent(parent_node)
 
     def find_cComponents(self):
-        for i in range(self.numberOfNodes):
-            if not self.visited[i] and self.cardinalities[i] < 1:
+        for node in self.node_set:
+            if not self.visited[node] and self.cardinalities[node] < 1:
                 self.currNodes.clear()
-                self.visit_nodes_in_same_cComponent(i)
+                self.visit_nodes_in_same_cComponent(node)
                 self.dagComponents.append(self.currNodes[:])
-                self.cComponentToUnob[len(self.dagComponents) - 1] = i
+                self.cComponentToUnob[len(self.dagComponents) - 1] = node
 
     def base_dfs(self, node: str):
         self.visited[node] = True
@@ -67,11 +69,15 @@ class Graph:
             if not self.visited[adj_node]:
                 self.base_dfs(adj_node)
 
-    def is_descendant(self, ancestor, descendant):
-        for i in range(len(self.visited)):
-            self.visited[i] = False
+    def is_descendant(self, ancestor: str, descendant:str) -> bool:
+        self.clear_visited()
+        print(self.visited)
         self.base_dfs(node=ancestor)
         return self.visited[descendant]
+    
+    def clear_visited(self):
+        for node in self.node_set:
+            self.visited[node] = False
 
     def build_moral(
         self,
