@@ -9,7 +9,7 @@ from causal_reasoning.utils.parser import (
     parse_to_int_list,
     parse_to_string,
     parse_to_string_list,
-    parse_default_input,
+    parse_input_graph
 )
 from causal_reasoning.linear_algorithm.opt_problem_builder import OptProblemBuilder
 
@@ -40,7 +40,7 @@ class CausalModel:
         # Quando for fazer a query, usar os valores dados,
         # Caso não tenha dado, dar erro e falar que não foram
         # dadas as intervenções e o target
-        self.graph = get_graph(str_graph=edges, unobservables=self.unobservables)
+        self.graph: Graph = get_graph(edges=edges, unobservables=self.unobservables)
 
     def visualize_graph(self):
         """
@@ -134,51 +134,35 @@ class CausalModel:
         # # Save the image
         # plt.savefig("digraph.png", dpi=300, bbox_inches='tight')
         # plt.show()
-        a = nx.is_d_separator(G, set_nodes_X, set_nodes_Y, set_nodes_Z)
-        print(f"A:::{a}")
+        # a = nx.is_d_separator(G, set_nodes_X, set_nodes_Y, set_nodes_Z)
+        # print(f"A:::{a}")
         return self.graph.check_dseparation(set_nodes_X, set_nodes_Y, set_nodes_Z)
 
 
-def get_graph(str_graph: str = None, unobservables: list[str] = None):
-    auxTuple = parse_default_input(versao_str=str_graph, latent=unobservables)
+def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardinalities: str = None):
+    number_of_nodes, adjacency_list, node_cardinalities, parents, node_set, dag = parse_input_graph(edges, latents=unobservables)
+    order = list(nx.topological_sort(dag))
 
-    numberOfNodes, labelToIndex, indexToLabel, adj, cardinalities, parents = auxTuple
+    endogenous: list[str] = []
+    exogenous: list[str] = []
 
-    inpDAG: nx.DiGraph = nx.DiGraph()
-    for i in range(numberOfNodes):
-        inpDAG.add_node(i)
-
-    for parent, edge in enumerate(adj):
-        if bool(edge):
-            for ch in edge:
-                inpDAG.add_edge(parent, ch)
-    order = list(nx.topological_sort(inpDAG))
-
-    for i in range(numberOfNodes):
-        name_node = indexToLabel[i]
-        nx.relabel_nodes(inpDAG, {i: name_node}, copy=False)
-
-    endogenIndex: list[int] = []
-    exogenIndex: list[int] = []
-    for i in range(numberOfNodes):
-        if not (bool(parents[i])):
-            exogenIndex.append(i)
+    for node in node_set:
+        if node in parents:
+            endogenous.append(node)
         else:
-            endogenIndex.append(i)
+            exogenous.append(node)
 
-    graphNodes: list[Node] = [
-        Node(latentParent=-1, parents=[], children=[], isLatent=False)
-        for _ in range(numberOfNodes)
-    ]
-    for node in range(numberOfNodes):
-        if cardinalities[node] == 0:
+    graphNodes: dict[str, Node] = {}
+
+    for node in node_set:
+        if node_cardinalities[node] == 0:
             graphNodes[node] = Node(
-                children=adj[node], parents=[], latentParent=None, isLatent=True
+                children=adjacency_list[node], parents=[], latentParent=None, isLatent=True
             )
         else:
             latentParent = -1
             for nodeParent in parents[node]:
-                if cardinalities[nodeParent] == 0:
+                if node_cardinalities[nodeParent] == 0:
                     latentParent = nodeParent
                     break
 
@@ -188,74 +172,30 @@ def get_graph(str_graph: str = None, unobservables: list[str] = None):
                 )
 
             graphNodes[node] = Node(
-                children=adj[node],
+                children=adjacency_list[node],
                 parents=parents[node],
                 latentParent=latentParent,
                 isLatent=False,
             )
         pass
 
+    visited: dict[str, bool] = {}
+    for node in node_set:
+        visited[node] = False
+
     return Graph(
-        numberOfNodes=numberOfNodes,
+        numberOfNodes=number_of_nodes,
         currNodes=[],
-        visited=[False] * (numberOfNodes),
-        cardinalities=cardinalities,
-        parents=parents,
-        adj=adj,
-        indexToLabel=indexToLabel,
-        labelToIndex=labelToIndex,
+        visited=visited, # dict[str, bool]
+        cardinalities=node_cardinalities, # dict[str, int]
+        parents=parents, # dict[str, int]
+        adj=adjacency_list, # dict[str, list[str]]
         dagComponents=[],
-        exogenous=exogenIndex,
-        endogenous=endogenIndex,
-        topologicalOrder=order,
-        DAG=inpDAG,
+        exogenous=exogenous, # list[str]
+        endogenous=endogenous, # list[str]
+        topologicalOrder=order, # list[str]
+        DAG=dag,
         cComponentToUnob={},
-        graphNodes=graphNodes,
+        graphNodes=graphNodes, #dict[str, Node]
         moralGraphNodes=[],
     )
-
-
-def parse_str_to_nx_graph(edges_str: str, latents: list[str]) -> str:
-    custom_cardinalities = {}
-
-    edges_part = edges_str.split(",")
-    edges = []
-    node_order = []
-    node_set = set()
-
-    for part in edges_part:
-        part = part.strip()
-        left, right = part.split("->")
-        left = left.strip()
-        right = right.strip()
-
-        edges.append((left, right))
-
-        for n in (left, right):
-            if n not in node_set:
-                node_order.append(n)
-                node_set.add(n)
-
-    node_card = {}
-    for node in node_order:
-        if node in custom_cardinalities:
-            node_card[node] = custom_cardinalities[node]
-        else:
-            node_card[node] = 0 if node in latents else 2
-
-    u_nodes = [n for n in node_order if n in latents]
-    other_nodes = [n for n in node_order if not n in latents]
-    final_node_order = u_nodes + other_nodes
-
-    lines = []
-
-    lines.append(str(len(final_node_order)))  # no nodes
-    lines.append(str(len(edges)))  # no edges
-
-    for node in final_node_order:
-        lines.append(f"{node} {node_card[node]}")
-
-    for left, right in edges:
-        lines.append(f"{left} {right}")
-
-    return "\n".join(lines)

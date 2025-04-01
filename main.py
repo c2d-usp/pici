@@ -22,8 +22,8 @@ def main():
         target=balke_target,
         target_value=1,
     )
-    balke_model.inference_query()
-    print(f"{balke_model.are_d_separated({"Z"}, {"Y"}, {"X"})}")
+    # balke_model.inference_query()
+    # print(f"{balke_model.are_d_separated({"Z"}, {"Y"}, {"X"})}")
 
     # itau_input = (
     #     "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"

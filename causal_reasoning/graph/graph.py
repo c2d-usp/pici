@@ -12,8 +12,6 @@ class Graph:
         cardinalities: dict[int, int],
         parents: list[list[int]],
         adj: list[list[int]],
-        labelToIndex: dict[str, int],
-        indexToLabel: dict[int, str],
         dagComponents: list[list[int]],
         exogenous: list[int],
         endogenous: list[int],
@@ -29,8 +27,6 @@ class Graph:
         self.cardinalities = cardinalities
         self.parents = parents
         self.adj = adj
-        self.labelToIndex = labelToIndex
-        self.indexToLabel = indexToLabel
         self.dagComponents = dagComponents
         self.endogenous = endogenous
         self.exogenous = exogenous

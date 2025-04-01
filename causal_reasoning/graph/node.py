@@ -1,7 +1,7 @@
 class Node:
-    children: list[int]
-    parents: list[int]
-    latentParent: int
+    children: list[str]
+    parents: list[str]
+    latentParent: str
     isLatent: bool
 
     def __init__(self, children, parents, latentParent, isLatent):
