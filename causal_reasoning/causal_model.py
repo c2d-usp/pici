@@ -197,6 +197,6 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
         DAG=dag,
         cComponentToUnob={},
         graphNodes=graphNodes, #dict[str, Node]
-        moralGraphNodes=[],
+        moralGraphNodes={}, #dict[str, MoralNode]
         node_set=node_set,
     )
