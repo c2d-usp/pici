@@ -22,6 +22,10 @@ def main():
         target=balke_target,
         target_value=1,
     )
+
+    print(balke_model.graph.check_dseparation(['X'], ['Y'], ['Z']))
+
+
     # balke_model.inference_query()
     # print(f"{balke_model.are_d_separated({"Z"}, {"Y"}, {"X"})}")
 
@@ -34,7 +38,6 @@ def main():
     # itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
     # itau_df = pd.read_csv(itau_csv_path)
 
-    # print("------")
     # itau_model = CausalModel(
     #     data=itau_df,
     #     edges=itau_input,

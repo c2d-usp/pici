@@ -8,7 +8,7 @@ dictAndIndex = namedtuple("dictAndIndex", ["mechanisms", "index"])
 
 class MechanismGenerator:
     def helper_generate_spaces(
-            nodes: list[int], cardinalities: dict[int, int]):
+            nodes: list[str], cardinalities: dict[str, int]):
         spaces: list[list[int]] = []
 
         for node in nodes:
@@ -21,9 +21,9 @@ class MechanismGenerator:
         return [list(combination) for combination in crossProductsTuples]
 
     def mechanisms_generator(
-        latentNode: int,
-        endogenousNodes: list[int],
-        cardinalities: dict[int, int],
+        latentNode: str,
+        endogenousNodes: list[str],
+        cardinalities: dict[str, int],
         graphNodes: list[Node],
         v=True,
     ):
@@ -50,7 +50,7 @@ class MechanismGenerator:
             auxSpaces.clear()
             header: str = f"determines variable: {var}"
             amount: int = 1
-            orderedParents: list[int] = []
+            orderedParents: list[str] = []
             for parent in graphNodes[var].parents:
                 if parent != latentNode:
                     orderedParents.append(parent)
