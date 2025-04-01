@@ -1,10 +1,11 @@
 import pandas as pd
-
+import networkx as nx
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
 
 
 def main():
+
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
     balke_unobs = ["U1", "U2"]
     balke_target = "Y"
