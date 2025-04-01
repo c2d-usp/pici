@@ -12,12 +12,12 @@ class Graph:
         cardinalities: dict[str, int],
         parents: dict[str, list[str]],
         adj: dict[str, list[str]],
-        dagComponents: dict[str, list[str]],
+        dagComponents: list[list[str]],
         exogenous: list[str],
         endogenous: list[str],
         topologicalOrder: list[str],
         DAG: nx.DiGraph,
-        cComponentToUnob: dict[int, int], #??
+        cComponentToUnob: dict[int, str],
         graphNodes: list[Node],
         moralGraphNodes: dict[str, MoralNode],
         node_set: set[str]

@@ -190,12 +190,12 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
         cardinalities=node_cardinalities, # dict[str, int]
         parents=parents, # dict[str, int]
         adj=adjacency_list, # dict[str, list[str]]
-        dagComponents=[],
+        dagComponents=[], #list[list[str]]
         exogenous=exogenous, # list[str]
         endogenous=endogenous, # list[str]
         topologicalOrder=order, # list[str]
         DAG=dag,
-        cComponentToUnob={},
+        cComponentToUnob={}, #dict[int, str]
         graphNodes=graphNodes, #dict[str, Node]
         moralGraphNodes={}, #dict[str, MoralNode]
         node_set=node_set,
