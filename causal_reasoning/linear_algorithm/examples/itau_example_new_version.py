@@ -61,64 +61,61 @@ def main(dag: Graph):
     _, _, mechanism = MechanismGenerator.mechanisms_generator(
         latentNode="U1", endogenousNodes=[
             "Y", "X"], cardinalities=dag.cardinalities, graphNodes=dag.graphNodes, v=False)
-    print(mechanism)
-    # y0: int = 1
-    # x0: int = 1
-    # xRlt: dict[int, int] = {}
-    # yRlt: dict[int, int] = {}
-    # dRlt: dict[int, int] = {}
-    # dxRlt: dict[int, int] = {}
-    # c: list[float] = []
-    # a: list[list[float]] = []
-    # b: list[float] = []
-    # df: pd.DataFrame = pd.read_csv(
-    #     Examples.CSV_ITAU_EXAMPLE.value)
+    
+    y0: int = 1
+    x0: int = 1
+    xRlt: dict[str, int] = {}
+    yRlt: dict[str, int] = {}
+    dRlt: dict[str, int] = {}
+    dxRlt: dict[str, int] = {}
+    c: list[float] = []
+    a: list[list[float]] = []
+    b: list[float] = []
+    df: pd.DataFrame = pd.read_csv(
+        Examples.CSV_ITAU_EXAMPLE.value)
 
-    # bounds: list[tuple[float]] = [(0, 1) for _ in range(len(mechanism))]
+    bounds: list[tuple[float]] = [(0, 1) for _ in range(len(mechanism))]
 
-    # xRlt[dag.labelToIndex["X"]] = x0
+    xRlt["X"] = x0
 
-    # for u in range(len(mechanism)):
-    #     coef = 0
-    #     for d in range(2):
-    #         dRlt[dag.labelToIndex["D"]] = d
-    #         if mechanism[u]["3=" + str(x0) + ",4=" + str(d)] == y0:
-    #             coef += find_conditional_probability(
-    #                 dataFrame=df,
-    #                 indexToLabel=dag.indexToLabel,
-    #                 targetRealization=dRlt,
-    #                 conditionRealization=xRlt)
-    #     c.append(coef)
-    # a.append([1 for _ in range(len(mechanism))])
-    # b.append(1)
-    # for y in range(2):
-    #     for x in range(2):
-    #         for d in range(2):
-    #             aux: list[float] = []
-    #             yRlt[dag.labelToIndex["Y"]] = y
-    #             dxRlt[dag.labelToIndex["X"]] = x
-    #             dxRlt[dag.labelToIndex["D"]] = d
-    #             xRlt[dag.labelToIndex["X"]] = x
-    #             dRlt[dag.labelToIndex["D"]] = d
-    #             b.append(
-    #                 find_conditional_probability(
-    #                     dataFrame=df,
-    #                     indexToLabel=dag.indexToLabel,
-    #                     targetRealization=yRlt,
-    #                     conditionRealization=dxRlt) *
-    #                 find_probability(
-    #                     dataFrame=df,
-    #                     indexToLabel=dag.indexToLabel,
-    #                     variableRealizations=xRlt))
-    #             for u in range(len(mechanism)):
-    #                 if (mechanism[u]["3=" + str(x) + ",4=" + str(d)]
-    #                         == y) and (mechanism[u][""] == x):
-    #                     aux.append(1)
-    #                 else:
-    #                     aux.append(0)
-    #             a.append(aux)
-    # for i in range(len(a)):
-    #     print(f"{a[i]} = {b[i]}")
+    for u in range(len(mechanism)):
+        coef = 0
+        for d in range(2):
+            dRlt["D"] = d
+            if mechanism[u]["X=" + str(x0) + ",D=" + str(d)] == y0:
+                coef += find_conditional_probability(
+                    dataFrame=df,
+                    targetRealization=dRlt,
+                    conditionRealization=xRlt)
+        c.append(coef)
+    a.append([1 for _ in range(len(mechanism))])
+    b.append(1)
+    for y in range(2):
+        for x in range(2):
+            for d in range(2):
+                aux: list[float] = []
+                yRlt["Y"] = y
+                dxRlt["X"] = x
+                dxRlt["D"] = d
+                xRlt["X"] = x
+                dRlt["D"] = d
+                b.append(
+                    find_conditional_probability(
+                        dataFrame=df,
+                        targetRealization=yRlt,
+                        conditionRealization=dxRlt) *
+                    find_probability(
+                        dataFrame=df,
+                        variableRealizations=xRlt))
+                for u in range(len(mechanism)):
+                    if (mechanism[u]["X=" + str(x) + ",D=" + str(d)]
+                            == y) and (mechanism[u][""] == x):
+                        aux.append(1)
+                    else:
+                        aux.append(0)
+                a.append(aux)
+    for i in range(len(a)):
+        print(f"{a[i]} = {b[i]}")
     # opt_problem(objFunction=c, Aeq=a, Beq=b, interval=bounds, v=True)
 
 
