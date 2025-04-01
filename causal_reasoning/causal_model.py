@@ -1,6 +1,5 @@
 import networkx as nx
 from pandas import DataFrame
-import matplotlib.pyplot as plt
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
