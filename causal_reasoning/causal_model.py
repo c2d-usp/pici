@@ -140,7 +140,7 @@ class CausalModel:
 
 
 def get_graph(str_graph: str = None, unobservables: list[str] = None):
-    auxTuple = parse_default_input(versao_str=str_graph, latent=unobservables)
+    auxTuple = parse_default_input(str_graph, latents=unobservables)
 
     numberOfNodes, labelToIndex, indexToLabel, adj, cardinalities, parents = auxTuple
 
