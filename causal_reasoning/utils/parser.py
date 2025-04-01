@@ -1,18 +1,44 @@
 import networkx as nx
 
+# Create DAG with latents
+# Validate if the DAG is a DAG
 
-def parse_state(state):
+
+
+
+def parse_to_string_list(state):
     if isinstance(state, str):
         return [state]
     if isinstance(state, list):
-        return state
-    raise Exception(f"Input format for {state} not recognized: {type(state)}")
+        if all(isinstance(item, str) for item in state):
+            return state
+    raise Exception(f"Input format for {state} not recognized.")
 
 
-def parse_target(state):
+def parse_to_string(state):
     if isinstance(state, str):
         return state
     raise Exception(f"Input format for {state} not recognized: {type(state)}")
+
+
+def parse_to_int(state):
+    if isinstance(state, int):
+        return state
+    raise Exception(f"Input format for {state} not recognized: {type(state)}")
+
+
+def parse_to_int_list(state):
+    if isinstance(state, int):
+        return [state]
+    if isinstance(state, list):
+        if all(isinstance(item, int) for item in state):
+            return state
+    raise Exception(f"Input format for {state} not recognized.")
+
+
+def parse_interventions(intervention_variables, intervention_values):
+    if isinstance(intervention_variables, str) and isinstance(intervention_values, int):
+        return 
 
 
 def parse_edges(state):
@@ -21,8 +47,7 @@ def parse_edges(state):
         # TODO: Parse the string into nx.Graph
         return ""
     if isinstance(state, nx.Graph):
-        # TODO: Verify if it is a valid string
-        # TODO: Parse the string into nx.Graph
+        # TODO: Verify if it is a valid nx.Graph
         return ""
     if isinstance(state, list):
         # TODO: Verify if it is list of tuples
@@ -35,12 +60,12 @@ def parse_edges(state):
 
 
 def parse_default_input(
-    versao_str: str, latent: list[str]) -> str:
+    edges: str, latents: list[str]) -> str:
 
     custom_cardinalities = {}
 
-    edges_part = versao_str.split(",")
-    edges = []
+    edges_part = edges.split(",")
+    edges_tuples = []
     node_order = []
     node_set = set()
 
@@ -50,7 +75,7 @@ def parse_default_input(
         left = left.strip()
         right = right.strip()
 
-        edges.append((left, right))
+        edges_tuples.append((left, right))
 
         for n in (left, right):
             if n not in node_set:
@@ -62,10 +87,10 @@ def parse_default_input(
         if node in custom_cardinalities:
             node_card[node] = custom_cardinalities[node]
         else:
-            node_card[node] = 0 if node in latent else 2
+            node_card[node] = 0 if node in latents else 2
 
-    u_nodes = [n for n in node_order if n in latent]
-    other_nodes = [n for n in node_order if n not in latent]
+    u_nodes = [n for n in node_order if n in latents]
+    other_nodes = [n for n in node_order if n not in latents]
     final_node_order = u_nodes + other_nodes
 
     numberOfNodes = len(final_node_order)
@@ -82,7 +107,7 @@ def parse_default_input(
 
     adjacency_list: list[list[int]] = [[] for _ in range(numberOfNodes)]
     parents: list[list[int]] = [[] for _ in range(numberOfNodes)]
-    for left, right in edges:
+    for left, right in edges_tuples:
         uIndex = labelToIndex[left]
         vIndex = labelToIndex[right]
         adjacency_list[uIndex].append(vIndex)
