@@ -1,8 +1,11 @@
+from typing import Any
+
 class Node:
     children: list[str]
     parents: list[str]
     latentParent: str
     isLatent: bool
+    value: Any
 
     def __init__(self, children, parents, latentParent, isLatent):
         self.children = children

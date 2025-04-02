@@ -142,6 +142,10 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
     number_of_nodes, adjacency_list, node_cardinalities, parents, node_set, dag = parse_input_graph(edges, latents=unobservables)
     order = list(nx.topological_sort(dag))
 
+    topologicalOrderIndexes = {}
+    for i, node in enumerate(order):
+        topologicalOrderIndexes[node] = i
+
     endogenous: list[str] = []
     exogenous: list[str] = []
 
@@ -156,7 +160,7 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
     for node in node_set:
         if node_cardinalities[node] == 0:
             graphNodes[node] = Node(
-                children=adjacency_list[node], parents=[], latentParent=None, isLatent=True
+                children=adjacency_list[node], parents=[], latentParent=None, isLatent=True, value=node
             )
         else:
             latentParent = -1
@@ -175,6 +179,7 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
                 parents=parents[node],
                 latentParent=latentParent,
                 isLatent=False,
+                value=node
             )
         pass
 
@@ -193,9 +198,10 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
         exogenous=exogenous, # list[str]
         endogenous=endogenous, # list[str]
         topologicalOrder=order, # list[str]
-        DAG=dag,
+        DAG=dag, # nx.DiGraph
         cComponentToUnob={}, #dict[int, str]
         graphNodes=graphNodes, #dict[str, Node]
         moralGraphNodes={}, #dict[str, MoralNode]
-        node_set=node_set,
+        node_set=node_set, #set(Node)
+        topologicalOrderIndexes=topologicalOrderIndexes # dict[str, int]
     )
