@@ -14,8 +14,8 @@ class ObjFunctionGenerator:
         graph: Graph,
         intervention: str,
         target: str,
-        interventionValue: int,
-        targetValue: int,
+        intervention_value: int,
+        target_value: int,
         dataFrame,
         empiricalProbabilitiesVariables: list[str],
         mechanismVariables: list[str],
@@ -25,15 +25,15 @@ class ObjFunctionGenerator:
         """
         graph: an instance of the personalized class graph
         intervention: X in P(Y|do(X))
-        interventionValue: the value assumed by the X variable
+        intervention_value: the value assumed by the X variable
         target: Y in P(Y|do(X))
         """
 
         self.graph = graph
         self.intervention = intervention
-        self.interventionValue = interventionValue
+        self.intervention_value = intervention_value
         self.target = target
-        self.targetValue = targetValue
+        self.target_value = target_value
         self.dataFrame = dataFrame
 
         self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
@@ -236,7 +236,7 @@ class ObjFunctionGenerator:
             nodes=summandNodes, cardinalities=self.graph.cardinalities
         )
         summandNodes.append(self.target)
-        spaces.append([self.targetValue])
+        spaces.append([self.target_value])
         inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
             listSpaces=spaces
         )
@@ -261,8 +261,8 @@ class ObjFunctionGenerator:
             for inputCase in inputCases:
                 print("---- START INPUT CASE ----")
                 variablesValues: dict[str, int] = {
-                    self.intervention: self.interventionValue,
-                    self.target: self.targetValue,
+                    self.intervention: self.intervention_value,
+                    self.target: self.target_value,
                 }
                 partialCoefficient = 1
 

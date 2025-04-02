@@ -19,9 +19,9 @@ class OptProblemBuilder:
         objFG = ObjFunctionGenerator(
             graph=graph,
             dataFrame=df,
-            intervention=graph.labelToIndex[intervention],
+            intervention=intervention,
             intervention_value=intervention_value,
-            target=graph.labelToIndex[target],
+            target=target,
             target_value=target_value,
             empiricalProbabilitiesVariables=[],
             mechanismVariables=[],
