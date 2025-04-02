@@ -7,21 +7,21 @@ class Graph:
     def __init__(
         self,
         numberOfNodes: int,
-        currNodes: list[int],
+        currNodes: list[str],
         visited: list[bool],
-        cardinalities: dict[int, int],
-        parents: list[list[int]],
-        adj: list[list[int]],
-        labelToIndex: dict[str, int],
-        indexToLabel: dict[int, str],
-        dagComponents: list[list[int]],
-        exogenous: list[int],
-        endogenous: list[int],
-        topologicalOrder: list[int],
+        cardinalities: dict[str, int],
+        parents: dict[str, list[str]],
+        adj: dict[str, list[str]],
+        dagComponents: list[list[str]],
+        exogenous: list[str],
+        endogenous: list[str],
+        topologicalOrder: list[str],
         DAG: nx.DiGraph,
-        cComponentToUnob: dict[int, int],
-        graphNodes: list[Node],
-        moralGraphNodes: list[MoralNode],
+        cComponentToUnob: dict[int, str],
+        graphNodes: dict[str, Node],
+        moralGraphNodes: dict[str, MoralNode],
+        node_set: set[str],
+        topologicalOrderIndexes: dict[str, int]
     ):
         self.numberOfNodes = numberOfNodes
         self.currNodes = currNodes
@@ -29,8 +29,6 @@ class Graph:
         self.cardinalities = cardinalities
         self.parents = parents
         self.adj = adj
-        self.labelToIndex = labelToIndex
-        self.indexToLabel = indexToLabel
         self.dagComponents = dagComponents
         self.endogenous = endogenous
         self.exogenous = exogenous
@@ -39,8 +37,10 @@ class Graph:
         self.cComponentToUnob = cComponentToUnob
         self.graphNodes = graphNodes
         self.moralGraphNodes = moralGraphNodes
+        self.node_set = node_set
+        self.topologicalOrderIndexes = topologicalOrderIndexes
 
-    def dfs(self, node: int):
+    def visit_nodes_in_same_cComponent(self, node: str):
         self.visited[node] = True
         self.currNodes.append(node)
         is_observable = self.cardinalities[node] > 1
@@ -48,39 +48,54 @@ class Graph:
         if not is_observable:
             for adj_node in self.adj[node]:
                 if not self.visited[adj_node]:
-                    self.dfs(adj_node)
+                    self.visit_nodes_in_same_cComponent(adj_node)
         else:
             for parent_node in self.parents[node]:
                 if (
                     not self.visited[parent_node]
                     and self.cardinalities[parent_node] < 1
                 ):
-                    self.dfs(parent_node)
+                    self.visit_nodes_in_same_cComponent(parent_node)
 
     def find_cComponents(self):
-        for i in range(self.numberOfNodes):
-            if not self.visited[i] and self.cardinalities[i] < 1:
+        for node in self.node_set:
+            if not self.visited[node] and self.cardinalities[node] < 1:
                 self.currNodes.clear()
-                self.dfs(i)
+                self.visit_nodes_in_same_cComponent(node)
                 self.dagComponents.append(self.currNodes[:])
-                self.cComponentToUnob[len(self.dagComponents) - 1] = i
+                self.cComponentToUnob[len(self.dagComponents) - 1] = node
 
-    def base_dfs(self, node: int):
+    def base_dfs(self, node: str):
         self.visited[node] = True
         for adj_node in self.graphNodes[node].children:
             if not self.visited[adj_node]:
                 self.base_dfs(adj_node)
 
-    def is_descendant(self, ancestor, descendant):
-        for i in range(len(self.visited)):
-            self.visited[i] = False
+    def is_descendant(self, ancestor: str, descendant:str) -> bool:
+        if ancestor not in self.node_set or descendant not in self.node_set:
+            return True
+        self.clear_visited()
         self.base_dfs(node=ancestor)
         return self.visited[descendant]
+    
+    def clear_visited(self):
+        for node in self.node_set:
+            self.visited[node] = False
+        
+    def get_closest_node_from_leaf_in_the_topological_order(self, nodes: list[str]):
+        higher_idx = 0
+        higher_node = ''
+        for node in nodes:
+            idx = self.topologicalOrderIndexes[node]
+            if idx >= higher_idx:
+                higher_idx = idx
+                higher_node = node
+        return higher_node
 
     def build_moral(
         self,
-        consideredNodes: list[int],
-        conditionedNodes: list[int],
+        consideredNodes: list[str],
+        conditionedNodes: list[str],
         flag=False,
         intervention=-1,
     ):
@@ -88,10 +103,10 @@ class Graph:
         Builds the moral graph, considering only part of the nodes.
         flag: if true, the outgoing edges of the intervention should not be considered.
         """
-        self.moralGraphNodes = [
-            MoralNode(adjacent=[]) for _ in range(self.numberOfNodes)
-        ]
-        for node in range(self.numberOfNodes):
+        for node in self.node_set:
+            self.moralGraphNodes[node] = MoralNode(adjacent=[])
+
+        for node in self.node_set:
             if node not in consideredNodes:
                 continue
 
@@ -112,37 +127,37 @@ class Graph:
                 if flag and node == intervention:
                     continue
 
-                for ch in self.graphNodes[node].children:
-                    if ch in consideredNodes and ch not in conditionedNodes:
-                        if node not in self.moralGraphNodes[ch].adjacent:
-                            self.moralGraphNodes[ch].adjacent.append(node)
-                        if ch not in self.moralGraphNodes[node].adjacent:
-                            self.moralGraphNodes[node].adjacent.append(ch)
+                for child in self.graphNodes[node].children:
+                    if child in consideredNodes and child not in conditionedNodes:
+                        if node not in self.moralGraphNodes[child].adjacent:
+                            self.moralGraphNodes[child].adjacent.append(node)
+                        if child not in self.moralGraphNodes[node].adjacent:
+                            self.moralGraphNodes[node].adjacent.append(child)
 
-    def find_ancestors(self, node: int):
+    def find_ancestors(self, target_node: str):
         self.currNodes.clear()
-        self.visited = [False] * self.numberOfNodes
-        self.dfs_ancestor(node)
-        ancestors: list[int] = []
-        for i in range(0, self.numberOfNodes):
-            if self.visited[i]:
-                ancestors.append(i)
+        self.clear_visited()
+        self.dfs_ancestor(target_node)
+        ancestors: list[str] = []
+        for node in self.node_set:
+            if self.visited[node]:
+                ancestors.append(node)
         return ancestors
 
-    def dfs_ancestor(self, node):
+    def dfs_ancestor(self, node: str):
         self.visited[node] = True
 
         for parent in self.graphNodes[node].parents:
             if not self.visited[parent]:
                 self.dfs_ancestor(parent)
 
-    def independency_moral(self, node1: int, node2: int):
-        self.visited = [False] * self.numberOfNodes
+    def independency_moral(self, node1: str, node2: str):
+        self.clear_visited()
         self.dfs_moral(node1)
 
         return not self.visited[node2]
 
-    def dfs_moral(self, node):
+    def dfs_moral(self, node: str):
         self.visited[node] = True
 
         for adj in self.moralGraphNodes[node].adjacent:
@@ -156,22 +171,19 @@ class Graph:
         Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
         is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
         """
-        nodes1 = [self.labelToIndex[node] for node in set_nodes_1]
-        nodes2 = [self.labelToIndex[node] for node in set_nodes_2]
-        conditionedNodes = [self.labelToIndex[node] for node in conditioned_nodes]
 
         self.build_moral(
-            consideredNodes=list(range(0, self.numberOfNodes)),
-            conditionedNodes=conditionedNodes,
+            consideredNodes=list(self.node_set),
+            conditionedNodes=conditioned_nodes,
         )
 
-        self.visited = [False] * self.numberOfNodes
-        for node in nodes1:
+        self.clear_visited()
+        for node in set_nodes_1:
             if not self.visited[node]:
                 self.dfs_moral(node)
 
         areDseparated = True
-        for node in nodes2:
+        for node in set_nodes_2:
             if self.visited[node]:
                 areDseparated = False
                 break

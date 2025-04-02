@@ -1,5 +1,3 @@
-import pandas as pd
-
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
 from causal_reasoning.linear_algorithm.probabilities_helper import find_probability, find_conditional_probability
@@ -14,15 +12,15 @@ class ObjFunctionGenerator:
     def __init__(
         self,
         graph: Graph,
-        intervention: int,
-        target: int | str,
+        intervention: str,
+        target: str,
         intervention_value: int,
         target_value: int,
         dataFrame,
-        empiricalProbabilitiesVariables: list[int],
-        mechanismVariables: list[int],
-        conditionalProbabilitiesVariables: dict[int, list[int]],
-        debugOrder: list[int],
+        empiricalProbabilitiesVariables: list[str],
+        mechanismVariables: list[str],
+        conditionalProbabilities: dict[str, list[str]],
+        debugOrder: list[str],
     ):
         """
         graph: an instance of the personalized class graph
@@ -40,16 +38,16 @@ class ObjFunctionGenerator:
 
         self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
         self.mechanismVariables = mechanismVariables
-        self.conditionalProbabilitiesVariables = conditionalProbabilitiesVariables
+        self.conditionalProbabilities = conditionalProbabilities
         self.debugOrder = debugOrder
 
     def find_linear_good_set(self):
         """
         Runs each step of the algorithm. Finds a set of variables/restrictions that linearizes the problem.
         """
-        intervention: int = self.intervention
-        current_targets: list[int] = [self.target]
-        interventionLatent: int = self.graph.graphNodes[intervention].latentParent
+        intervention: str = self.intervention
+        current_targets: list[str] = [self.target]
+        interventionLatent: str = self.graph.graphNodes[intervention].latentParent
 
         empiricalProbabilitiesVariables = (
             []
@@ -59,21 +57,18 @@ class ObjFunctionGenerator:
         mechanismVariables = []
         # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
         # function
-        conditionalProbabilities: dict[int, list[int]] = {}
-        debugOrder: list[int] = []
+        conditionalProbabilities: dict[str, list[str]] = {}
+        debugOrder: list[str] = []
 
         while len(current_targets) > 0:
             print("---- Current targets array:")
             for tg in current_targets:
                 print(f"- {tg}")
 
-            # TODO: check if the topological order is reversed.
-            current_target = -1
-            for node in self.graph.topologicalOrder:
-                if node in current_targets and node > current_target:
-                    current_target = node
-
-            current_targets.remove(current_target)
+            # ARROYO-> TODO: check if the topological order is reversed.
+            current_target = self.graph.get_closest_node_from_leaf_in_the_topological_order(current_targets)
+            print(f'__>>{current_target}<<__')
+            if current_target in current_targets: current_targets.remove(current_target)
             debugOrder.append(current_target)
             print(f"Current target: {current_target}")
 
@@ -92,62 +87,17 @@ class ObjFunctionGenerator:
                         current_targets.append(parent)
             else:
                 print(f"------- Case 3: Find d-separator set")
-                ancestors = self.graph.find_ancestors(node=current_target)
-                conditionableAncestors: list[int] = []
+                validConditionedNodes = self.find_d_separator_set(
+                    current_target, current_targets,
+                    interventionLatent, intervention
+                )
 
-                for ancestor in ancestors:
-                    # Question: does it need to not be the intervention?
-                    if (
-                        self.graph.cardinalities[ancestor] > 0
-                        and ancestor != current_target
-                    ):
-                        conditionableAncestors.append(ancestor)
+                current_targets = list(
+                    (set(current_targets) | set(validConditionedNodes))
+                    - {intervention, current_target}
+                )
 
-                alwaysConditionedNodes: list[int] = current_targets.copy()
-                if current_target in alwaysConditionedNodes:
-                    alwaysConditionedNodes.remove(current_target)
-
-                if interventionLatent in alwaysConditionedNodes:
-                    alwaysConditionedNodes.remove(interventionLatent)
-
-                for x in range(pow(2, len(conditionableAncestors))):
-                    conditionedNodes: list[int] = alwaysConditionedNodes.copy()
-                    for i in range(len(conditionableAncestors)):
-                        if (x >> i) % 2 == 1:
-                            conditionedNodes.append(conditionableAncestors[i])
-
-                    self.graph.build_moral(
-                        consideredNodes=ancestors, conditionedNodes=conditionedNodes
-                    )
-                    condition1 = self.graph.independency_moral(
-                        node2=interventionLatent, node1=current_target
-                    )
-
-                    self.graph.build_moral(
-                        consideredNodes=ancestors,
-                        conditionedNodes=conditionedNodes,
-                        flag=True,
-                        intervention=intervention,
-                    )
-                    condition2 = self.graph.independency_moral(
-                        node2=intervention, node1=current_target
-                    )
-
-                    if condition1 and condition2:
-                        separator: list[int] = []
-                        print(f"The following set works:")
-                        for element in conditionedNodes:
-                            print(f"- {element}")
-                            separator.append(element)
-
-                        current_targets = list(
-                            (set(current_targets) | set(conditionedNodes))
-                            - {intervention, current_target}
-                        )
-
-                # Choose one of the valid subsets - Last instance of
-                # "separator", for now.
-                conditionalProbabilities[current_target] = separator
+                conditionalProbabilities[current_target] = validConditionedNodes
 
                 # Question: is any already solved variable selected for the second time? Does the program need to address this issue
                 # by forcing the set to not contain any of such variables?
@@ -158,7 +108,87 @@ class ObjFunctionGenerator:
         self.debugOrder = debugOrder
         print("Test completed")
 
-    def get_mechanisms_pruned(self) -> list[list[int]]:
+
+    def find_d_separator_set(
+        self,
+        current_target: str,
+        current_targets: list[str],
+        interventionLatent: str,
+        intervention: str
+    ):
+        ancestors = self.graph.find_ancestors(target_node=current_target)
+        conditionableAncestors: list[str] = []
+
+        for ancestor in ancestors:
+            # Question: does it need to not be the intervention?
+            if (
+                self.graph.cardinalities[ancestor] > 0
+                and ancestor != current_target
+            ):
+                conditionableAncestors.append(ancestor)
+
+        alwaysConditionedNodes: list[str] = current_targets.copy()
+        if current_target in alwaysConditionedNodes:
+            alwaysConditionedNodes.remove(current_target)
+
+        if interventionLatent in alwaysConditionedNodes:
+            alwaysConditionedNodes.remove(interventionLatent)
+        
+        return self.test_all_conditioned_sets(
+            conditionableAncestors,
+            alwaysConditionedNodes,
+            ancestors,
+            interventionLatent,
+            current_target,
+            intervention
+        )
+
+
+    # TODO: I suggest rename it
+    def test_all_conditioned_sets(
+        self,
+        conditionableAncestors: list[str],
+        alwaysConditionedNodes: list[str],
+        ancestors: list[str],
+        interventionLatent: str,
+        current_target: str,
+        intervention: str
+    ):
+        # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
+        for x in range(pow(2, len(conditionableAncestors))):
+            conditionedNodes: list[str] = alwaysConditionedNodes.copy()
+            for i in range(len(conditionableAncestors)):
+                if (x >> i) % 2 == 1:
+                    conditionedNodes.append(conditionableAncestors[i])
+
+            self.graph.build_moral(
+                consideredNodes=ancestors, conditionedNodes=conditionedNodes
+            )
+            condition1 = self.graph.independency_moral(
+                node2=interventionLatent, node1=current_target
+            )
+
+            self.graph.build_moral(
+                consideredNodes=ancestors,
+                conditionedNodes=conditionedNodes,
+                flag=True,
+                intervention=intervention,
+            )
+            condition2 = self.graph.independency_moral(
+                node2=intervention, node1=current_target
+            )
+            if condition1 and condition2:
+                validConditionedNodes: list[str] = []
+                print(f"The following set works:")
+                for element in conditionedNodes:
+                    print(f"- {element}")
+                    validConditionedNodes.append(element)
+        # Returns one of the valid subsets - Last instance of
+        # "validConditionedNodes", for now.
+        return validConditionedNodes
+
+
+    def get_mechanisms_pruned(self) -> list[dict[str, int]]:
         """
         Remove c-component variables that do not appear in the objective function
         """
@@ -178,7 +208,7 @@ class ObjFunctionGenerator:
         )
         return mechanisms
 
-    def build_objective_function(self, mechanisms: list[list[int]]) -> list[float]:
+    def build_objective_function(self, mechanisms: list[dict[str, int]]) -> list[float]:
         """
         Intermediate step: remove useless endogenous variables in the mechanisms creation?
         Must be called after generate restrictions. Returns the objective function with the following encoding
@@ -222,7 +252,7 @@ class ObjFunctionGenerator:
 
         print("Debug summand nodes")
         for node in summandNodes:
-            print(f"index={node}, label={self.graph.indexToLabel[node]}")
+            print(f"Node={node}")
 
         print("--- DEBUG OBJ FUNCTION GENERATION ---")
         for mechanism in mechanisms:
@@ -230,7 +260,7 @@ class ObjFunctionGenerator:
             mechanismCoefficient: int = 0
             for inputCase in inputCases:
                 print("---- START INPUT CASE ----")
-                variablesValues: dict[int, int] = {
+                variablesValues: dict[str, int] = {
                     self.intervention: self.intervention_value,
                     self.target: self.target_value,
                 }
@@ -238,14 +268,14 @@ class ObjFunctionGenerator:
 
                 for index, variableValue in enumerate(inputCase):
                     print(
-                        f"{self.graph.indexToLabel[summandNodes[index]]} = {variableValue}",
+                        f"{summandNodes[index]} = {variableValue}",
                         end="",
                     )
                     variablesValues[summandNodes[index]] = variableValue
 
                 for variable in summandNodes:
                     print(
-                        f"\nCurrent variable: {self.graph.indexToLabel[variable]} (index={variable})"
+                        f"\nCurrent variable: {variable}"
                     )
                     if (
                         variable in self.empiricalProbabilitiesVariables
@@ -253,9 +283,7 @@ class ObjFunctionGenerator:
                         print("Case 1")
                         variableProbability = find_probability(
                             dataFrame=self.dataFrame,
-                            indexToLabel=self.graph.indexToLabel,
                             variableRealizations={variable: variablesValues[variable]},
-                            v=False,
                         )
                         partialCoefficient *= variableProbability
                     elif (
@@ -263,10 +291,10 @@ class ObjFunctionGenerator:
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0. Do nothing otherwise
                         print("Case 2")
                         mechanismKey: str = ""
-                        for nodeIndex, node in enumerate(self.graph.graphNodes):
-                            if not node.isLatent and (variable in node.children):
+                        for node_key, node_item in self.graph.graphNodes.items():
+                            if not node_item.isLatent and (variable in node_item.children):
                                 mechanismKey += (
-                                    f"{nodeIndex}={variablesValues[nodeIndex]},"
+                                    f"{node_item.value}={variablesValues[node_item.value]},"
                                 )
                         print(f"key: {mechanismKey[:-1]}")
                         expectedValue = mechanism[mechanismKey[:-1]]
@@ -276,7 +304,7 @@ class ObjFunctionGenerator:
                             print("End process")
                     else:  # Case 3: coeff *= P(V|some endo parents)
                         print("Case 3")
-                        conditionRealization: dict[int, int] = {}
+                        conditionRealization: dict[str, int] = {}
                         for conditionalVariable in self.conditionalProbabilities[
                             variable
                         ]:
@@ -287,10 +315,8 @@ class ObjFunctionGenerator:
                         conditionalProbability = (
                             find_conditional_probability(
                                 dataFrame=self.dataFrame,
-                                indexToLabel=self.graph.indexToLabel,
                                 targetRealization={variable: variablesValues[variable]},
                                 conditionRealization=conditionRealization,
-                                v=False,
                             )
                         )
                         partialCoefficient *= conditionalProbability
@@ -305,62 +331,3 @@ class ObjFunctionGenerator:
             objFunctionCoefficients.append(mechanismCoefficient)
 
         return objFunctionCoefficients
-
-    def test(graph: Graph, csv_path):
-        """
-        used for the development of the class. Uses the itau graph itau.txt.
-        """
-        if False:
-            print("debug graph parsed by terminal:")
-
-            for i in range(graph.numberOfNodes):
-                print(f"node index {i} - node name: {graph.indexToLabel[i]}")
-                print(f"children: {graph.graphNodes[i].children}")
-                print(f"latentParent: {graph.graphNodes[i].latentParent}")
-                print(f"parents: {graph.graphNodes[i].parents}")
-            print("\n\n\n\n")
-
-        df = pd.read_csv(csv_path)
-
-        objFG = ObjFunctionGenerator(
-            graph=graph,
-            intervention=graph.labelToIndex["X"],
-            intervention_value=0,
-            target=graph.labelToIndex["Y"],
-            target_value=1,
-            empiricalProbabilitiesVariables=[],
-            mechanismVariables=[],
-            conditionalProbabilitiesVariables={},
-            debugOrder=[],
-            dataFrame=df,
-        )
-        objFG.find_linear_good_set()
-        print(f"\n\n-------- Debug restrictions --------")
-        for node in objFG.debugOrder:
-            if node in objFG.empiricalProbabilitiesVariables:
-                print(f"P({objFG.graph.indexToLabel[node]})", end="")
-            elif node in objFG.mechanismVariables:
-                parents: str = ""
-                for parent in objFG.graph.graphNodes[node].parents:
-                    parents += f"{objFG.graph.indexToLabel[parent]}, "
-                print(f"P({objFG.graph.indexToLabel[node]}|{parents[:-2]})", end="")
-            else:
-                wset: str = ""
-                for condVar in objFG.conditionalProbabilities[node]:
-                    if condVar != objFG.intervention:
-                        wset += f"{objFG.graph.indexToLabel[condVar]}, "
-                print(
-                    f"P({objFG.graph.indexToLabel[node]}|{objFG.graph.indexToLabel[objFG.intervention]}, {wset[:-2]})",
-                    end="",
-                )
-
-            if node != objFG.debugOrder[-1]:
-                print(" * ", end="")
-
-        print("\n")
-
-        mechanisms = objFG.get_mechanisms_pruned()
-        objCoefficients = objFG.build_objective_function(mechanisms)
-        print("--- DEBUG OBJ FUNCTION ---")
-        for i, coeff in enumerate(objCoefficients):
-            print(f"c_{i} = {coeff}")

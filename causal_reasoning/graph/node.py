@@ -1,14 +1,18 @@
-class Node:
-    children: list[int]
-    parents: list[int]
-    latentParent: int
-    isLatent: bool
+from typing import Any
 
-    def __init__(self, children, parents, latentParent, isLatent):
+class Node:
+    children: list[str]
+    parents: list[str]
+    latentParent: str
+    isLatent: bool
+    value: Any
+
+    def __init__(self, children, parents, latentParent, isLatent, value):
         self.children = children
         self.parents = parents
         self.latentParent = latentParent
         self.isLatent = isLatent
+        self.value = value
 
 class Intervention:
     label: str

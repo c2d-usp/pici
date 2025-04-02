@@ -8,7 +8,7 @@ dictAndIndex = namedtuple("dictAndIndex", ["mechanisms", "index"])
 
 class MechanismGenerator:
     def helper_generate_spaces(
-            nodes: list[int], cardinalities: dict[int, int]):
+            nodes: list[str], cardinalities: dict[str, int]):
         spaces: list[list[int]] = []
 
         for node in nodes:
@@ -21,10 +21,10 @@ class MechanismGenerator:
         return [list(combination) for combination in crossProductsTuples]
 
     def mechanisms_generator(
-        latentNode: int,
-        endogenousNodes: list[int],
-        cardinalities: dict[int, int],
-        graphNodes: list[Node],
+        latentNode: str,
+        endogenousNodes: list[str],
+        cardinalities: dict[str, int],
+        graphNodes: dict[str, Node],
         v=True,
     ):
         """
@@ -50,7 +50,7 @@ class MechanismGenerator:
             auxSpaces.clear()
             header: str = f"determines variable: {var}"
             amount: int = 1
-            orderedParents: list[int] = []
+            orderedParents: list[str] = []
             for parent in graphNodes[var].parents:
                 if parent != latentNode:
                     orderedParents.append(parent)
@@ -74,6 +74,7 @@ class MechanismGenerator:
                 print(f"Function domain: {functionDomain}")
                 print(f"VarResult: {varResult}")
 
+            # TODO: Talvez aqui precise rever domainCase, functionDomain
             for domainCase in functionDomain:
                 key: str = ""
                 for index, el in enumerate(domainCase):
@@ -130,16 +131,16 @@ class MechanismGenerator:
     # Not used, but useful when there is more than one latent in the
     # optimization system
     def mechanism_list_generator(
-        cardinalities: dict[int, int],
-        listU: list[int],
-        listSpaces: set[int],
-        graphNodes: list[Node],
+        cardinalities: dict[str, int],
+        listU: list[str],
+        listSpaces: set[str],
+        graphNodes: dict[str, Node],
     ):
         mechanismDictsList: list[list[dictAndIndex]] = []
         globalIndex: int = 0
-        latentCardinalities: dict[int, int] = {}
+        latentCardinalities: dict[str, int] = {}
         for latentVariable in listU:
-            endogenousInS: list[int] = list(
+            endogenousInS: list[str] = list(
                 set(graphNodes[latentVariable].children) & listSpaces
             )
             _, _, mechanismDicts = MechanismGenerator.mechanisms_generator(
