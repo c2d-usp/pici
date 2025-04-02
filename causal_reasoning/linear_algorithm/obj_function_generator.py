@@ -284,7 +284,6 @@ class ObjFunctionGenerator:
                         variableProbability = find_probability(
                             dataFrame=self.dataFrame,
                             variableRealizations={variable: variablesValues[variable]},
-                            v=False,
                         )
                         partialCoefficient *= variableProbability
                     elif (
