@@ -24,7 +24,7 @@ def main():
     )
 
     print(balke_model.graph.check_dseparation(['X'], ['Y'], ['Z']))
-    # balke_model.inference_query()
+    balke_model.inference_query()
 
     # itau_input = (
     #     "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"

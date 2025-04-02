@@ -5,7 +5,7 @@ from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGene
 from causal_reasoning.linear_algorithm.probabilities_helper import find_conditional_probability
 
 
-def create_dict_index(parents: list[int], rlt: list[int], indexerList: list[int]):
+def create_dict_index(parents: list[str], rlt: list[int], indexerList: list[str]):
     index: str = ""
     for parNode in parents:
         if parents.index(parNode) == len(parents) - 1:
@@ -18,25 +18,28 @@ def create_dict_index(parents: list[int], rlt: list[int], indexerList: list[int]
 def generate_constraints(
     data: pd.DataFrame,
     dag: Graph,
-    unob: int,
-    consideredCcomp: list[int],
+    unob: str,
+    consideredCcomp: list[str],
     mechanism: list[dict[str, int]],
 ):
-    topoOrder: list[int] = dag.topologicalOrder
-    cCompOrder: list[int] = []
+    topoOrder: list[str] = dag.topologicalOrder
+    cCompOrder: list[str] = []
     probs: list[float] = [1.0]
-    condVars: list[int] = []
-    usedVars: list[int] = []
-    productTerms: list[dict[int, list[int]]] = []
-    dictTarget: dict[int, int] = {}
-    dictCond: dict[int, int] = {}
+    condVars: list[str] = []
+    usedVars: list[str] = []
+    
+    
+    productTerms: list[dict[str, list[str]]] = []
+    
+    dictTarget: dict[str, int] = {}
+    dictCond: dict[str, int] = {}
     decisionMatrix: list[list[int]] = [[1 for _ in range(len(mechanism))]]
     for node in topoOrder:
         if (unob in dag.graphNodes[node].parents) and (node in consideredCcomp):
             cCompOrder.append(node)
     cCompOrder.reverse()
     usedVars = cCompOrder.copy()
-    Wc: list[int] = cCompOrder.copy()
+    Wc: list[str] = cCompOrder.copy()
     for cCompNode in cCompOrder:
         for par in dag.parents[cCompNode]:
             if not (par in Wc) and (par != unob):
@@ -63,7 +66,6 @@ def generate_constraints(
                     dictCond[cVar] = rlt[usedVars.index(cVar)]
             prob *= find_conditional_probability(
                 dataFrame=data,
-                indexToLabel=dag.indexToLabel,
                 targetRealization=dictTarget,
                 conditionRealization=dictCond,
                 v=False,
@@ -76,7 +78,7 @@ def generate_constraints(
             coef: bool = True
             for var in usedVars:
                 if var in consideredCcomp:
-                    endoParents: list[int] = dag.parents[var].copy()
+                    endoParents: list[str] = dag.parents[var].copy()
                     endoParents.remove(unob)
                     key = create_dict_index(
                         parents=endoParents, rlt=rlt, indexerList=usedVars

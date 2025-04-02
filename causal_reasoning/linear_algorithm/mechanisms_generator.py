@@ -24,7 +24,7 @@ class MechanismGenerator:
         latentNode: str,
         endogenousNodes: list[str],
         cardinalities: dict[str, int],
-        graphNodes: list[Node],
+        graphNodes: dict[str, Node],
         v=True,
     ):
         """
@@ -74,6 +74,7 @@ class MechanismGenerator:
                 print(f"Function domain: {functionDomain}")
                 print(f"VarResult: {varResult}")
 
+            # TODO: Talvez aqui precise rever domainCase, functionDomain
             for domainCase in functionDomain:
                 key: str = ""
                 for index, el in enumerate(domainCase):
@@ -133,13 +134,13 @@ class MechanismGenerator:
         cardinalities: dict[str, int],
         listU: list[str],
         listSpaces: set[str],
-        graphNodes: list[Node],
+        graphNodes: dict[str, Node],
     ):
         mechanismDictsList: list[list[dictAndIndex]] = []
         globalIndex: int = 0
         latentCardinalities: dict[str, int] = {}
         for latentVariable in listU:
-            endogenousInS: list[int] = list(
+            endogenousInS: list[str] = list(
                 set(graphNodes[latentVariable].children) & listSpaces
             )
             _, _, mechanismDicts = MechanismGenerator.mechanisms_generator(

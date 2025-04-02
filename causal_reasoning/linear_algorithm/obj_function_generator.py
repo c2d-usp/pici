@@ -67,8 +67,8 @@ class ObjFunctionGenerator:
 
             # ARROYO-> TODO: check if the topological order is reversed.
             current_target = self.graph.get_closest_node_from_leaf_in_the_topological_order(current_targets)
-
-            current_targets.remove(current_target)
+            print(f'__>>{current_target}<<__')
+            if current_target in current_targets: current_targets.remove(current_target)
             debugOrder.append(current_target)
             print(f"Current target: {current_target}")
 
@@ -292,10 +292,10 @@ class ObjFunctionGenerator:
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0. Do nothing otherwise
                         print("Case 2")
                         mechanismKey: str = ""
-                        for node in self.graph.graphNodes:
-                            if not node.isLatent and (variable in node.children):
+                        for node_key, node_item in self.graph.graphNodes.items():
+                            if not node_item.isLatent and (variable in node_item.children):
                                 mechanismKey += (
-                                    f"{node.value}={variablesValues[node.value]},"
+                                    f"{node_item.value}={variablesValues[node_item.value]},"
                                 )
                         print(f"key: {mechanismKey[:-1]}")
                         expectedValue = mechanism[mechanismKey[:-1]]

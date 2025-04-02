@@ -21,7 +21,7 @@ class Graph:
         graphNodes: dict[str, Node],
         moralGraphNodes: dict[str, MoralNode],
         node_set: set[str],
-        topologicalOrderIndexes: dict[str, str]
+        topologicalOrderIndexes: dict[str, int]
     ):
         self.numberOfNodes = numberOfNodes
         self.currNodes = currNodes
@@ -72,8 +72,9 @@ class Graph:
                 self.base_dfs(adj_node)
 
     def is_descendant(self, ancestor: str, descendant:str) -> bool:
+        if ancestor not in self.node_set or descendant not in self.node_set:
+            return True
         self.clear_visited()
-        print(self.visited)
         self.base_dfs(node=ancestor)
         return self.visited[descendant]
     
