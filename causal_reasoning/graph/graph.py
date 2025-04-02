@@ -20,7 +20,8 @@ class Graph:
         cComponentToUnob: dict[int, str],
         graphNodes: list[Node],
         moralGraphNodes: dict[str, MoralNode],
-        node_set: set[str]
+        node_set: set[str],
+        topologicalOrderIndexes: dict[str, str]
     ):
         self.numberOfNodes = numberOfNodes
         self.currNodes = currNodes
@@ -37,6 +38,7 @@ class Graph:
         self.graphNodes = graphNodes
         self.moralGraphNodes = moralGraphNodes
         self.node_set = node_set
+        self.topologicalOrderIndexes = topologicalOrderIndexes
 
     def visit_nodes_in_same_cComponent(self, node: str):
         self.visited[node] = True
@@ -78,6 +80,16 @@ class Graph:
     def clear_visited(self):
         for node in self.node_set:
             self.visited[node] = False
+        
+    def get_closest_node_from_leaf_in_the_topological_order(self, nodes: list[str]):
+        higher_idx = 0
+        higher_node = ''
+        for node in nodes:
+            idx = self.topologicalOrderIndexes[node]
+            if idx > higher_idx:
+                higher_idx = idx
+                higher_node = node
+        return higher_node
 
     def build_moral(
         self,

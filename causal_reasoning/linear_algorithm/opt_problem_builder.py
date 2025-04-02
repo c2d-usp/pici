@@ -25,7 +25,7 @@ class OptProblemBuilder:
             target_value=target_value,
             empiricalProbabilitiesVariables=[],
             mechanismVariables=[],
-            conditionalProbabilitiesVariables={},
+            conditionalProbabilities={},
             debugOrder=[],
         )
         objFG.find_linear_good_set()
