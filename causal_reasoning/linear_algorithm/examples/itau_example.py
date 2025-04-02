@@ -60,7 +60,7 @@ def main(dag: Graph):
 
     _, _, mechanism = MechanismGenerator.mechanisms_generator(
         latentNode="U1", endogenousNodes=[
-            "Y", "X"], cardinalities=dag.cardinalities, graphNodes=dag.graphNodes, v=False)
+            "Y", "X"], cardinalities=dag.cardinalities, graphNodes=dag.graphNodes)
     
     y0: int = 1
     x0: int = 1

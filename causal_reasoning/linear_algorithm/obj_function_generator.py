@@ -317,7 +317,6 @@ class ObjFunctionGenerator:
                                 dataFrame=self.dataFrame,
                                 targetRealization={variable: variablesValues[variable]},
                                 conditionRealization=conditionRealization,
-                                v=False,
                             )
                         )
                         partialCoefficient *= conditionalProbability
