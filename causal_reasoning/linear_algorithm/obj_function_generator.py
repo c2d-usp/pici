@@ -116,7 +116,7 @@ class ObjFunctionGenerator:
         interventionLatent: str,
         intervention: str
     ):
-        ancestors = self.graph.find_ancestors(node=current_target)
+        ancestors = self.graph.find_ancestors(target_node=current_target)
         conditionableAncestors: list[str] = []
 
         for ancestor in ancestors:
