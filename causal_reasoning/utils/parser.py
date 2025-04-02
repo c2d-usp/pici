@@ -70,7 +70,7 @@ def edge_string_to_edge_tuples(edges: str) -> list[tuple]:
 
 
 def parse_default_input(
-    edge_tuples: list[tuple], latents: list[str], custom_cardinalities: dict[str, int]):    
+    edge_tuples: list[tuple], latents: list[str], custom_cardinalities: dict[str, int]) -> tuple[int, dict[str, list[str]], dict[str, int], dict[str, list[str]], set[str], nx.DiGraph]:
     node_set = set()
     adjacency_list: dict[str, list[str]] = {}
     parents: dict[str, list[str]] = {}
