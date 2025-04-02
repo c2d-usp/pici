@@ -18,7 +18,7 @@ class Graph:
         topologicalOrder: list[str],
         DAG: nx.DiGraph,
         cComponentToUnob: dict[int, str],
-        graphNodes: list[Node],
+        graphNodes: dict[str, Node],
         moralGraphNodes: dict[str, MoralNode],
         node_set: set[str],
         topologicalOrderIndexes: dict[str, str]
