@@ -7,11 +7,12 @@ class Node:
     isLatent: bool
     value: Any
 
-    def __init__(self, children, parents, latentParent, isLatent):
+    def __init__(self, children, parents, latentParent, isLatent, value):
         self.children = children
         self.parents = parents
         self.latentParent = latentParent
         self.isLatent = isLatent
+        self.value = value
 
 class Intervention:
     label: str
