@@ -87,7 +87,7 @@ class Graph:
         higher_node = ''
         for node in nodes:
             idx = self.topologicalOrderIndexes[node]
-            if idx > higher_idx:
+            if idx >= higher_idx:
                 higher_idx = idx
                 higher_node = node
         return higher_node
