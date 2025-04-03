@@ -1,18 +1,22 @@
 from typing import Any
+from typing import TypeVar, Generic
 
-class Node:
+T = TypeVar("T")
+
+class Node(Generic[T]):
     children: list[str]
     parents: list[str]
     latentParent: str
     isLatent: bool
-    value: Any
+    value: T
 
-    def __init__(self, children, parents, latentParent, isLatent, value):
+    def __init__(self, children, parents, latentParent, isLatent, value: T):
         self.children = children
         self.parents = parents
         self.latentParent = latentParent
         self.isLatent = isLatent
         self.value = value
+
 
 class Intervention:
     label: str
