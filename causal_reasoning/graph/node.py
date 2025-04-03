@@ -4,11 +4,13 @@ from typing import TypeVar, Generic
 T = TypeVar("T")
 
 class Node(Generic[T]):
-    children: list[str]
-    parents: list[str]
-    latentParent: str
+    children: list[T]
+    parents: list[T]
+    latentParent: T
     isLatent: bool
     value: T
+    cardinality: int
+    visited: bool
 
     def __init__(self, children, parents, latentParent, isLatent, value: T):
         self.children = children
@@ -16,6 +18,8 @@ class Node(Generic[T]):
         self.latentParent = latentParent
         self.isLatent = isLatent
         self.value = value
+        self.cardinality = 0
+        self.visited: bool = False
 
 
 class Intervention:
