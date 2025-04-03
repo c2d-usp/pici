@@ -8,10 +8,12 @@ class Graph:
         self,
         numberOfNodes: int,
         currNodes: list[str],
+
         visited: list[bool],
         cardinalities: dict[str, int],
         parents: dict[str, list[str]],
         adj: dict[str, list[str]],
+        
         dagComponents: list[list[str]],
         exogenous: list[str],
         endogenous: list[str],
@@ -25,10 +27,12 @@ class Graph:
     ):
         self.numberOfNodes = numberOfNodes
         self.currNodes = currNodes
+
         self.visited = visited
         self.cardinalities = cardinalities
         self.parents = parents
         self.adj = adj
+        
         self.dagComponents = dagComponents
         self.endogenous = endogenous
         self.exogenous = exogenous
@@ -40,47 +44,47 @@ class Graph:
         self.node_set = node_set
         self.topologicalOrderIndexes = topologicalOrderIndexes
 
-    def visit_nodes_in_same_cComponent(self, node: str):
-        self.visited[node] = True
-        self.currNodes.append(node)
-        is_observable = self.cardinalities[node] > 1
+    def visit_nodes_in_same_cComponent(self, node_label: str):
+        self.graphNodes[node_label].visited =True
+        self.currNodes.append(node_label)
+        is_observable = self.graphNodes[node_label].cardinality > 1
 
         if not is_observable:
-            for adj_node in self.adj[node]:
-                if not self.visited[adj_node]:
-                    self.visit_nodes_in_same_cComponent(adj_node)
+            for adj_node_label in self.graphNodes[node_label].children:
+                if not self.graphNodes[adj_node_label].visited:
+                    self.visit_nodes_in_same_cComponent(adj_node_label)
         else:
-            for parent_node in self.parents[node]:
+            for parent_node_label in self.graphNodes[node_label].parents:
                 if (
-                    not self.visited[parent_node]
-                    and self.cardinalities[parent_node] < 1
+                    not self.graphNodes[parent_node_label].visited
+                    and self.graphNodes[parent_node_label].cardinality < 1
                 ):
-                    self.visit_nodes_in_same_cComponent(parent_node)
+                    self.visit_nodes_in_same_cComponent(parent_node_label)
 
     def find_cComponents(self):
-        for node in self.node_set:
-            if not self.visited[node] and self.cardinalities[node] < 1:
+        for node_label in self.node_set:
+            if not self.graphNodes[node_label].visited and self.graphNodes[node_label].cardinality < 1:
                 self.currNodes.clear()
-                self.visit_nodes_in_same_cComponent(node)
+                self.visit_nodes_in_same_cComponent(node_label)
                 self.dagComponents.append(self.currNodes[:])
-                self.cComponentToUnob[len(self.dagComponents) - 1] = node
+                self.cComponentToUnob[len(self.dagComponents) - 1] = node_label
 
-    def base_dfs(self, node: str):
-        self.visited[node] = True
-        for adj_node in self.graphNodes[node].children:
-            if not self.visited[adj_node]:
-                self.base_dfs(adj_node)
+    def base_dfs(self, node_label: str):
+        self.graphNodes[node_label].visited = True
+        for adj_node_label in self.graphNodes[node_label].children:
+            if not self.graphNodes[adj_node_label].visited:
+                self.base_dfs(adj_node_label)
 
     def is_descendant(self, ancestor: str, descendant:str) -> bool:
         if ancestor not in self.node_set or descendant not in self.node_set:
             return True
         self.clear_visited()
-        self.base_dfs(node=ancestor)
-        return self.visited[descendant]
+        self.base_dfs(node_label=ancestor)
+        return self.graphNodes[descendant].visited
     
     def clear_visited(self):
-        for node in self.node_set:
-            self.visited[node] = False
+        for node in self.graphNodes.values():
+            node.visited = False
         
     def get_closest_node_from_leaf_in_the_topological_order(self, nodes: list[str]):
         higher_idx = 0
@@ -134,35 +138,36 @@ class Graph:
                         if child not in self.moralGraphNodes[node].adjacent:
                             self.moralGraphNodes[node].adjacent.append(child)
 
-    def find_ancestors(self, target_node: str):
+    # COMMENT: HERE 'ANCESTORS' is a list of Nodes
+    def find_ancestors(self, target_node_label: str):
         self.currNodes.clear()
         self.clear_visited()
-        self.dfs_ancestor(target_node)
-        ancestors: list[str] = []
-        for node in self.node_set:
-            if self.visited[node]:
+        self.dfs_ancestor(target_node_label)
+        ancestors: list[Node] = []
+        for node in self.graphNodes.values():
+            if node.visited:
                 ancestors.append(node)
         return ancestors
 
-    def dfs_ancestor(self, node: str):
-        self.visited[node] = True
+    def dfs_ancestor(self, node_label: str):
+        self.graphNodes[node_label].visited = True
 
-        for parent in self.graphNodes[node].parents:
-            if not self.visited[parent]:
-                self.dfs_ancestor(parent)
+        for parent_label in self.graphNodes[node_label].parents:
+            if not self.graphNodes[parent_label].visited:
+                self.dfs_ancestor(parent_label)
 
-    def independency_moral(self, node1: str, node2: str):
+    def independency_moral(self, node_1_label: str, node_2_label: str):
         self.clear_visited()
-        self.dfs_moral(node1)
+        self.dfs_moral(node_1_label)
 
-        return not self.visited[node2]
+        return not self.graphNodes[node_2_label].visited
 
-    def dfs_moral(self, node: str):
-        self.visited[node] = True
+    def dfs_moral(self, node_label: str):
+        self.graphNodes[node_label].visited = True
 
-        for adj in self.moralGraphNodes[node].adjacent:
-            if not self.visited[adj]:
-                self.dfs_moral(node=adj)
+        for adj_label in self.moralGraphNodes[node_label].adjacent:
+            if not self.graphNodes[adj_label].visited:
+                self.dfs_moral(adj_label)
 
     def check_dseparation(
         self, set_nodes_1: list[str], set_nodes_2: list[str], conditioned_nodes: list[str]

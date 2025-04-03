@@ -100,6 +100,8 @@ class CausalModel:
         ):
             # TODO: Rewrite the error message
             raise Exception("Expect some value")
+        
+        # get_node 
             
         # TODO: Set interventions and target to CausalModel object
         OptProblemBuilder.builder_linear_problem(
@@ -190,10 +192,12 @@ def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardina
     return Graph(
         numberOfNodes=number_of_nodes,
         currNodes=[],
+
         visited=visited, # dict[str, bool]
         cardinalities=node_cardinalities, # dict[str, int]
         parents=parents, # dict[str, int]
         adj=adjacency_list, # dict[str, list[str]]
+        
         dagComponents=[], #list[list[str]]
         exogenous=exogenous, # list[str]
         endogenous=endogenous, # list[str]
