@@ -1,6 +1,8 @@
 import networkx as nx
 from typing import Any
 
+from causal_reasoning.graph.node import T
+
 
 def parse_to_string_list(state):
     if isinstance(state, str):
@@ -34,12 +36,14 @@ def parse_to_int_list(state):
 
 def parse_interventions(intervention_variables, intervention_values):
     if isinstance(intervention_variables, str) and isinstance(intervention_values, int):
-        return 
+        return
 
 
-def parse_input_graph(edges: Any, latents: list[str], custom_cardinalities: dict[str, int]={}):
+def parse_input_graph(
+    edges: Any, latents_label: list[T], custom_cardinalities: dict[T, int] = {}
+):
     edge_tuples = parse_edges(edges)
-    return parse_default_input(edge_tuples, latents, custom_cardinalities)
+    return parse_default_input(edge_tuples, latents_label, custom_cardinalities)
 
 
 def parse_edges(state):
@@ -47,7 +51,7 @@ def parse_edges(state):
         return edge_string_to_edge_tuples(state)
     if isinstance(state, list):
         # TODO: Validate if the Tuple is (str, str)
-        # TODO: Also consider int variables (int, int) 
+        # TODO: Also consider int variables (int, int)
         if all(isinstance(item, tuple) for item in state):
             return state
         raise Exception(f"Input format for {state} not recognized.")
@@ -70,48 +74,41 @@ def edge_string_to_edge_tuples(edges: str) -> list[tuple]:
 
 
 def parse_default_input(
-    edge_tuples: list[tuple], latents: list[str], custom_cardinalities: dict[str, int]) -> tuple[int, dict[str, list[str]], dict[str, int], dict[str, list[str]], set[str], nx.DiGraph]:
-    node_set = set()
-    adjacency_list: dict[str, list[str]] = {}
-    parents: dict[str, list[str]] = {}
+    edge_tuples: list[tuple], latents_label: list[T], custom_cardinalities: dict[T, int]
+) -> tuple[int, dict[T, list[T]], dict[T, int], dict[T, list[T]], set[T], nx.DiGraph]:
+    node_labels_set = set()
+    children: dict[T, list[T]] = {}
+    parents: dict[T, list[T]] = {}
     dag: nx.DiGraph = nx.DiGraph()
 
     for each_tuple in edge_tuples:
         left, right = each_tuple
-        if right in latents:
+        if right in latents_label:
             raise Exception(f"Invalid latent node: {right}. Latent has income arrows.")
-        
-        node_set.add(left)
-        node_set.add(right)
 
-        if left not in adjacency_list:
-            adjacency_list[left] = []
-        adjacency_list[left].append(right)
+        node_labels_set.add(left)
+        node_labels_set.add(right)
 
-        # APENAS PARA DEIXAR VAZIO
-        if left not in parents:
-            parents[left] = []
+        children.setdefault(left, []).append(right)
+        parents.setdefault(left, [])
 
-        if right not in parents:
-            parents[right] = []    
-        parents[right].append(left)
-
-        # APENAS PARA DEIXAR VAZIO
-        if right not in adjacency_list:
-            adjacency_list[right] = []
+        parents.setdefault(right, []).append(left)
+        children.setdefault(right, [])
 
         dag.add_edge(left, right)
 
-    for node in latents:
-        if node not in node_set:
-            raise Exception(f"Invalid latent node: {node}. Not present in the graph.")
-    
-    number_of_nodes = len(node_set)
+    for node_label in latents_label:
+        if node_label not in node_labels_set:
+            raise Exception(
+                f"Invalid latent node: {node_label}. Not present in the graph."
+            )
 
-    node_cardinalities: dict[str, int] = {}
-    for node in node_set:
-        if node in custom_cardinalities:
-            node_cardinalities[node] = custom_cardinalities[node]
+    number_of_nodes = len(node_labels_set)
+
+    node_cardinalities: dict[T, int] = {}
+    for node_label in node_labels_set:
+        if node_label in custom_cardinalities:
+            node_cardinalities[node_label] = custom_cardinalities[node_label]
         else:
-            node_cardinalities[node] = 0 if node in latents else 2
-    return number_of_nodes, adjacency_list, node_cardinalities, parents, node_set, dag
+            node_cardinalities[node_label] = 0 if node_label in latents_label else 2
+    return number_of_nodes, children, node_cardinalities, parents, node_labels_set, dag

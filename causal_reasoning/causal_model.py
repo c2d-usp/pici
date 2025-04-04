@@ -2,7 +2,7 @@ import networkx as nx
 from pandas import DataFrame
 
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
+from causal_reasoning.graph.node import T, Node
 from causal_reasoning.utils.parser import (
     parse_to_int,
     parse_to_int_list,
@@ -137,75 +137,86 @@ class CausalModel:
         # plt.show()
         # a = nx.is_d_separator(G, set_nodes_X, set_nodes_Y, set_nodes_Z)
         # print(f"A:::{a}")
-        return self.graph.check_dseparation(set_nodes_X, set_nodes_Y, set_nodes_Z)
+        return self.graph.check_dseparation(get_node_list(self.graph.graphNodes, set_nodes_X), get_node_list(self.graph.graphNodes, set_nodes_Y), get_node_list(self.graph.graphNodes, set_nodes_Z))
 
 
-def get_graph(edges: str = None, unobservables: list[str] = None, custom_cardinalities: str = None):
-    number_of_nodes, adjacency_list, node_cardinalities, parents, node_set, dag = parse_input_graph(edges, latents=unobservables)
+def get_node(graphNodes: dict[T, Node], node_label: T):
+    return graphNodes[node_label]
+
+
+def get_node_list(graphNodes: dict[T, Node], node_labels: list[T])-> list[Node]:
+    return [get_node(node_label) for node_label in node_labels]
+
+
+def get_latent_parent(parents_label: list[T], node_cardinalities: list[T]) -> T:
+    latentParent = None
+    for node_parent in parents_label:
+        if node_cardinalities[node_parent] == 0:
+            return node_parent
+    return None
+
+
+def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinalities: dict[T, int] = None):
+    number_of_nodes, children_labels, node_cardinalities, parents_labels, node_labels_set, dag = parse_input_graph(edges, latents=unobservables)
     order = list(nx.topological_sort(dag))
 
-    topologicalOrderIndexes = {}
-    for i, node in enumerate(order):
-        topologicalOrderIndexes[node] = i
+    latent_parents_labels = dict[T, T]
+    graphNodes: dict[T, Node] = {}
+    node_set = set()
 
-    endogenous: list[str] = []
-    exogenous: list[str] = []
-
-    for node in node_set:
-        if node in parents:
-            endogenous.append(node)
-        else:
-            exogenous.append(node)
-
-    graphNodes: dict[str, Node] = {}
-
-    for node in node_set:
-        if node_cardinalities[node] == 0:
-            graphNodes[node] = Node(
-                children=adjacency_list[node], parents=[], latentParent=None, isLatent=True, value=node
+    for node_label in node_labels_set:
+        latent_parent_label = None
+        if node_cardinalities[node_label] == 0:
+            new_node = Node(
+                children=[], parents=[], latentParent=None, isLatent=True, value=node_label
             )
         else:
-            latentParent = -1
-            for nodeParent in parents[node]:
-                if node_cardinalities[nodeParent] == 0:
-                    latentParent = nodeParent
-                    break
-
-            if latentParent == -1:
+            latent_parent_label = get_latent_parent(parents_labels[node_label])
+            
+            if latent_parent_label == None:
+                # TODO: ADD WARNING MESSAGE
                 print(
-                    f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node} DOES NOT."
+                    f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node_label} DOES NOT."
                 )
 
-            graphNodes[node] = Node(
-                children=adjacency_list[node],
-                parents=parents[node],
-                latentParent=latentParent,
+            new_node = Node(
+                children=[],
+                parents=[],
+                latentParent=None,
                 isLatent=False,
-                value=node
+                value=node_label
             )
-        pass
 
-    visited: dict[str, bool] = {}
-    for node in node_set:
-        visited[node] = False
+        graphNodes[node_label] = new_node
+        latent_parents_labels[new_node.label] = latent_parent_label
+        node_set.add(new_node)
+
+    endogenous: list[Node] = []
+    exogenous: list[Node] = []
+    topologicalOrderIndexes = {}
+
+    for i, node_label in enumerate(node_labels_set):
+        node = graphNodes[node_label]
+        node.latentParent = graphNodes[latent_parents_labels[node_label]]
+
+        if node.isLatent:
+            exogenous.append(node)
+            node.children=get_node_list(graphNodes, children_labels[node.label])
+        else:
+            endogenous.append(node)
+            node.parents=get_node_list(graphNodes, parents_labels[node.label])
+        topologicalOrderIndexes[node] = i
 
     return Graph(
         numberOfNodes=number_of_nodes,
-        currNodes=[],
-
-        visited=visited, # dict[str, bool]
-        cardinalities=node_cardinalities, # dict[str, int]
-        parents=parents, # dict[str, int]
-        adj=adjacency_list, # dict[str, list[str]]
-        
-        dagComponents=[], #list[list[str]]
-        exogenous=exogenous, # list[str]
-        endogenous=endogenous, # list[str]
-        topologicalOrder=order, # list[str]
+        exogenous=exogenous, # list[Node]
+        endogenous=endogenous, # list[Node]
+        topologicalOrder=order, # list[Node]
         DAG=dag, # nx.DiGraph
-        cComponentToUnob={}, #dict[int, str]
         graphNodes=graphNodes, #dict[str, Node]
-        moralGraphNodes={}, #dict[str, MoralNode]
         node_set=node_set, #set(Node)
-        topologicalOrderIndexes=topologicalOrderIndexes # dict[str, int]
+        topologicalOrderIndexes=topologicalOrderIndexes, # dict[Node, int]
+        currNodes=[],
+        dagComponents=[], #list[list[Node]]
+        cComponentToUnob={}, #dict[int, Node]
     )

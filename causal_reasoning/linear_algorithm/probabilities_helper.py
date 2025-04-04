@@ -1,10 +1,12 @@
 import pandas as pd
 
+from causal_reasoning.graph.node import Node
+
 
 def find_conditional_probability(
-    dataFrame,
-    targetRealization: dict[str, int],
-    conditionRealization: dict[str, int],
+    dataFrame: pd.DataFrame,
+    targetRealization: list[Node],
+    conditionRealization: list[Node],
 ):
     """
     dataFrame              : pandas dataFrama that contains the data from the csv
@@ -22,27 +24,27 @@ def find_conditional_probability(
     if conditionProbability == 0:
         return 0
 
-    targetAndConditionRealization = targetRealization | conditionRealization
+    targetAndConditionRealization = targetRealization + conditionRealization
 
     targetAndConditionProbability = find_probability(
         dataFrame, targetAndConditionRealization)
     return targetAndConditionProbability / conditionProbability
 
 def find_probability(
-    dataFrame, variableRealizations: dict[str, int]
+    dataFrame: pd.DataFrame, variables: list[Node]
 ):
-    compatibleCasesCount = count_occurrences(dataFrame, variableRealizations)
+    compatibleCasesCount = count_occurrences(dataFrame, variables)
     totalCases = dataFrame.shape[0]
-    # TODO: ADD LOG??
+    # TODO: ADD LOGGING
     if False:
         print(f"Count compatible cases: {compatibleCasesCount}")
         print(f"Total cases: {totalCases}")
     return compatibleCasesCount / totalCases
 
-def count_occurrences(dataFrame: pd.DataFrame, variableRealizations: dict[str, int]):
+def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
     conditions = pd.Series([True] * len(dataFrame), index=dataFrame.index)
-    for variable_label in variableRealizations:
-        conditions &= (dataFrame[variable_label]
-                        == variableRealizations[variable_label])
+    for variable_node in variables:
+        conditions &= (dataFrame[variable_node.label]
+                        == variable_node.value)
 
     return dataFrame[conditions].shape[0]
