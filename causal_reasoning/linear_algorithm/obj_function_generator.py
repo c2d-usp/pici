@@ -123,7 +123,7 @@ class ObjFunctionGenerator:
         for ancestor in ancestors:
             # Question: does it need to not be the intervention?
             if (
-                self.graph.cardinalities[ancestor.label] > 0
+                ancestor.cardinality > 0
                 and ancestor.label != current_target.label
             ):
                 conditionable_ancestors.append(ancestor)
@@ -149,17 +149,17 @@ class ObjFunctionGenerator:
     def test_all_conditioned_sets(
         self,
         conditionable_ancestors: list[Node],
-        alwaysconditioned_nodes: list[Node],
+        conditioned_nodes: list[Node],
         ancestors: list[Node],
         intervention_latent: Node,
         current_target: Node,
         intervention: Node
     ):
         # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
-        for x in range(pow(2, len(conditionable_ancestors))):
-            conditioned_nodes: list[Node] = alwaysconditioned_nodes.copy()
+        for no_of_possibilities in range(pow(2, len(conditionable_ancestors))):
+            # CRIAR UMA FUNÇÃO PARA ISSO
             for i in range(len(conditionable_ancestors)):
-                if (x >> i) % 2 == 1:
+                if (no_of_possibilities >> i) % 2 == 1:
                     conditioned_nodes.append(conditionable_ancestors[i])
 
             self.graph.build_moral(
@@ -289,7 +289,7 @@ class ObjFunctionGenerator:
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0. Do nothing otherwise
                         print("Case 2")
                         mechanismKey: str = ""
-                        for node_key, node_item in self.graph.graphNodes.items():
+                        for _key, node_item in self.graph.graphNodes.items():
                             if not node_item.isLatent and (variable in node_item.children):
                                 mechanismKey += (
                                     f"{node_item.label}={node_item.value},"
@@ -302,17 +302,11 @@ class ObjFunctionGenerator:
                             print("End process")
                     else:  # Case 3: coeff *= P(V|some endo parents)
                         print("Case 3")
-                        conditionRealization: list[Node] = []
-                        for conditionalVariable in self.conditionalProbabilities[
-                            variable
-                        ]:
-                            conditionRealization.append(conditionalVariable)
-
                         conditionalProbability = (
                             find_conditional_probability(
                                 dataFrame=self.dataFrame,
                                 targetRealization=[variable.value],
-                                conditionRealization=conditionRealization,
+                                conditionRealization=self.conditionalProbabilities[variable],
                             )
                         )
                         partialCoefficient *= conditionalProbability
