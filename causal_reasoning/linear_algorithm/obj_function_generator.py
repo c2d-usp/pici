@@ -157,13 +157,12 @@ class ObjFunctionGenerator:
     ):
         # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
         for no_of_possibilities in range(pow(2, len(conditionable_ancestors))):
-            # CRIAR UMA FUNÇÃO PARA ISSO
-            for i in range(len(conditionable_ancestors)):
-                if (no_of_possibilities >> i) % 2 == 1:
-                    conditioned_nodes.append(conditionable_ancestors[i])
+            current_conditionable_ancestors = self.get_current_conditionable_ancestors(conditionable_ancestors, no_of_possibilities)
+            current_conditioned_nodes: list[Node] = []
+            current_conditioned_nodes = conditioned_nodes + current_conditionable_ancestors
 
             self.graph.build_moral(
-                consideredNodes=ancestors, conditionedNodes=conditioned_nodes
+                consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
             )
             condition1 = self.graph.independency_moral(
                 node2=intervention_latent, node1=current_target
@@ -171,7 +170,7 @@ class ObjFunctionGenerator:
 
             self.graph.build_moral(
                 consideredNodes=ancestors,
-                conditionedNodes=conditioned_nodes,
+                conditionedNodes=current_conditioned_nodes,
                 intervention_outgoing_edges_are_considered=False,
                 intervention=intervention,
             )
@@ -181,12 +180,19 @@ class ObjFunctionGenerator:
             if condition1 and condition2:
                 valid_conditioned_nodes: list[Node] = []
                 print(f"The following set works:")
-                for node in conditioned_nodes:
+                for node in current_conditioned_nodes:
                     print(f"- {node.label}")
                     valid_conditioned_nodes.append(node)
         # Returns one of the valid subsets - Last instance of
         # "valid_conditioned_nodes", for now.
         return valid_conditioned_nodes
+
+    def get_current_conditionable_ancestors(self, conditionable_ancestors: list[Node], no_of_possibilities: int) -> list[Node]:
+        current_conditionable_ancestors: list[Node] = []
+        for i in range(len(conditionable_ancestors)):
+            if (no_of_possibilities >> i) % 2 == 1:
+                current_conditionable_ancestors.append(conditionable_ancestors[i])
+        return current_conditionable_ancestors
 
 
     def get_mechanisms_pruned(self) -> list[dict[T, int]]:
