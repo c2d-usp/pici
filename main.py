@@ -23,28 +23,28 @@ def main():
         target_value=1,
     )
 
-    print(balke_model.graph.check_dseparation(['X'], ['Y'], ['Z']))
+    print(balke_model.are_d_separated(['Z'], ['Y'], ['X']))
     balke_model.inference_query()
 
-    itau_input = (
-        "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
-    )
-    itau_unobs = ["U1", "U2", "U3"]
-    itau_target = "Y"
-    itau_intervention = "X"
-    itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
-    itau_df = pd.read_csv(itau_csv_path)
+    # itau_input = (
+    #     "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
+    # )
+    # itau_unobs = ["U1", "U2", "U3"]
+    # itau_target = "Y"
+    # itau_intervention = "X"
+    # itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
+    # itau_df = pd.read_csv(itau_csv_path)
 
-    itau_model = CausalModel(
-        data=itau_df,
-        edges=itau_input,
-        unobservables=itau_unobs,
-        interventions=itau_intervention,
-        interventions_value=1,
-        target=itau_target,
-        target_value=1,
-    )
-    itau_model.inference_query()
+    # itau_model = CausalModel(
+    #     data=itau_df,
+    #     edges=itau_input,
+    #     unobservables=itau_unobs,
+    #     interventions=itau_intervention,
+    #     interventions_value=1,
+    #     target=itau_target,
+    #     target_value=1,
+    # )
+    # itau_model.inference_query()
 
 
 if __name__ == "__main__":

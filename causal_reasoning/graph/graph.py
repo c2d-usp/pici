@@ -1,5 +1,5 @@
 import networkx as nx
-from causal_reasoning.graph.node import T, Node, MoralNode
+from causal_reasoning.graph.node import T, Node
 
 
 class Graph:
@@ -7,31 +7,18 @@ class Graph:
         self,
         numberOfNodes: int,
         currNodes: list[Node],
-        visited: list[bool],
-        cardinalities: dict[str, int],
-        parents: dict[str, list[str]],
-        adj: dict[str, list[str]],
         dagComponents: list[list[Node]],
         exogenous: list[Node],
         endogenous: list[Node],
         topologicalOrder: list[Node],
         DAG: nx.DiGraph,
         cComponentToUnob: dict[int, Node],
-        graphNodes: dict[str, Node],
+        graphNodes: dict[T, Node],
         node_set: set[Node],
         topologicalOrderIndexes: dict[Node, int],
     ):
         self.numberOfNodes = numberOfNodes
         self.graphNodes = graphNodes
-
-        """ TODO: REMOVE THE FOLLOWING ATTRIBUTES FROM THIS CLASS
-        """ """"""
-        self.visited = visited
-        self.cardinalities = cardinalities
-        self.parents = parents
-        self.adj = adj
-        """""" ""
-
         self.currNodes = currNodes
         self.dagComponents = dagComponents
         self.endogenous = endogenous
@@ -70,12 +57,12 @@ class Graph:
             if not adj_node.visited:
                 self.base_dfs(adj_node)
 
-    def is_descendant(self, ancestor_node: Node, descendant_node: Node) -> bool:
-        if ancestor_node not in self.node_set or descendant_node not in self.node_set:
+    def is_descendant(self, ancestor: Node, descendant: Node) -> bool:
+        if ancestor not in self.node_set or descendant not in self.node_set:
             return True
         self.clear_visited()
-        self.base_dfs(node=ancestor_node)
-        return descendant_node.visited
+        self.base_dfs(node=ancestor)
+        return descendant.visited
 
     def clear_visited(self):
         for node in self.graphNodes.values():

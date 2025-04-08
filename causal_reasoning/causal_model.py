@@ -93,6 +93,7 @@ class CausalModel:
         target: str | None = "",
         target_value: int | None = None,
     ):
+        # TODO: ADD handler that gets input from the method 
         if ( (interventions is None and self.interventions is None) \
             or (interventions_value is None and self.interventions_value is None) \
             or (target is None and self.target is None) \
@@ -101,8 +102,8 @@ class CausalModel:
             # TODO: Rewrite the error message
             raise Exception("Expect some value")
 
-        intervention_node = self.graph.graphNodes[interventions[0]]
-        target_node = self.graph.graphNodes[target]
+        intervention_node = self.graph.graphNodes[self.interventions[0]]
+        target_node = self.graph.graphNodes[self.target]
 
         # TODO: Set interventions and target to CausalModel object
         OptProblemBuilder.builder_linear_problem(
@@ -146,11 +147,10 @@ def get_node(graphNodes: dict[T, Node], node_label: T):
 
 
 def get_node_list(graphNodes: dict[T, Node], node_labels: list[T])-> list[Node]:
-    return [get_node(node_label) for node_label in node_labels]
+    return [get_node(graphNodes, node_label) for node_label in node_labels]
 
 
-def get_latent_parent(parents_label: list[T], node_cardinalities: list[T]) -> T:
-    latentParent = None
+def get_parent_latent(parents_label: list[T], node_cardinalities: list[T]) -> T:
     for node_parent in parents_label:
         if node_cardinalities[node_parent] == 0:
             return node_parent
@@ -158,23 +158,24 @@ def get_latent_parent(parents_label: list[T], node_cardinalities: list[T]) -> T:
 
 
 def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinalities: dict[T, int] = None):
-    number_of_nodes, children_labels, node_cardinalities, parents_labels, node_labels_set, dag = parse_input_graph(edges, latents=unobservables)
+    number_of_nodes, children_labels, node_cardinalities, parents_labels, node_labels_set, dag = parse_input_graph(edges, latents_label=unobservables)
     order = list(nx.topological_sort(dag))
 
-    latent_parents_labels = dict[T, T]
+    parent_latent_labels: dict[T, T] = {}
     graphNodes: dict[T, Node] = {}
     node_set = set()
 
+    parent_latent_label: T = None
     for node_label in node_labels_set:
-        latent_parent_label = None
         if node_cardinalities[node_label] == 0:
+            parent_latent_label = None
             new_node = Node(
-                children=[], parents=[], latentParent=None, isLatent=True, value=node_label
+                children=[], parents=[], latentParent=None, isLatent=True, label=node_label
             )
         else:
-            latent_parent_label = get_latent_parent(parents_labels[node_label])
+            parent_latent_label = get_parent_latent(parents_labels[node_label], node_cardinalities)
             
-            if latent_parent_label == None:
+            if parent_latent_label == None:
                 # TODO: ADD WARNING MESSAGE
                 print(
                     f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node_label} DOES NOT."
@@ -185,11 +186,11 @@ def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinaliti
                 parents=[],
                 latentParent=None,
                 isLatent=False,
-                value=node_label
+                label=node_label
             )
 
         graphNodes[node_label] = new_node
-        latent_parents_labels[new_node.label] = latent_parent_label
+        parent_latent_labels[new_node.label] = parent_latent_label
         node_set.add(new_node)
 
     endogenous: list[Node] = []
@@ -198,21 +199,24 @@ def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinaliti
 
     for i, node_label in enumerate(node_labels_set):
         node = graphNodes[node_label]
-        node.latentParent = graphNodes[latent_parents_labels[node_label]]
-
         if node.isLatent:
             exogenous.append(node)
             node.children=get_node_list(graphNodes, children_labels[node.label])
         else:
+            node.latentParent = graphNodes[parent_latent_labels[node_label]]
             endogenous.append(node)
             node.parents=get_node_list(graphNodes, parents_labels[node.label])
         topologicalOrderIndexes[node] = i
+    
+    topological_order_nodes: list[Node] = []
+    for node_label in order:
+        topological_order_nodes.append(graphNodes[node_label])
 
     return Graph(
         numberOfNodes=number_of_nodes,
         exogenous=exogenous, # list[Node]
         endogenous=endogenous, # list[Node]
-        topologicalOrder=order, # list[Node]
+        topologicalOrder=topological_order_nodes, # list[Node]
         DAG=dag, # nx.DiGraph
         graphNodes=graphNodes, #dict[str, Node]
         node_set=node_set, #set(Node)
