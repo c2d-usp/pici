@@ -106,8 +106,8 @@ class CausalModel:
         OptProblemBuilder.builder_linear_problem(
             self.graph,
             self.data,
-            self.interventions,
-            self.interventions_value,
+            self.interventions[0],
+            self.interventions_value[0],
             self.target,
             self.target_value,
         )

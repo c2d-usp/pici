@@ -261,7 +261,6 @@ class ObjFunctionGenerator:
                             dataFrame=self.dataFrame,
                             indexToLabel=self.graph.indexToLabel,
                             variableRealizations={variable: variablesValues[variable]},
-                            v=False,
                         )
                         partialCoefficient *= variableProbability
                     elif (
@@ -296,7 +295,6 @@ class ObjFunctionGenerator:
                                 indexToLabel=self.graph.indexToLabel,
                                 targetRealization={variable: variablesValues[variable]},
                                 conditionRealization=conditionRealization,
-                                v=False,
                             )
                         )
                         partialCoefficient *= conditionalProbability

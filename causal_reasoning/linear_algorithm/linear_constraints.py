@@ -66,7 +66,6 @@ def generate_constraints(
                 indexToLabel=dag.indexToLabel,
                 targetRealization=dictTarget,
                 conditionRealization=dictCond,
-                v=False,
             )
             dictTarget.clear()
             dictCond.clear()
