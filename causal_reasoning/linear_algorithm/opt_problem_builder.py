@@ -38,7 +38,7 @@ class OptProblemBuilder:
         probs, decisionMatrix = generate_constraints(
             data=df,
             dag=objFG.graph,
-            unob=objFG.graph.graphNodes[objFG.intervention].latentParent,
+            unob=interventionLatentParent,
             consideredCcomp=consideredEndogenousNodes,
             mechanism=mechanisms,
         )
