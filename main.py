@@ -44,7 +44,7 @@ def main():
         target=itau_target,
         target_value=1,
     )
-    # itau_model.inference_query()
+    itau_model.inference_query()
 
 
 if __name__ == "__main__":

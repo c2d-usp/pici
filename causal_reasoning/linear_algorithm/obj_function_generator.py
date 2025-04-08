@@ -3,6 +3,7 @@ from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import T, Node
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
 from causal_reasoning.linear_algorithm.probabilities_helper import find_probability, find_conditional_probability
+from causal_reasoning.new_types import MechanismType
 
 
 class ObjFunctionGenerator:
@@ -57,10 +58,6 @@ class ObjFunctionGenerator:
         # function
         conditionalProbabilities: dict[Node, list[Node]] = {}
         debugOrder: list[Node] = []
-        print("+++++++++++++++++++++++++++++++LENNN+++++++++++++++++++++++++++++++")
-        print(len(current_targets))
-        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
         while len(current_targets) > 0:
             print("---- Current targets array:")
             for tg in current_targets:
@@ -195,7 +192,7 @@ class ObjFunctionGenerator:
         return current_conditionable_ancestors
 
 
-    def get_mechanisms_pruned(self) -> list[dict[T, int]]:
+    def get_mechanisms_pruned(self) -> MechanismType:
         """
         Remove c-component variables that do not appear in the objective function
         """
@@ -212,7 +209,7 @@ class ObjFunctionGenerator:
         )
         return mechanisms
 
-    def build_objective_function(self, mechanisms: list[dict[T, int]]) -> list[float]:
+    def build_objective_function(self, mechanisms: MechanismType) -> list[float]:
         """
         Intermediate step: remove useless endogenous variables in the mechanisms creation?
         Must be called after generate restrictions. Returns the objective function with the following encoding
@@ -259,10 +256,6 @@ class ObjFunctionGenerator:
         for node in summandNodes:
             print(f"Node={node.label}")
 
-        # print("Mechanisms ====================================================")
-        # for k, v in mechanism.items():
-        #     print(f"     {k}: {v}")
-        # print("===============================================================")
         print("--- DEBUG OBJ FUNCTION GENERATION ---")
         for mechanism in mechanisms:
             print("-- START MECHANISM --")
@@ -304,9 +297,6 @@ class ObjFunctionGenerator:
                         for _key, node_item in self.graph.graphNodes.items():
                             if not node_item.isLatent and (variable in node_item.children):
                                 current_mechanism_key.append(f"{node_item.label}={node_item.value}")
-                                # mechanismKey += (
-                                #     f"{node_item.label}={node_item.value},"
-                                # )
                         for e in sorted(current_mechanism_key):
                             mechanismKey += f"{e},"
                         print(f"key: {mechanismKey[:-1]}")

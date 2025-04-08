@@ -41,7 +41,6 @@ class MechanismGenerator:
         allCasesList: list[list[list[int]]] = []
         dictKeys: list[str] = []
 
-        # TEM DIFERENÇA A ORDEM DE PROCESSAR OS NÓS
         for endogenous_node in endogenousNodes:
             auxSpaces.clear()
             header: str = f"determines variable: {endogenous_node.label}"
