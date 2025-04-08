@@ -206,13 +206,10 @@ class ObjFunctionGenerator:
             self.intervention
         }
 
-        print("OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
         _, _, mechanisms = MechanismGenerator.mechanisms_generator(
             latentNode=interventionLatentParent,
             endogenousNodes=endogenousNodes,
         )
-        print(mechanisms)
-        print("OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
         return mechanisms
 
     def build_objective_function(self, mechanisms: list[dict[T, int]]) -> list[float]:
@@ -302,12 +299,16 @@ class ObjFunctionGenerator:
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0. 
                         # Do nothing otherwise
                         print("Case 2")
+                        current_mechanism_key = []
                         mechanismKey: str = ""
                         for _key, node_item in self.graph.graphNodes.items():
                             if not node_item.isLatent and (variable in node_item.children):
-                                mechanismKey += (
-                                    f"{node_item.label}={node_item.value},"
-                                )
+                                current_mechanism_key.append(f"{node_item.label}={node_item.value}")
+                                # mechanismKey += (
+                                #     f"{node_item.label}={node_item.value},"
+                                # )
+                        for e in sorted(current_mechanism_key):
+                            mechanismKey += f"{e},"
                         print(f"key: {mechanismKey[:-1]}")
                         expectedValue = mechanism[mechanismKey[:-1]]
 

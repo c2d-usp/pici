@@ -7,13 +7,13 @@ from causal_reasoning.linear_algorithm.probabilities_helper import find_conditio
 
 
 def create_dict_index(parents: list[Node], rlt: list[int], indexerList: list[Node]):
-    index: str = ""
+    current_index = []
     for parNode in parents:
-        if parents.index(parNode) == len(parents) - 1:
-            index += str(parNode.label) + "=" + str(rlt[indexerList.index(parNode)])
-        else:
-            index += str(parNode.label) + "=" + str(rlt[indexerList.index(parNode)]) + ","
-    return index
+        current_index.append(str(parNode.label) + "=" + str(rlt[indexerList.index(parNode)]))
+    index: str = ""
+    for e in sorted(current_index):
+        index += f"{e},"
+    return index[:-1]
 
 
 def generate_constraints(
