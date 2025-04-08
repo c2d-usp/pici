@@ -57,6 +57,9 @@ class ObjFunctionGenerator:
         # function
         conditionalProbabilities: dict[Node, list[Node]] = {}
         debugOrder: list[Node] = []
+        print("+++++++++++++++++++++++++++++++LENNN+++++++++++++++++++++++++++++++")
+        print(len(current_targets))
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
         while len(current_targets) > 0:
             print("---- Current targets array:")
@@ -162,7 +165,7 @@ class ObjFunctionGenerator:
                 consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
             )
             condition1 = self.graph.independency_moral(
-                node2=intervention_latent, node1=current_target
+                node_2=intervention_latent, node_1=current_target
             )
 
             self.graph.build_moral(
@@ -172,7 +175,7 @@ class ObjFunctionGenerator:
                 intervention=intervention,
             )
             condition2 = self.graph.independency_moral(
-                node2=intervention, node1=current_target
+                node_2=intervention, node_1=current_target
             )
             if condition1 and condition2:
                 valid_conditioned_nodes: list[Node] = []
@@ -203,10 +206,13 @@ class ObjFunctionGenerator:
             self.intervention
         }
 
+        print("OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
         _, _, mechanisms = MechanismGenerator.mechanisms_generator(
             latentNode=interventionLatentParent,
             endogenousNodes=endogenousNodes,
         )
+        print(mechanisms)
+        print("OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
         return mechanisms
 
     def build_objective_function(self, mechanisms: list[dict[T, int]]) -> list[float]:
@@ -256,6 +262,10 @@ class ObjFunctionGenerator:
         for node in summandNodes:
             print(f"Node={node.label}")
 
+        # print("Mechanisms ====================================================")
+        # for k, v in mechanism.items():
+        #     print(f"     {k}: {v}")
+        # print("===============================================================")
         print("--- DEBUG OBJ FUNCTION GENERATION ---")
         for mechanism in mechanisms:
             print("-- START MECHANISM --")
@@ -309,7 +319,7 @@ class ObjFunctionGenerator:
                         conditionalProbability = (
                             find_conditional_probability(
                                 dataFrame=self.dataFrame,
-                                targetRealization=[variable.value],
+                                targetRealization=[variable],
                                 conditionRealization=self.conditionalProbabilities[variable],
                             )
                         )

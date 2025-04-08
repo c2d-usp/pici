@@ -33,36 +33,51 @@ class MechanismGenerator:
         parentsDict: dictionary that has the same key as the above argument, but instead returns a list with the parents of each endogenous
         node. PS: Note that some parents may not be in the c-component, but the ones in the tail are also necessary for this function, so they
         must be included.
+
         """
+        print("     OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
+        print(f"        {latentNode.label}")
+        end = [e.label for e in endogenousNodes]
+        print(f"        {end}")
+        print("     OOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOIOOOIIOI")
+
 
         auxSpaces: list[list[int]] = []
         headerArray: list[str] = []
         allCasesList: list[list[list[int]]] = []
         dictKeys: list[str] = []
 
+        # TEM DIFERENÇA A ORDEM DE PROCESSAR OS NÓS
         for endogenous_node in endogenousNodes:
             auxSpaces.clear()
             header: str = f"determines variable: {endogenous_node.label}"
+            print(f"header: {header}")
             amount: int = 1
             ordered_parents: list[Node] = []
             for parent in endogenous_node.parents:
                 if parent.label != latentNode.label:
                     ordered_parents.append(parent)
                     header = f"{parent.label}, " + header
+                    print(f"UPDATED_header: {header}")
+                    print(f"Parent: {parent.label}  {parent.cardinality}")
                     auxSpaces.append(range(parent.cardinality))
                     amount *= parent.cardinality
 
             headerArray.append(header + f" (x {amount})")
+            if True:
+                print(f'auxSpaces {auxSpaces}')
             functionDomain: list[list[int]] = [
                 list(auxTuple) for auxTuple in itertools.product(*auxSpaces)
             ]
+            if True:
+                print(f'functionDomain {functionDomain}')
 
             imageValues: list[int] = range(endogenous_node.cardinality)
 
             varResult = [[domainCase + [c] for c in imageValues]
                          for domainCase in functionDomain]
             # TODO: LOGGING
-            if False:
+            if True:
                 print(f"For variable {endogenous_node.label}:")
                 print(f"Function domain: {functionDomain}")
                 print(f"VarResult: {varResult}")
@@ -70,13 +85,13 @@ class MechanismGenerator:
             for domainCase in functionDomain:
                 key: str = ""
                 for index, el in enumerate(domainCase):
-                    key = key + f"{ordered_parents[index]}={el},"
+                    key = key + f"{ordered_parents[index].label}={el},"
                 dictKeys.append(key[:-1])
 
             allCasesList = allCasesList + varResult
 
         # TODO: LOGGING
-        if False:
+        if True:
             print(headerArray)
             print(
                 f"List all possible mechanism, placing in the same array those that determine the same function:\n{allCasesList}"
@@ -89,19 +104,19 @@ class MechanismGenerator:
         mechanismDicts: list[dict[T, int]] = []
         for index, mechanism in enumerate(allPossibleMechanisms):
             # TODO: LOGGING
-            if False:
+            if True:
                 print(f"{index}) {mechanism}")
             currDict: dict[T, int] = {}
             for domainIndex, nodeFunction in enumerate(mechanism):
                 # TODO: LOGGING
-                if False:
+                if True:
                     print(f"The node function = {nodeFunction}")
                 currDict[dictKeys[domainIndex]] = nodeFunction[-1]
 
             mechanismDicts.append(currDict)
 
         # TODO: LOGGING
-        if False:
+        if True:
             print("Check if the mechanism dictionary is working as expected:")
             for mechanismDict in mechanismDicts:
                 for key in mechanismDict:

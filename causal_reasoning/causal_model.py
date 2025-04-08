@@ -163,14 +163,14 @@ def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinaliti
 
     parent_latent_labels: dict[T, T] = {}
     graphNodes: dict[T, Node] = {}
-    node_set = set()
+    node_set: set[Node] = set()
 
     parent_latent_label: T = None
     for node_label in node_labels_set:
         if node_cardinalities[node_label] == 0:
             parent_latent_label = None
             new_node = Node(
-                children=[], parents=[], latentParent=None, isLatent=True, label=node_label
+                children=[], parents=[], latentParent=None, isLatent=True, label=node_label, cardinality=node_cardinalities[node_label]
             )
         else:
             parent_latent_label = get_parent_latent(parents_labels[node_label], node_cardinalities)
@@ -186,7 +186,8 @@ def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinaliti
                 parents=[],
                 latentParent=None,
                 isLatent=False,
-                label=node_label
+                label=node_label,
+                cardinality=node_cardinalities[node_label],
             )
 
         graphNodes[node_label] = new_node
@@ -205,6 +206,7 @@ def get_graph(edges: T = None, unobservables: list[T] = None, custom_cardinaliti
         else:
             node.latentParent = graphNodes[parent_latent_labels[node_label]]
             endogenous.append(node)
+            node.children=get_node_list(graphNodes, children_labels[node.label])
             node.parents=get_node_list(graphNodes, parents_labels[node.label])
         topologicalOrderIndexes[node] = i
     
