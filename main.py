@@ -6,25 +6,25 @@ from causal_reasoning.utils._enum import Examples
 
 def main():
 
-    # balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-    # balke_unobs = ["U1", "U2"]
-    # balke_target = "Y"
-    # balke_intervention = "X"
-    # balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
-    # balke_df = pd.read_csv(balke_csv_path)
+    balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+    balke_unobs = ["U1", "U2"]
+    balke_target = "Y"
+    balke_intervention = "X"
+    balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+    balke_df = pd.read_csv(balke_csv_path)
 
-    # balke_model = CausalModel(
-    #     data=balke_df,
-    #     edges=balke_input,
-    #     unobservables=balke_unobs,
-    #     interventions=balke_intervention,
-    #     interventions_value=1,
-    #     target=balke_target,
-    #     target_value=1,
-    # )
+    balke_model = CausalModel(
+        data=balke_df,
+        edges=balke_input,
+        unobservables=balke_unobs,
+        interventions=balke_intervention,
+        interventions_value=1,
+        target=balke_target,
+        target_value=1,
+    )
 
-    # print(balke_model.are_d_separated(['Z'], ['Y'], ['X']))
-    # balke_model.inference_query()
+    print(balke_model.are_d_separated(['Z'], ['Y'], ['X']))
+    balke_model.inference_query()
 
     itau_input = (
         "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
@@ -44,7 +44,7 @@ def main():
         target=itau_target,
         target_value=1,
     )
-    itau_model.inference_query()
+    # itau_model.inference_query()
 
 
 if __name__ == "__main__":
