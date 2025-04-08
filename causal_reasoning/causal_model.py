@@ -100,16 +100,17 @@ class CausalModel:
         ):
             # TODO: Rewrite the error message
             raise Exception("Expect some value")
-        
-        # get_node 
-            
+
+        intervention_node = self.graph.graphNodes[interventions[0]]
+        target_node = self.graph.graphNodes[target]
+
         # TODO: Set interventions and target to CausalModel object
         OptProblemBuilder.builder_linear_problem(
             self.graph,
             self.data,
-            self.interventions[0],
+            intervention_node,
             self.interventions_value[0],
-            self.target,
+            target_node,
             self.target_value,
         )
 
