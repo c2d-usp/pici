@@ -1,3 +1,4 @@
+import pandas as pd
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import T, Node
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
@@ -13,15 +14,11 @@ class ObjFunctionGenerator:
     def __init__(
         self,
         graph: Graph,
+        dataFrame: pd.DataFrame,
         intervention: Node,
-        target: Node,
         intervention_value: int,
+        target: Node,
         target_value: int,
-        dataFrame,
-        empiricalProbabilitiesVariables: list[Node],
-        mechanismVariables: list[Node],
-        conditionalProbabilities: dict[Node, list[Node]],
-        debugOrder: list[Node],
     ):
         """
         graph: an instance of the personalized class graph
@@ -37,10 +34,10 @@ class ObjFunctionGenerator:
         self.target_value = target_value
         self.dataFrame = dataFrame
 
-        self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
-        self.mechanismVariables = mechanismVariables
-        self.conditionalProbabilities = conditionalProbabilities
-        self.debugOrder = debugOrder
+        self.empiricalProbabilitiesVariables = []
+        self.mechanismVariables = []
+        self.conditionalProbabilities = []
+        self.debugOrder = []
 
     def find_linear_good_set(self):
         """
@@ -292,7 +289,8 @@ class ObjFunctionGenerator:
                         partialCoefficient *= variableProbability
                     elif (
                         variable in self.mechanismVariables
-                    ):  # Case 2: terminate with coeff 0 if the decision function is 0. Do nothing otherwise
+                    ):  # Case 2: terminate with coeff 0 if the decision function is 0. 
+                        # Do nothing otherwise
                         print("Case 2")
                         mechanismKey: str = ""
                         for _key, node_item in self.graph.graphNodes.items():
