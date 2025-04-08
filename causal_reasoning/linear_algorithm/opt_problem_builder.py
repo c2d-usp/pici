@@ -77,6 +77,6 @@ class OptProblemBuilder:
         upperBound = -upperBoundSol.fun
 
         print(
-            f"Causal query: P({target}={target_value}|do({intervention}={intervention_value}))"
+            f"Causal query: P({target.label}={target_value}|do({intervention.label}={intervention_value}))"
         )
         print(f"Bounds: {lowerBound} <= P <= {upperBound}")

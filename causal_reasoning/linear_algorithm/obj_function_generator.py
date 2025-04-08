@@ -65,10 +65,10 @@ class ObjFunctionGenerator:
 
             # ARROYO-> TODO: check if the topological order is reversed.
             current_target = self.graph.get_closest_node_from_leaf_in_the_topological_order(current_targets)
-            print(f'__>>{current_target}<<__')
+            print(f'__>>{current_target.label}<<__')
             if current_target in current_targets: current_targets.remove(current_target)
             debugOrder.append(current_target)
-            print(f"Current target: {current_target}")
+            print(f"Current target: {current_target.label}")
 
             if not self.graph.is_descendant(
                 ancestor=self.intervention, descendant=current_target
