@@ -26,7 +26,6 @@ class ObjFunctionGenerator:
         """
         graph: an instance of the personalized class graph
         intervention: X in P(Y|do(X))
-        intervention_value: the value assumed by the X variable
         target: Y in P(Y|do(X))
         """
 
@@ -44,7 +43,8 @@ class ObjFunctionGenerator:
 
     def find_linear_good_set(self):
         """
-        Runs each step of the algorithm. Finds a set of variables/restrictions that linearizes the problem.
+        Runs each step of the algorithm.
+        Finds a set of variables/restrictions that linearizes the problem.
         """
         intervention: Node = self.intervention
         current_targets: list[Node] = [self.target]

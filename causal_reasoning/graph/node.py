@@ -1,24 +1,18 @@
-from typing import Generic, TypeVar
-
-
-T = TypeVar("T")
-
-
-class Node(Generic[T]):
+class Node:
     def __init__(
         self,
         children: list["Node"],
         parents: list["Node"],
         latentParent: "Node",
         isLatent: bool,
-        label: T,
+        label: str,
         cardinality: int,
     ):
         self.children: list["Node"] = children
         self.parents: list["Node"] = parents
         self.latentParent: "Node" = latentParent
         self.isLatent: bool = isLatent
-        self.label: T = label
+        self.label: str = label
         self.cardinality: int = cardinality
         self.visited: bool = False
         self.moral_adjacency: list[Node] = []

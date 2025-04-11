@@ -9,18 +9,18 @@ def main():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
     balke_unobs = ["U1", "U2"]
     balke_target = "Y"
+    balke_target_value = 1
     balke_intervention = "X"
+    balke_intervention_value = 1
     balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
     balke_df = pd.read_csv(balke_csv_path)
 
     balke_model = CausalModel(
         data=balke_df,
         edges=balke_input,
-        unobservables=balke_unobs,
-        interventions=balke_intervention,
-        interventions_value=1,
-        target=balke_target,
-        target_value=1,
+        unobservables_labels=balke_unobs,
+        interventions=(balke_intervention, balke_intervention_value),
+        target=(balke_target, balke_target_value),
     )
 
     print(balke_model.are_d_separated(["Z"], ["Y"], ["X"]))
@@ -38,11 +38,9 @@ def main():
     itau_model = CausalModel(
         data=itau_df,
         edges=itau_input,
-        unobservables=itau_unobs,
-        interventions=itau_intervention,
-        interventions_value=1,
-        target=itau_target,
-        target_value=1,
+        unobservables_labels=itau_unobs,
+        interventions=(itau_intervention, 1),
+        target=(itau_target, 1),
     )
     itau_model.inference_query()
 

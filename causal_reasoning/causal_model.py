@@ -1,69 +1,64 @@
+from typing import TypeVar
 import networkx as nx
 from pandas import DataFrame
 
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node, T
+from causal_reasoning.graph.node import Node
 from causal_reasoning.linear_algorithm.opt_problem_builder import builder_linear_problem
-from causal_reasoning.utils.parser import parse_input_graph, parse_to_string_list
+from causal_reasoning.utils.parser import (
+    list_tuples_into_list_nodes,
+    parse_edges,
+    parse_input_graph,
+    parse_to_string_list,
+    parse_tuples_str_int_list,
+    parse_tuple_str_int,
+    tuple_into_node,
+)
+
+T = TypeVar("str")
 
 
 class CausalModel:
     def __init__(
         self,
         data: DataFrame,
-        edges: str,
+        edges: T,
         unobservables_labels: list[T] | T | None = [],
-        interventions: list[tuple[T, int]] = [],
+        interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
     ) -> None:
         self.data = data
-        unobservables_labels = parse_to_string_list(unobservables_labels)
 
+        # If it is a nx
+        # Or str
+        # or list of tuples
+        # or one tuple
+        edges = parse_edges(edges)
+
+        unobservables_labels = parse_to_string_list(unobservables_labels)
         self.graph: Graph = get_graph(edges=edges, unobservables=unobservables_labels)
         self.unobservables = [
             self.graph.graphNodes[unobservable_label]
             for unobservable_label in unobservables_labels
         ]
-        self.interventions = self.parse_list_tuples_into_list_nodes(interventions)
-        self.target = self.parse_tuple_into_node(target)
+        self.interventions = list_tuples_into_list_nodes(
+            parse_tuples_str_int_list(interventions), self.graph
+        )
+        self.target = tuple_into_node(parse_tuple_str_int(target), self.graph)
 
-    def parse_list_tuples_into_list_nodes(
-        self, list_tuples_label_value: list[tuple[T, int]]
-    ):
-        if list_tuples_label_value is None or len(list_tuples_label_value) <= 0:
-            return None
-        return [self.parse_tuple_into_node(tuple) for tuple in list_tuples_label_value]
+    def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
 
-    def parse_tuple_into_node(self, tuple_label_value: tuple[T, int]):
-        if tuple_label_value is None:
-            return None
-        label, value = tuple_label_value
-        if not self.is_node_in_graph(label):
-            raise Exception(f"Node '{label}' not present in the defined graph.")
-        self.set_node_value(label, value)
-        return self.graph.graphNodes[label]
-
-    def is_node_in_graph(self, node_label: T) -> bool:
-        return node_label in self.graph.graphNodes
-
-    def set_node_value(self, node_label: T, node_value: int) -> Node:
-        # TODO: Validate if value fits in node cardinality
-        self.graph.graphNodes[node_label].value = node_value
-        return self.graph.graphNodes[node_label]
-
-    def set_interventions(self, interventions: list[tuple[T, int]]) -> None:
-        self.interventions = self.parse_list_tuples_into_list_nodes(interventions)
-
-    def add_interventions(self, interventions: list[tuple[T, int]]) -> None:
-        more_interventions = self.parse_list_tuples_into_list_nodes(interventions)
+    def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        more_interventions = list_tuples_into_list_nodes(interventions, self.graph)
         if more_interventions is None:
             return
         for intervention in more_interventions:
             if intervention not in self.interventions:
                 self.interventions.append(intervention)
 
-    def set_target(self, target: tuple[T, int]) -> None:
-        self.target = self.parse_tuple_into_node(target)
+    def set_target(self, target: tuple[str, int]) -> None:
+        self.target = tuple_into_node(target, self.graph)
 
     def single_intervention_query(self):
         builder_linear_problem(
@@ -90,16 +85,16 @@ class CausalModel:
         raise NotImplementedError
 
     def inference_query(
-        self, interventions: list[tuple[T, int]] = [], target: tuple[T, int] = None
+        self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ):
-        interventions_nodes = self.parse_list_tuples_into_list_nodes(interventions)
+        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
         if interventions_nodes is not None:
             self.interventions = interventions_nodes
 
-        target_node = self.parse_tuple_into_node(target)
+        target_node = tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
         if target_node is not None:
@@ -140,15 +135,15 @@ class CausalModel:
         )
 
 
-def get_node(graphNodes: dict[T, Node], node_label: T):
+def get_node(graphNodes: dict[str, Node], node_label: str):
     return graphNodes[node_label]
 
 
-def get_node_list(graphNodes: dict[T, Node], node_labels: list[T]) -> list[Node]:
+def get_node_list(graphNodes: dict[str, Node], node_labels: list[str]) -> list[Node]:
     return [get_node(graphNodes, node_label) for node_label in node_labels]
 
 
-def get_parent_latent(parents_label: list[T], node_cardinalities: list[T]) -> T:
+def get_parent_latent(parents_label: list[str], node_cardinalities: list[str]) -> str:
     for node_parent in parents_label:
         if node_cardinalities[node_parent] == 0:
             return node_parent
@@ -156,9 +151,9 @@ def get_parent_latent(parents_label: list[T], node_cardinalities: list[T]) -> T:
 
 
 def get_graph(
-    edges: T = None,
-    unobservables: list[T] = None,
-    custom_cardinalities: dict[T, int] = None,
+    edges: tuple[str, str] = None,
+    unobservables: list[str] = None,
+    custom_cardinalities: dict[str, int] = {},
 ):
     (
         number_of_nodes,
@@ -167,14 +162,16 @@ def get_graph(
         parents_labels,
         node_labels_set,
         dag,
-    ) = parse_input_graph(edges, latents_label=unobservables)
+    ) = parse_input_graph(
+        edges, latents_label=unobservables, custom_cardinalities=custom_cardinalities
+    )
     order = list(nx.topological_sort(dag))
 
-    parent_latent_labels: dict[T, T] = {}
-    graphNodes: dict[T, Node] = {}
+    parent_latent_labels: dict[str, str] = {}
+    graphNodes: dict[str, Node] = {}
     node_set: set[Node] = set()
 
-    parent_latent_label: T = None
+    parent_latent_label: str = None
     for node_label in node_labels_set:
         if node_cardinalities[node_label] == 0:
             parent_latent_label = None

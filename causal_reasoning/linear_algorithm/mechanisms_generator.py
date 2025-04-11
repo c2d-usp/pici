@@ -1,7 +1,7 @@
 import itertools
 from collections import namedtuple
 
-from causal_reasoning.graph.node import Node, T
+from causal_reasoning.graph.node import Node
 
 dictAndIndex = namedtuple("dictAndIndex", ["mechanisms", "index"])
 
@@ -27,10 +27,7 @@ class MechanismGenerator:
 
         latentNode: an identifier for the latent node of the c-component
         endogenousNodes: list of endogenous node of the c-component
-        cardinalities: dictionary with the cardinalities of the endogenous nodes. The key for each node is the number that represents
-        it in the endogenousNode list
-        parentsDict: dictionary that has the same key as the above argument, but instead returns a list with the parents of each endogenous
-        node. PS: Note that some parents may not be in the c-component, but the ones in the tail are also necessary for this function, so they
+        PS: Note that some parents may not be in the c-component, but the ones in the tail are also necessary for this function, so they
         must be included.
 
         """
@@ -94,12 +91,12 @@ class MechanismGenerator:
             )
 
         allPossibleMechanisms = list(itertools.product(*allCasesList))
-        mechanismDicts: list[dict[T, int]] = []
+        mechanismDicts: list[dict[str, int]] = []
         for index, mechanism in enumerate(allPossibleMechanisms):
             # TODO: LOGGING
             if verbose:
                 print(f"{index}) {mechanism}")
-            currDict: dict[T, int] = {}
+            currDict: dict[str, int] = {}
             for domainIndex, nodeFunction in enumerate(mechanism):
                 # TODO: LOGGING
                 if verbose:
@@ -117,7 +114,7 @@ class MechanismGenerator:
                 print("------------")
 
         """
-        mechanismDicts: list[dict[T, int]]
+        mechanismDicts: list[dict[str, int]]
         --- Has all the mechanisms for ONE latent variable. Each element of the list is a set of mechanisms, which specify
             the value of any c-component endogenous node given the values of its endogenous parents.
 

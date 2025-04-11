@@ -1,6 +1,6 @@
 import networkx as nx
 
-from causal_reasoning.graph.node import Node, T
+from causal_reasoning.graph.node import Node
 
 
 class Graph:
@@ -14,7 +14,7 @@ class Graph:
         topologicalOrder: list[Node],
         DAG: nx.DiGraph,
         cComponentToUnob: dict[int, Node],
-        graphNodes: dict[T, Node],
+        graphNodes: dict[str, Node],
         node_set: set[Node],
         topologicalOrderIndexes: dict[Node, int],
     ):
@@ -68,6 +68,18 @@ class Graph:
     def clear_visited(self):
         for node in self.node_set:
             node.visited = False
+
+    def is_node_in_graph(self, node_label: str) -> bool:
+        if not isinstance(node_label, str):
+            raise Exception(f"Node label '{node_label}' is not of type {str}.")
+        return node_label in self.graphNodes
+
+    def set_node_value(self, node_label: str, node_value: int) -> Node:
+        if not isinstance(node_value, int):
+            raise Exception(f"Node value '{node_value}' is not of type int.")
+        # TODO: Validate if value fits in node cardinality
+        self.graphNodes[node_label].value = node_value
+        return self.graphNodes[node_label]
 
     def get_closest_node_from_leaf_in_the_topological_order(
         self, nodes: list[Node]
