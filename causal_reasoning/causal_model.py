@@ -3,10 +3,8 @@ from pandas import DataFrame
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node, T
-from causal_reasoning.linear_algorithm.opt_problem_builder import \
-    builder_linear_problem
-from causal_reasoning.utils.parser import (parse_input_graph,
-                                           parse_to_string_list)
+from causal_reasoning.linear_algorithm.opt_problem_builder import builder_linear_problem
+from causal_reasoning.utils.parser import parse_input_graph, parse_to_string_list
 
 
 class CausalModel:
@@ -193,7 +191,7 @@ def get_graph(
                 parents_labels[node_label], node_cardinalities
             )
 
-            if parent_latent_label == None:
+            if parent_latent_label is None:
                 # TODO: ADD WARNING MESSAGE
                 print(
                     f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node_label} DOES NOT."

@@ -1,4 +1,3 @@
-import networkx as nx
 import pandas as pd
 
 from causal_reasoning.causal_model import CausalModel
@@ -24,7 +23,7 @@ def main():
         target_value=1,
     )
 
-    print(balke_model.are_d_separated(['Z'], ['Y'], ['X']))
+    print(balke_model.are_d_separated(["Z"], ["Y"], ["X"]))
     balke_model.inference_query()
 
     itau_input = (

@@ -17,9 +17,7 @@ def find_conditional_probability(
 
         Calculates: P(Target|Condition) = P(Target,Condition) / P(Condition)
     """
-    conditionProbability = find_probability(
-        dataFrame, conditionRealization
-    )
+    conditionProbability = find_probability(dataFrame, conditionRealization)
 
     if conditionProbability == 0:
         return 0
@@ -27,12 +25,12 @@ def find_conditional_probability(
     targetAndConditionRealization = targetRealization + conditionRealization
 
     targetAndConditionProbability = find_probability(
-        dataFrame, targetAndConditionRealization)
+        dataFrame, targetAndConditionRealization
+    )
     return targetAndConditionProbability / conditionProbability
 
-def find_probability(
-    dataFrame: pd.DataFrame, variables: list[Node]
-):
+
+def find_probability(dataFrame: pd.DataFrame, variables: list[Node]):
     compatibleCasesCount = count_occurrences(dataFrame, variables)
     totalCases = dataFrame.shape[0]
     # TODO: ADD LOGGING
@@ -41,10 +39,10 @@ def find_probability(
         print(f"Total cases: {totalCases}")
     return compatibleCasesCount / totalCases
 
+
 def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
     conditions = pd.Series([True] * len(dataFrame), index=dataFrame.index)
     for variable_node in variables:
-        conditions &= (dataFrame[variable_node.label]
-                        == variable_node.value)
+        conditions &= dataFrame[variable_node.label] == variable_node.value
 
     return dataFrame[conditions].shape[0]

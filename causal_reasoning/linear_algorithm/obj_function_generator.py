@@ -1,11 +1,12 @@
 import pandas as pd
 
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node, T
-from causal_reasoning.linear_algorithm.mechanisms_generator import \
-    MechanismGenerator
+from causal_reasoning.graph.node import Node
+from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
 from causal_reasoning.linear_algorithm.probabilities_helper import (
-    find_conditional_probability, find_probability)
+    find_conditional_probability,
+    find_probability,
+)
 from causal_reasoning.new_types import MechanismType
 
 
@@ -79,16 +80,16 @@ class ObjFunctionGenerator:
             if not self.graph.is_descendant(
                 ancestor=self.intervention, descendant=current_target
             ):
-                print(f"------- Case 1: Not a descendant")
+                print("------- Case 1: Not a descendant")
                 empiricalProbabilitiesVariables.append(current_target)
             elif current_target.latentParent == interventionLatent:
-                print(f"------- Case 2: Mechanisms")
+                print("------- Case 2: Mechanisms")
                 mechanismVariables.append(current_target)
                 for parent in current_target.parents:
                     if (parent not in current_targets) and parent != intervention:
                         current_targets.append(parent)
             else:
-                print(f"------- Case 3: Find d-separator set")
+                print("------- Case 3: Find d-separator set")
                 validConditionedNodes = self.find_d_separator_set(
                     current_target, current_targets, interventionLatent, intervention
                 )
@@ -178,7 +179,7 @@ class ObjFunctionGenerator:
             )
             if condition1 and condition2:
                 valid_conditioned_nodes: list[Node] = []
-                print(f"The following set works:")
+                print("The following set works:")
                 for node in current_conditioned_nodes:
                     print(f"- {node.label}")
                     valid_conditioned_nodes.append(node)
@@ -252,7 +253,7 @@ class ObjFunctionGenerator:
         objFunctionCoefficients: list[float] = []
         print("Debug input cases:")
         print(f"Size of #inputs: {len(inputCases)}")
-        print(f"first component:")
+        print("first component:")
         print(inputCases[0])
 
         print("Debug summand nodes")

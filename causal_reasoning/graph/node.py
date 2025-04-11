@@ -1,13 +1,22 @@
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
+
 
 T = TypeVar("T")
 
 
 class Node(Generic[T]):
-    def __init__(self, children, parents, latentParent, isLatent, label: T, cardinality: int):
-        self.children: list[Node] = children
-        self.parents: list[Node] = parents
-        self.latentParent: Node = latentParent
+    def __init__(
+        self,
+        children: list["Node"],
+        parents: list["Node"],
+        latentParent: "Node",
+        isLatent: bool,
+        label: T,
+        cardinality: int,
+    ):
+        self.children: list["Node"] = children
+        self.parents: list["Node"] = parents
+        self.latentParent: "Node" = latentParent
         self.isLatent: bool = isLatent
         self.label: T = label
         self.cardinality: int = cardinality

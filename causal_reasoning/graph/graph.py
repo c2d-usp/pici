@@ -68,7 +68,7 @@ class Graph:
     def clear_visited(self):
         for node in self.node_set:
             node.visited = False
- 
+
     def get_closest_node_from_leaf_in_the_topological_order(
         self, nodes: list[Node]
     ) -> Node:

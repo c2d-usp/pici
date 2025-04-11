@@ -7,8 +7,7 @@ dictAndIndex = namedtuple("dictAndIndex", ["mechanisms", "index"])
 
 
 class MechanismGenerator:
-    def helper_generate_spaces(
-            nodes: list[Node]):
+    def helper_generate_spaces(nodes: list[Node]):
         spaces: list[list[int]] = []
         for node in nodes:
             spaces.append(range(0, node.cardinality))
@@ -55,17 +54,18 @@ class MechanismGenerator:
 
             headerArray.append(header + f" (x {amount})")
             if verbose:
-                print(f'auxSpaces {auxSpaces}')
+                print(f"auxSpaces {auxSpaces}")
             functionDomain: list[list[int]] = [
                 list(auxTuple) for auxTuple in itertools.product(*auxSpaces)
             ]
             if verbose:
-                print(f'functionDomain {functionDomain}')
+                print(f"functionDomain {functionDomain}")
 
             imageValues: list[int] = range(endogenous_node.cardinality)
 
-            varResult = [[domainCase + [c] for c in imageValues]
-                         for domainCase in functionDomain]
+            varResult = [
+                [domainCase + [c] for c in imageValues] for domainCase in functionDomain
+            ]
             # TODO: LOGGING
             if verbose:
                 print(f"For variable {endogenous_node.label}:")
@@ -137,9 +137,7 @@ class MechanismGenerator:
         mechanismDictsList: list[list[dictAndIndex]] = []
         globalIndex: int = 0
         for latentVariable in listU:
-            endogenousInS: list[Node] = list(
-                set(latentVariable.children) & listSpaces
-            )
+            endogenousInS: list[Node] = list(set(latentVariable.children) & listSpaces)
             _, _, mechanismDicts = MechanismGenerator.mechanisms_generator(
                 latentNode=latentVariable,
                 endogenousNodes=endogenousInS,
@@ -148,8 +146,7 @@ class MechanismGenerator:
             mechanismIndexDict: list[dictAndIndex] = []
             initVal: int = globalIndex
             for mechanismDict in mechanismDicts:
-                mechanismIndexDict.append(
-                    dictAndIndex(mechanismDict, globalIndex))
+                mechanismIndexDict.append(dictAndIndex(mechanismDict, globalIndex))
                 globalIndex += 1
 
             latentVariable.cardinality = globalIndex - initVal
