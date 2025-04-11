@@ -2,9 +2,11 @@ import networkx as nx
 from pandas import DataFrame
 
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import T, Node
-from causal_reasoning.utils.parser import parse_to_string_list, parse_input_graph
-from causal_reasoning.linear_algorithm.opt_problem_builder import builder_linear_problem
+from causal_reasoning.graph.node import Node, T
+from causal_reasoning.linear_algorithm.opt_problem_builder import \
+    builder_linear_problem
+from causal_reasoning.utils.parser import (parse_input_graph,
+                                           parse_to_string_list)
 
 
 class CausalModel:

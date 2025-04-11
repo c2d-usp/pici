@@ -1,5 +1,6 @@
-import networkx as nx
 from typing import Any
+
+import networkx as nx
 
 from causal_reasoning.graph.node import T
 

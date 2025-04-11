@@ -1,5 +1,6 @@
-import pandas as pd
 import networkx as nx
+import pandas as pd
+
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
 

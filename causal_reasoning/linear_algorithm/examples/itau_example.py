@@ -1,12 +1,14 @@
 import time as tm
 
-from scipy.optimize import linprog
 import pandas as pd
+from scipy.optimize import linprog
 
-from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
-from causal_reasoning.linear_algorithm.probabilities_helper import find_probability, find_conditional_probability
+from causal_reasoning.causal_model import CausalModel, get_graph
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.causal_model import get_graph, CausalModel
+from causal_reasoning.linear_algorithm.mechanisms_generator import \
+    MechanismGenerator
+from causal_reasoning.linear_algorithm.probabilities_helper import (
+    find_conditional_probability, find_probability)
 from causal_reasoning.utils._enum import Examples
 
 

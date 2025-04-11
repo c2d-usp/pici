@@ -1,5 +1,6 @@
 import networkx as nx
-from causal_reasoning.graph.node import T, Node
+
+from causal_reasoning.graph.node import Node, T
 
 
 class Graph:

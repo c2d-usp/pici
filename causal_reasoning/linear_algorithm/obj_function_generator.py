@@ -1,11 +1,11 @@
 import pandas as pd
+
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import T, Node
-from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
+from causal_reasoning.graph.node import Node, T
+from causal_reasoning.linear_algorithm.mechanisms_generator import \
+    MechanismGenerator
 from causal_reasoning.linear_algorithm.probabilities_helper import (
-    find_probability,
-    find_conditional_probability,
-)
+    find_conditional_probability, find_probability)
 from causal_reasoning.new_types import MechanismType
 
 

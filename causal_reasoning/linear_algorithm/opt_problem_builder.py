@@ -1,13 +1,12 @@
-from scipy.optimize import linprog
-
 import pandas as pd
+from scipy.optimize import linprog
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.linear_algorithm.linear_constraints import generate_constraints
-from causal_reasoning.linear_algorithm.obj_function_generator import (
-    ObjFunctionGenerator,
-)
+from causal_reasoning.linear_algorithm.linear_constraints import \
+    generate_constraints
+from causal_reasoning.linear_algorithm.obj_function_generator import \
+    ObjFunctionGenerator
 
 
 def builder_linear_problem(

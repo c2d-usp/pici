@@ -1,5 +1,4 @@
-from typing import Any
-from typing import TypeVar, Generic
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
