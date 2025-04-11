@@ -15,21 +15,3 @@ class Node(Generic[T]):
         self.visited: bool = False
         self.moral_adjacency: list[Node] = []
         self.value: int = None
-
-
-class Intervention:
-    def __init__(self, label: str, value: int = None):
-        self.label = label
-        self.value = value
-
-    def set_value(self, value: int):
-        self.value = value
-
-
-class Target:
-    def __init__(self, label: str, value: int = None):
-        self.label = label
-        self.value = value
-
-    def set_value(self, value: int):
-        self.value = value
