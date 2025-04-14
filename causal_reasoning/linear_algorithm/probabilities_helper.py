@@ -1,15 +1,15 @@
 import pandas as pd
 
+from causal_reasoning.graph.node import Node
+
 
 def find_conditional_probability(
-    dataFrame,
-    indexToLabel,
-    targetRealization: dict[int, int],
-    conditionRealization: dict[int, int],
+    dataFrame: pd.DataFrame,
+    targetRealization: list[Node],
+    conditionRealization: list[Node],
 ):
     """
     dataFrame              : pandas dataFrama that contains the data from the csv
-    indexToLabel           : dictionary that converts an endogenous variable index to its label
     targetRealization      : specifies the values assumed by the endogenous variables V
     conditionalRealization : specifies the values assumed by the c-component tail T
 
@@ -17,34 +17,32 @@ def find_conditional_probability(
 
         Calculates: P(Target|Condition) = P(Target,Condition) / P(Condition)
     """
-    conditionProbability = find_probability(
-        dataFrame, indexToLabel, conditionRealization
-    )
+    conditionProbability = find_probability(dataFrame, conditionRealization)
 
     if conditionProbability == 0:
         return 0
 
-    targetAndConditionRealization = targetRealization | conditionRealization
+    targetAndConditionRealization = targetRealization + conditionRealization
 
     targetAndConditionProbability = find_probability(
-        dataFrame, indexToLabel, targetAndConditionRealization)
+        dataFrame, targetAndConditionRealization
+    )
     return targetAndConditionProbability / conditionProbability
 
-def find_probability(
-    dataFrame, indexToLabel, variableRealizations: dict[int, int]
-):
-    compatibleCasesCount = count_occurrences(dataFrame, indexToLabel, variableRealizations)
+
+def find_probability(dataFrame: pd.DataFrame, variables: list[Node]):
+    compatibleCasesCount = count_occurrences(dataFrame, variables)
     totalCases = dataFrame.shape[0]
-    # TODO: ADD LOG??
+    # TODO: ADD LOGGING
     if False:
         print(f"Count compatible cases: {compatibleCasesCount}")
         print(f"Total cases: {totalCases}")
     return compatibleCasesCount / totalCases
 
-def count_occurrences(dataFrame: pd.DataFrame, indexToLabel: dict[int, str], variableRealizations: dict[int, int]):
+
+def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
     conditions = pd.Series([True] * len(dataFrame), index=dataFrame.index)
-    for variable_key in variableRealizations:
-        conditions &= (dataFrame[indexToLabel[variable_key]]
-                        == variableRealizations[variable_key])
+    for variable_node in variables:
+        conditions &= dataFrame[variable_node.label] == variable_node.value
 
     return dataFrame[conditions].shape[0]
