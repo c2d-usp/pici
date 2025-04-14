@@ -286,12 +286,7 @@ class ObjFunctionGenerator:
                         print("Case 1")
                         variableProbability = find_probability(
                             dataFrame=self.dataFrame,
-<<<<<<< HEAD
-                            indexToLabel=self.graph.indexToLabel,
-                            variableRealizations={variable: variablesValues[variable]},
-=======
                             variables=[variable],
->>>>>>> refactor-to-generic-type
                         )
                         partialCoefficient *= variableProbability
                     elif (
@@ -318,30 +313,12 @@ class ObjFunctionGenerator:
                             print("End process")
                     else:  # Case 3: coeff *= P(V|some endo parents)
                         print("Case 3")
-<<<<<<< HEAD
-                        conditionRealization: dict[int, int] = {}
-                        for conditionalVariable in self.conditionalProbabilities[
-                            variable
-                        ]:
-                            conditionRealization[conditionalVariable] = variablesValues[
-                                conditionalVariable
-                            ]
-
-                        conditionalProbability = (
-                            find_conditional_probability(
-                                dataFrame=self.dataFrame,
-                                indexToLabel=self.graph.indexToLabel,
-                                targetRealization={variable: variablesValues[variable]},
-                                conditionRealization=conditionRealization,
-                            )
-=======
                         conditionalProbability = find_conditional_probability(
                             dataFrame=self.dataFrame,
                             targetRealization=[variable],
                             conditionRealization=self.conditionalProbabilities[
                                 variable
                             ],
->>>>>>> refactor-to-generic-type
                         )
                         partialCoefficient *= conditionalProbability
 

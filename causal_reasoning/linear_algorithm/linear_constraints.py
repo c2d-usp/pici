@@ -79,14 +79,8 @@ def generate_constraints(
                     conditionRealizationNodes.append(cVar)
             prob *= find_conditional_probability(
                 dataFrame=data,
-<<<<<<< HEAD
-                indexToLabel=dag.indexToLabel,
-                targetRealization=dictTarget,
-                conditionRealization=dictCond,
-=======
                 targetRealization=targetRealizationNodes,
                 conditionRealization=conditionRealizationNodes,
->>>>>>> refactor-to-generic-type
             )
             targetRealizationNodes.clear()
             conditionRealizationNodes.clear()

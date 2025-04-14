@@ -65,10 +65,6 @@ class CausalModel:
             self.graph,
             self.data,
             self.interventions[0],
-<<<<<<< HEAD
-            self.interventions_value[0],
-=======
->>>>>>> refactor-to-generic-type
             self.target,
         )
 
