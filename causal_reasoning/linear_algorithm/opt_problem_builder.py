@@ -23,7 +23,6 @@ def builder_linear_problem(
     )
     objFG.find_linear_good_set()
     mechanisms = objFG.get_mechanisms_pruned()
-    objFunctionCoefficients = objFG.build_objective_function(mechanisms)
 
     interventionLatentParent = objFG.intervention.latentParent
     cComponentEndogenous = interventionLatentParent.children
@@ -36,9 +35,10 @@ def builder_linear_problem(
         dag=objFG.graph,
         unob=interventionLatentParent,
         consideredCcomp=consideredEndogenousNodes,
-        mechanism=mechanisms,
+        mechanisms=mechanisms,
     )
 
+    objFunctionCoefficients: list[float] = objFG.build_objective_function(mechanisms)
     print("-- DEBUG OBJ FUNCTION --")
     for i, coeff in enumerate(objFunctionCoefficients):
         print(f"c_{i} = {coeff}")
@@ -49,6 +49,9 @@ def builder_linear_problem(
             print(f"{decisionMatrix[i][j]} ", end="")
         print(f" = {probs[i]}")
     intervals = [(0, 1) for _ in range(len(decisionMatrix[0]))]
+
+    # lowerBound, upperBound = causal_reasoning.column_generation.pyomo_use(objFunctionCoefficients, decisionMatrix, probs, intervals)
+
     lowerBoundSol = linprog(
         c=objFunctionCoefficients,
         A_ub=None,
@@ -69,7 +72,6 @@ def builder_linear_problem(
         method="highs",
         bounds=intervals,
     )
-
     upperBound = -upperBoundSol.fun
 
     print(

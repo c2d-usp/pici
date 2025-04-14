@@ -26,8 +26,8 @@ def generate_constraints(
     dag: Graph,
     unob: Node,
     consideredCcomp: list[Node],
-    mechanism: MechanismType,
-):
+    mechanisms: MechanismType,
+) -> tuple[float, list[list[int]]]:
     topoOrder: list[Node] = dag.topologicalOrder
     cCompOrder: list[Node] = []
     probs: list[float] = [1.0]
@@ -35,7 +35,7 @@ def generate_constraints(
     usedVars: list[Node] = []
     productTerms: list[dict[Node, list[Node]]] = []
 
-    decisionMatrix: list[list[int]] = [[1 for _ in range(len(mechanism))]]
+    decisionMatrix: list[list[int]] = [[1 for _ in range(len(mechanisms))]]
 
     for node in topoOrder:
         if (unob in node.parents) and (node in consideredCcomp):
@@ -87,7 +87,7 @@ def generate_constraints(
 
         probs.append(prob)
         aux: list[int] = []
-        for u in range(len(mechanism)):
+        for u in range(len(mechanisms)):
             coef: bool = True
             for var in usedVars:
                 if var in consideredCcomp:
@@ -98,7 +98,7 @@ def generate_constraints(
                         parents=endoParents, rlt=rlt, indexerList=usedVars
                     )
                     endoParents.clear()
-                    if mechanism[u][key] == rlt[usedVars.index(var)]:
+                    if mechanisms[u][key] == rlt[usedVars.index(var)]:
                         coef *= 1
                     else:
                         coef *= 0
