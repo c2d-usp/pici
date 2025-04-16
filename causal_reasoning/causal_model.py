@@ -4,6 +4,7 @@ from pandas import DataFrame
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
+from causal_reasoning.gurobi.gurobi_use import gurobi_builder_linear_problem
 from causal_reasoning.linear_algorithm.opt_problem_builder import builder_linear_problem
 from causal_reasoning.utils.parser import (
     list_tuples_into_list_nodes,
@@ -61,7 +62,8 @@ class CausalModel:
         self.target = tuple_into_node(target, self.graph)
 
     def single_intervention_query(self):
-        builder_linear_problem(
+        # builder_linear_problem(
+        gurobi_builder_linear_problem(
             self.graph,
             self.data,
             self.interventions[0],

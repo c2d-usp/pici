@@ -1,28 +1,27 @@
 import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
+import pandas as pd
 
+from causal_reasoning.graph.graph import Graph
+from causal_reasoning.graph.node import Node
+from causal_reasoning.linear_algorithm.linear_constraints import generate_constraints
+from causal_reasoning.linear_algorithm.obj_function_generator import ObjFunctionGenerator
 
-# https://colab.research.google.com/github/Gurobi/modeling-examples/blob/master/colgen-cutting_stock/colgen-cutting_stock.ipynb#scrollTo=HXWEmpkxUIR_
 
 class MasterProblem:
     def __init__(self):
-        self.model = gp.Model("master")
+        self.model = gp.Model("linear")
         self.vars = None
         self.constrs = None
         
-    def setup(self, patterns, demand):
-        num_patterns = len(patterns)
-        # Variáveis Mecanismos
-        # self.vars = self.model.addVars(mechanisms, ...)
-        self.vars = self.model.addVars(num_patterns, obj=1, name="Pattern")
+    def setup(self, probs, decisionMatrix):
+        num_vars = len(probs)
+        self.vars = self.model.addVars(num_vars, obj=1, name="Variables")
         
-        # Constraints
-        # self.constrs = self.model.addConstrs(decisionMatrix == probs) 
-        self.constrs = self.model.addConstrs((gp.quicksum(patterns[pattern][piece]*self.vars[pattern]
-                                                          for pattern in range(num_patterns))
-                                              >= demand[piece] for piece in demand.keys()),
-                                             name="Demand")
+        for i in range(len(decisionMatrix)):
+            self.constrs = self.model.addConstrs(decisionMatrix[i] == probs[i])
+        
         self.model.modelSense = GRB.MINIMIZE
         # Turning off output because of the iterative procedure
         self.model.params.outputFlag = 0
@@ -116,3 +115,48 @@ class CuttingStock:
         for pattern, var in self.master.vars.items():
             if var.x > 0.5:
                 self.solution[pattern] = round(var.x)
+
+
+def gurobi_builder_linear_problem(
+    graph: Graph,
+    df: pd.DataFrame,
+    intervention: Node,
+    target: Node,
+):
+    objFG = ObjFunctionGenerator(
+        graph=graph,
+        dataFrame=df,
+        intervention=intervention,
+        target=target,
+    )
+    objFG.find_linear_good_set()
+    mechanisms = objFG.get_mechanisms_pruned()
+
+    interventionLatentParent = objFG.intervention.latentParent
+    cComponentEndogenous = interventionLatentParent.children
+    consideredEndogenousNodes = list(
+        (set(cComponentEndogenous) & set(objFG.debugOrder)) | {objFG.intervention}
+    )
+
+    probs, decisionMatrix = generate_constraints(
+        data=df,
+        dag=objFG.graph,
+        unob=interventionLatentParent,
+        consideredCcomp=consideredEndogenousNodes,
+        mechanisms=mechanisms,
+    )
+
+    objFunctionCoefficients: list[float] = objFG.build_objective_function(mechanisms)
+
+
+
+    master = MasterProblem()
+    master.setup(probs, decisionMatrix)
+
+    master.model.optimize()
+    duals = master.model.getAttr("pi", master.constrs)
+    if master.model.Status == GRB.OPTIMAL: # OPTIMAL
+            lower = master.model.objVal
+            print(f"Minimal solution found!\nMIN Query: {lower}")
+    else:
+        print(f"Minimal solution not found. Gurobi status code: {master.model.Status}")
