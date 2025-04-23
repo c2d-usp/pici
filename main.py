@@ -1,10 +1,13 @@
 import pandas as pd
+import logging
 
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
 
 
 def main():
+
+    logging.basicConfig(level=logging.INFO)
 
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
     balke_unobs = ["U1", "U2"]
@@ -23,7 +26,7 @@ def main():
         target=(balke_target, balke_target_value),
     )
 
-    print(balke_model.are_d_separated(["Z"], ["Y"], ["X"]))
+    print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(['Z'], ['Y'], ['X'])}")
     balke_model.inference_query()
 
     itau_input = (

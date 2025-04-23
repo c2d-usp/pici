@@ -1,6 +1,9 @@
 from typing import TypeVar
 import networkx as nx
 from pandas import DataFrame
+import logging
+
+logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -192,7 +195,7 @@ def get_graph(
 
             if parent_latent_label is None:
                 # TODO: ADD WARNING MESSAGE
-                print(
+                logger.error(
                     f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node_label} DOES NOT."
                 )
 

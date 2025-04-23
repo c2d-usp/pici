@@ -1,5 +1,8 @@
 import pandas as pd
 from scipy.optimize import linprog
+import logging
+
+logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -39,15 +42,15 @@ def builder_linear_problem(
     )
 
     objFunctionCoefficients: list[float] = objFG.build_objective_function(mechanisms)
-    print("-- DEBUG OBJ FUNCTION --")
+    logger.debug("-- DEBUG OBJ FUNCTION --")
     for i, coeff in enumerate(objFunctionCoefficients):
-        print(f"c_{i} = {coeff}")
+        logger.debug(f"c_{i} = {coeff}")
 
-    print("-- DECISION MATRIX --")
+    logger.debug("-- DECISION MATRIX --")
     for i in range(len(decisionMatrix)):
         for j in range(len(decisionMatrix[i])):
-            print(f"{decisionMatrix[i][j]} ", end="")
-        print(f" = {probs[i]}")
+            logger.debug(f"{decisionMatrix[i][j]} ", end="")
+        logger.debug(f" = {probs[i]}")
     intervals = [(0, 1) for _ in range(len(decisionMatrix[0]))]
 
     # lowerBound, upperBound = causal_reasoning.column_generation.pyomo_use(objFunctionCoefficients, decisionMatrix, probs, intervals)
@@ -74,7 +77,7 @@ def builder_linear_problem(
     )
     upperBound = -upperBoundSol.fun
 
-    print(
+    logger.debug(
         f"Causal query: P({target.label}={target.value}|do({intervention.label}={intervention.value}))"
     )
-    print(f"Bounds: {lowerBound} <= P <= {upperBound}")
+    logger.debug(f"Bounds: {lowerBound} <= P <= {upperBound}")

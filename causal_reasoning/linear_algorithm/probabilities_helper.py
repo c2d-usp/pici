@@ -1,4 +1,8 @@
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 from causal_reasoning.graph.node import Node
 
@@ -33,10 +37,8 @@ def find_conditional_probability(
 def find_probability(dataFrame: pd.DataFrame, variables: list[Node]):
     compatibleCasesCount = count_occurrences(dataFrame, variables)
     totalCases = dataFrame.shape[0]
-    # TODO: ADD LOGGING
-    if False:
-        print(f"Count compatible cases: {compatibleCasesCount}")
-        print(f"Total cases: {totalCases}")
+    logger.debug(f"Count compatible cases: {compatibleCasesCount}")
+    logger.debug(f"Total cases: {totalCases}")
     return compatibleCasesCount / totalCases
 
 

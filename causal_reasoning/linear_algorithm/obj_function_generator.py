@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 import pandas as pd
 
 from causal_reasoning.graph.graph import Graph
@@ -31,9 +35,7 @@ class ObjFunctionGenerator:
 
         self.graph = graph
         self.intervention = intervention
-        self.intervention_value = intervention.value
         self.target = target
-        self.target_value = target.value
         self.dataFrame = dataFrame
 
         self.empiricalProbabilitiesVariables = []
@@ -61,9 +63,9 @@ class ObjFunctionGenerator:
         conditionalProbabilities: dict[Node, list[Node]] = {}
         debugOrder: list[Node] = []
         while len(current_targets) > 0:
-            print("---- Current targets array:")
+            logger.debug("---- Current targets array:")
             for tg in current_targets:
-                print(f"- {tg.label}")
+                logger.debug(f"- {tg.label}")
 
             # ARROYO-> TODO: check if the topological order is reversed.
             current_target = (
@@ -71,25 +73,25 @@ class ObjFunctionGenerator:
                     current_targets
                 )
             )
-            print(f"__>>{current_target.label}<<__")
+            logger.debug(f"__>>{current_target.label}<<__")
             if current_target in current_targets:
                 current_targets.remove(current_target)
             debugOrder.append(current_target)
-            print(f"Current target: {current_target.label}")
+            logger.debug(f"Current target: {current_target.label}")
 
             if not self.graph.is_descendant(
                 ancestor=self.intervention, descendant=current_target
             ):
-                print("------- Case 1: Not a descendant")
+                logger.debug("------- Case 1: Not a descendant")
                 empiricalProbabilitiesVariables.append(current_target)
             elif current_target.latentParent == interventionLatent:
-                print("------- Case 2: Mechanisms")
+                logger.debug("------- Case 2: Mechanisms")
                 mechanismVariables.append(current_target)
                 for parent in current_target.parents:
                     if (parent not in current_targets) and parent != intervention:
                         current_targets.append(parent)
             else:
-                print("------- Case 3: Find d-separator set")
+                logger.debug("------- Case 3: Find d-separator set")
                 validConditionedNodes = self.find_d_separator_set(
                     current_target, current_targets, interventionLatent, intervention
                 )
@@ -108,7 +110,7 @@ class ObjFunctionGenerator:
         self.mechanismVariables = mechanismVariables
         self.conditionalProbabilities = conditionalProbabilities
         self.debugOrder = debugOrder
-        print("Test completed")
+        logger.debug("Test completed")
 
     def find_d_separator_set(
         self,
@@ -179,9 +181,9 @@ class ObjFunctionGenerator:
             )
             if condition1 and condition2:
                 valid_conditioned_nodes: list[Node] = []
-                print("The following set works:")
+                logger.debug("The following set works:")
                 for node in current_conditioned_nodes:
-                    print(f"- {node.label}")
+                    logger.debug(f"- {node.label}")
                     valid_conditioned_nodes.append(node)
         # Returns one of the valid subsets - Last instance of
         # "valid_conditioned_nodes", for now.
@@ -225,7 +227,7 @@ class ObjFunctionGenerator:
 
         # (3) Generate all the cases: cartesian product!
         debug_variables_label = [node.label for node in self.debugOrder]
-        print(f"Debug variables: {debug_variables_label}")
+        logger.debug(f"Debug variables: {debug_variables_label}")
         if self.intervention in self.debugOrder:
             self.debugOrder.remove(self.intervention)
 
@@ -242,7 +244,7 @@ class ObjFunctionGenerator:
             nodes=summandNodes
         )
         summandNodes.append(self.target)
-        spaces.append([self.target_value])
+        spaces.append([self.target.value])
         inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
             listSpaces=spaces
         )
@@ -251,39 +253,33 @@ class ObjFunctionGenerator:
         TODO: the case in which the summandNodes is empty (e.g Balke Pearl) has a very ugly fix
         """
         objFunctionCoefficients: list[float] = []
-        print("Debug input cases:")
-        print(f"Size of #inputs: {len(inputCases)}")
-        print("first component:")
-        print(inputCases[0])
+        logger.debug("Debug input cases:")
+        logger.debug(f"Size of #inputs: {len(inputCases)}")
+        logger.debug("first component:")
+        logger.debug(inputCases[0])
 
-        print("Debug summand nodes")
+        logger.debug("Debug summand nodes")
         for node in summandNodes:
-            print(f"Node={node.label}")
+            logger.debug(f"Node={node.label}")
 
-        print("--- DEBUG OBJ FUNCTION GENERATION ---")
+        logger.debug("--- DEBUG OBJ FUNCTION GENERATION ---")
         for mechanism in mechanisms:
-            print("-- START MECHANISM --")
+            logger.debug("-- START MECHANISM --")
             mechanismCoefficient: int = 0
             for inputCase in inputCases:
-                print("---- START INPUT CASE ----")
-                # TODO: POSSO FAZER ESSA ATRIBUIÇÃO ANTES NO CÓDIGO
-                self.intervention.value = self.intervention_value
-                self.target.value = (self.target_value,)
+                logger.debug("---- START INPUT CASE ----")
                 partialCoefficient = 1
 
                 for index, variableValue in enumerate(inputCase):
-                    print(
-                        f"{summandNodes[index].label} = {variableValue}",
-                        end="",
-                    )
+                    logger.debug(f"{summandNodes[index].label} = {variableValue}")
                     summandNodes[index].value = variableValue
 
                 for variable in summandNodes:
-                    print(f"\nCurrent variable: {variable.label}")
+                    logger.debug(f"\nCurrent variable: {variable.label}")
                     if (
                         variable in self.empiricalProbabilitiesVariables
                     ):  # Case 1: coff *= P(V=value)
-                        print("Case 1")
+                        logger.debug("Case 1")
                         variableProbability = find_probability(
                             dataFrame=self.dataFrame,
                             variables=[variable],
@@ -293,7 +289,7 @@ class ObjFunctionGenerator:
                         variable in self.mechanismVariables
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0.
                         # Do nothing otherwise
-                        print("Case 2")
+                        logger.debug("Case 2")
                         current_mechanism_key = []
                         mechanismKey: str = ""
                         for _key, node_item in self.graph.graphNodes.items():
@@ -305,14 +301,14 @@ class ObjFunctionGenerator:
                                 )
                         for e in sorted(current_mechanism_key):
                             mechanismKey += f"{e},"
-                        print(f"key: {mechanismKey[:-1]}")
+                        logger.debug(f"key: {mechanismKey[:-1]}")
                         expectedValue = mechanism[mechanismKey[:-1]]
 
                         if expectedValue != variable.value:
                             partialCoefficient = 0
-                            print("End process")
+                            logger.debug("End process")
                     else:  # Case 3: coeff *= P(V|some endo parents)
-                        print("Case 3")
+                        logger.debug("Case 3")
                         conditionalProbability = find_conditional_probability(
                             dataFrame=self.dataFrame,
                             targetRealization=[variable],
@@ -322,12 +318,12 @@ class ObjFunctionGenerator:
                         )
                         partialCoefficient *= conditionalProbability
 
-                    print(f"current partial coefficient: {partialCoefficient}")
+                    logger.debug(f"current partial coefficient: {partialCoefficient}")
                     if partialCoefficient == 0:
                         break
 
                 mechanismCoefficient += partialCoefficient
-                print(f"current coef = {mechanismCoefficient}")
+                logger.debug(f"current coef = {mechanismCoefficient}")
 
             objFunctionCoefficients.append(mechanismCoefficient)
 

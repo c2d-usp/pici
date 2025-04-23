@@ -1,7 +1,10 @@
 import numpy as np
 import gurobipy as gp
-from gurobipy import GRB
 import pandas as pd
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -15,14 +18,22 @@ class MasterProblem:
         self.vars = None
         self.constrs = None
         
-    def setup(self, probs, decisionMatrix):
-        num_vars = len(probs)
+    def setup(self, probs, decisionMatrix, objFunctionCoefficients: list[float], modelSense: int = 1):
+        num_vars = len(decisionMatrix[0])
         self.vars = self.model.addVars(num_vars, obj=1, name="Variables")
         
-        for i in range(len(decisionMatrix)):
-            self.constrs = self.model.addConstrs(decisionMatrix[i] == probs[i])
+        self.constrs = self.model.addConstrs(
+            (gp.quicksum(decisionMatrix[i][j] * self.vars[j] for j in range(num_vars)) == probs[i]
+            for i in range(len(probs))),
+            name="Constraints"
+        )
+
+        if modelSense == 1:
+            self.model.modelSense = gp.GRB.MINIMIZE
+        else:
+            self.model.modelSense = gp.GRB.MAXIMIZE
+        self.model.setObjective(gp.quicksum(objFunctionCoefficients[i] * self.vars[i] for i in range(len(objFunctionCoefficients))))
         
-        self.model.modelSense = GRB.MINIMIZE
         # Turning off output because of the iterative procedure
         self.model.params.outputFlag = 0
         self.model.update()
@@ -41,11 +52,11 @@ class SubProblem:
         self.constr = None
         
     def setup(self, stock_length, lengths, duals):
-        self.vars = self.model.addVars(len(lengths), obj=duals, vtype=GRB.INTEGER,
+        self.vars = self.model.addVars(len(lengths), obj=duals, vtype=gp.GRB.INTEGER,
                                        name="Frequency")
         self.constr = self.model.addConstr(self.vars.prod(lengths) <= stock_length,
                                            name="Knapsack")
-        self.model.modelSense = GRB.MAXIMIZE
+        self.model.modelSense = gp.GRB.MAXIMIZE
         # Turning off output because of the iterative procedure
         self.model.params.outputFlag = 0
         # Stop the subproblem routine as soon as the objective's best bound becomes
@@ -110,7 +121,7 @@ class CuttingStock:
         the local nodes of the search tree.
         """
         self._generate_patterns()
-        self.master.model.setAttr("vType", self.master.vars, GRB.INTEGER)
+        self.master.model.setAttr("vType", self.master.vars, gp.GRB.INTEGER)
         self.master.model.optimize()
         for pattern, var in self.master.vars.items():
             if var.x > 0.5:
@@ -145,18 +156,32 @@ def gurobi_builder_linear_problem(
         consideredCcomp=consideredEndogenousNodes,
         mechanisms=mechanisms,
     )
-
     objFunctionCoefficients: list[float] = objFG.build_objective_function(mechanisms)
 
-
-
     master = MasterProblem()
-    master.setup(probs, decisionMatrix)
+    modelSenseMin = 1
+    master.setup(probs, decisionMatrix, objFunctionCoefficients, modelSenseMin)
 
     master.model.optimize()
     duals = master.model.getAttr("pi", master.constrs)
-    if master.model.Status == GRB.OPTIMAL: # OPTIMAL
+    logger.info(f"duals: {duals}")
+    if master.model.Status == gp.GRB.OPTIMAL: # OPTIMAL
             lower = master.model.objVal
-            print(f"Minimal solution found!\nMIN Query: {lower}")
+            logger.info(f"Minimal solution found!\nMIN Query: {lower}")
     else:
-        print(f"Minimal solution not found. Gurobi status code: {master.model.Status}")
+        logger.info(f"Minimal solution not found. Gurobi status code: {master.model.Status}")
+        lower = None
+    modelSenseMax = -1
+    master.setup(probs, decisionMatrix, objFunctionCoefficients, modelSenseMax)
+
+    master.model.optimize()
+    duals = master.model.getAttr("pi", master.constrs)
+    logger.info(f"duals: {duals}")
+    if master.model.Status == gp.GRB.OPTIMAL: # OPTIMAL
+            upper = master.model.objVal
+            logger.info(f"Maximal solution found!\nMAX Query: {upper}")
+    else:
+        logger.info(f"Maximal solution not found. Gurobi status code: {master.model.Status}")
+        upper = None
+    
+    logger.info(f"Query interval = [{lower, upper}]")

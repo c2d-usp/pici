@@ -1,5 +1,9 @@
 import itertools
 from collections import namedtuple
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 from causal_reasoning.graph.node import Node
 
@@ -31,7 +35,6 @@ class MechanismGenerator:
         must be included.
 
         """
-        verbose = False
         auxSpaces: list[list[int]] = []
         headerArray: list[str] = []
         allCasesList: list[list[list[int]]] = []
@@ -50,24 +53,20 @@ class MechanismGenerator:
                     amount *= parent.cardinality
 
             headerArray.append(header + f" (x {amount})")
-            if verbose:
-                print(f"auxSpaces {auxSpaces}")
+            logger.debug(f"auxSpaces {auxSpaces}")
             functionDomain: list[list[int]] = [
                 list(auxTuple) for auxTuple in itertools.product(*auxSpaces)
             ]
-            if verbose:
-                print(f"functionDomain {functionDomain}")
+            logger.debug(f"functionDomain {functionDomain}")
 
             imageValues: list[int] = range(endogenous_node.cardinality)
 
             varResult = [
                 [domainCase + [c] for c in imageValues] for domainCase in functionDomain
             ]
-            # TODO: LOGGING
-            if verbose:
-                print(f"For variable {endogenous_node.label}:")
-                print(f"Function domain: {functionDomain}")
-                print(f"VarResult: {varResult}")
+            logger.debug(f"For variable {endogenous_node.label}:")
+            logger.debug(f"Function domain: {functionDomain}")
+            logger.debug(f"VarResult: {varResult}")
 
             for domainCase in functionDomain:
                 current_key = []
@@ -80,38 +79,30 @@ class MechanismGenerator:
 
             allCasesList = allCasesList + varResult
 
-        # TODO: LOGGING
-        if verbose:
-            print(headerArray)
-            print(
-                f"List all possible mechanism, placing in the same array those that determine the same function:\n{allCasesList}"
-            )
-            print(
-                f"List the keys of the dictionary (all combinations of the domains of the functions): {dictKeys}"
-            )
+        logger.debug(headerArray)
+        logger.debug(
+            f"List all possible mechanism, placing in the same array those that determine the same function:\n{allCasesList}"
+        )
+        logger.debug(
+            f"List the keys of the dictionary (all combinations of the domains of the functions): {dictKeys}"
+        )
 
         allPossibleMechanisms = list(itertools.product(*allCasesList))
         mechanismDicts: list[dict[str, int]] = []
         for index, mechanism in enumerate(allPossibleMechanisms):
-            # TODO: LOGGING
-            if verbose:
-                print(f"{index}) {mechanism}")
+            logger.debug(f"{index}) {mechanism}")
             currDict: dict[str, int] = {}
             for domainIndex, nodeFunction in enumerate(mechanism):
-                # TODO: LOGGING
-                if verbose:
-                    print(f"The node function = {nodeFunction}")
+                logger.debug(f"The node function = {nodeFunction}")
                 currDict[dictKeys[domainIndex]] = nodeFunction[-1]
 
             mechanismDicts.append(currDict)
 
-        # TODO: LOGGING
-        if verbose:
-            print("Check if the mechanism dictionary is working as expected:")
-            for mechanismDict in mechanismDicts:
-                for key in mechanismDict:
-                    print(f"key: {key} & val: {mechanismDict[key]}")
-                print("------------")
+        logger.debug("Check if the mechanism dictionary is working as expected:")
+        for mechanismDict in mechanismDicts:
+            for key in mechanismDict:
+                logger.debug(f"key: {key} & val: {mechanismDict[key]}")
+            logger.debug("------------")
 
         """
         mechanismDicts: list[dict[str, int]]
