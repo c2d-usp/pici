@@ -43,161 +43,6 @@ class ObjFunctionGenerator:
         self.conditionalProbabilities = []
         self.debugOrder = []
 
-    def find_linear_good_set(self):
-        """
-        Runs each step of the algorithm.
-        Finds a set of variables/restrictions that linearizes the problem.
-        """
-        intervention: Node = self.intervention
-        current_targets: list[Node] = [self.target]
-        interventionLatent: Node = intervention.latentParent
-
-        empiricalProbabilitiesVariables = (
-            []
-        )  # If V in this array then it implies P(v) in the objective function
-        # If V in this array then it implies a decision function: 1(Pa(v) => v=
-        # some value)
-        mechanismVariables = []
-        # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
-        # function
-        conditionalProbabilities: dict[Node, list[Node]] = {}
-        debugOrder: list[Node] = []
-        while len(current_targets) > 0:
-            logger.debug("---- Current targets array:")
-            for tg in current_targets:
-                logger.debug(f"- {tg.label}")
-
-            # ARROYO-> TODO: check if the topological order is reversed.
-            current_target = (
-                self.graph.get_closest_node_from_leaf_in_the_topological_order(
-                    current_targets
-                )
-            )
-            logger.debug(f"__>>{current_target.label}<<__")
-            if current_target in current_targets:
-                current_targets.remove(current_target)
-            debugOrder.append(current_target)
-            logger.debug(f"Current target: {current_target.label}")
-
-            if not self.graph.is_descendant(
-                ancestor=self.intervention, descendant=current_target
-            ):
-                logger.debug("------- Case 1: Not a descendant")
-                empiricalProbabilitiesVariables.append(current_target)
-            elif current_target.latentParent == interventionLatent:
-                logger.debug("------- Case 2: Mechanisms")
-                mechanismVariables.append(current_target)
-                for parent in current_target.parents:
-                    if (parent not in current_targets) and parent != intervention:
-                        current_targets.append(parent)
-            else:
-                logger.debug("------- Case 3: Find d-separator set")
-                validConditionedNodes = self.find_d_separator_set(
-                    current_target, current_targets, interventionLatent, intervention
-                )
-
-                current_targets = list(
-                    (set(current_targets) | set(validConditionedNodes))
-                    - {intervention, current_target}
-                )
-
-                conditionalProbabilities[current_target] = validConditionedNodes
-
-                # Question: is any already solved variable selected for the second time? Does the program need to address this issue
-                # by forcing the set to not contain any of such variables?
-
-        self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
-        self.mechanismVariables = mechanismVariables
-        self.conditionalProbabilities = conditionalProbabilities
-        self.debugOrder = debugOrder
-        logger.debug("Test completed")
-
-    def find_d_separator_set(
-        self,
-        current_target: Node,
-        current_targets: list[Node],
-        intervention_latent: Node,
-        intervention: Node,
-    ):
-        ancestors: list[Node] = self.graph.find_ancestors(current_target)
-        conditionable_ancestors: list[Node] = []
-
-        for ancestor in ancestors:
-            # Question: does it need to not be the intervention?
-            if ancestor.cardinality > 0 and ancestor.label != current_target.label:
-                conditionable_ancestors.append(ancestor)
-
-        always_conditioned_nodes: list[Node] = current_targets.copy()
-        if current_target in always_conditioned_nodes:
-            always_conditioned_nodes.remove(current_target)
-
-        if intervention_latent in always_conditioned_nodes:
-            always_conditioned_nodes.remove(intervention_latent)
-
-        return self.test_all_conditioned_sets(
-            conditionable_ancestors,
-            always_conditioned_nodes,
-            ancestors,
-            intervention_latent,
-            current_target,
-            intervention,
-        )
-
-    # TODO: I suggest rename it
-    def test_all_conditioned_sets(
-        self,
-        conditionable_ancestors: list[Node],
-        conditioned_nodes: list[Node],
-        ancestors: list[Node],
-        intervention_latent: Node,
-        current_target: Node,
-        intervention: Node,
-    ):
-        # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
-        for no_of_possibilities in range(pow(2, len(conditionable_ancestors))):
-            current_conditionable_ancestors = self.get_current_conditionable_ancestors(
-                conditionable_ancestors, no_of_possibilities
-            )
-            current_conditioned_nodes: list[Node] = []
-            current_conditioned_nodes = (
-                conditioned_nodes + current_conditionable_ancestors
-            )
-
-            self.graph.build_moral(
-                consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
-            )
-            condition1 = self.graph.independency_moral(
-                node_2=intervention_latent, node_1=current_target
-            )
-
-            self.graph.build_moral(
-                consideredNodes=ancestors,
-                conditionedNodes=current_conditioned_nodes,
-                intervention_outgoing_edges_are_considered=False,
-                intervention=intervention,
-            )
-            condition2 = self.graph.independency_moral(
-                node_2=intervention, node_1=current_target
-            )
-            if condition1 and condition2:
-                valid_conditioned_nodes: list[Node] = []
-                logger.debug("The following set works:")
-                for node in current_conditioned_nodes:
-                    logger.debug(f"- {node.label}")
-                    valid_conditioned_nodes.append(node)
-        # Returns one of the valid subsets - Last instance of
-        # "valid_conditioned_nodes", for now.
-        return valid_conditioned_nodes
-
-    def get_current_conditionable_ancestors(
-        self, conditionable_ancestors: list[Node], no_of_possibilities: int
-    ) -> list[Node]:
-        current_conditionable_ancestors: list[Node] = []
-        for i in range(len(conditionable_ancestors)):
-            if (no_of_possibilities >> i) % 2 == 1:
-                current_conditionable_ancestors.append(conditionable_ancestors[i])
-        return current_conditionable_ancestors
-
     def get_mechanisms_pruned(self) -> MechanismType:
         """
         Remove c-component variables that do not appear in the objective function
@@ -328,3 +173,158 @@ class ObjFunctionGenerator:
             objFunctionCoefficients.append(mechanismCoefficient)
 
         return objFunctionCoefficients
+
+    def find_linear_good_set(self):
+        """
+        Runs each step of the algorithm.
+        Finds a set of variables/restrictions that linearizes the problem.
+        """
+        intervention: Node = self.intervention
+        current_targets: list[Node] = [self.target]
+        interventionLatent: Node = intervention.latentParent
+
+        empiricalProbabilitiesVariables = (
+            []
+        )  # If V in this array then it implies P(v) in the objective function
+        # If V in this array then it implies a decision function: 1(Pa(v) => v=
+        # some value)
+        mechanismVariables = []
+        # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
+        # function
+        conditionalProbabilities: dict[Node, list[Node]] = {}
+        debugOrder: list[Node] = []
+        while len(current_targets) > 0:
+            logger.debug("---- Current targets array:")
+            for tg in current_targets:
+                logger.debug(f"- {tg.label}")
+
+            # ARROYO-> TODO: check if the topological order is reversed.
+            current_target = (
+                self.graph.get_closest_node_from_leaf_in_the_topological_order(
+                    current_targets
+                )
+            )
+            logger.debug(f"__>>{current_target.label}<<__")
+            if current_target in current_targets:
+                current_targets.remove(current_target)
+            debugOrder.append(current_target)
+            logger.debug(f"Current target: {current_target.label}")
+
+            if not self.graph.is_descendant(
+                ancestor=self.intervention, descendant=current_target
+            ):
+                logger.debug("------- Case 1: Not a descendant")
+                empiricalProbabilitiesVariables.append(current_target)
+            elif current_target.latentParent == interventionLatent:
+                logger.debug("------- Case 2: Mechanisms")
+                mechanismVariables.append(current_target)
+                for parent in current_target.parents:
+                    if (parent not in current_targets) and parent != intervention:
+                        current_targets.append(parent)
+            else:
+                logger.debug("------- Case 3: Find d-separator set")
+                validConditionedNodes = self._find_d_separator_set(
+                    current_target, current_targets, interventionLatent, intervention
+                )
+
+                current_targets = list(
+                    (set(current_targets) | set(validConditionedNodes))
+                    - {intervention, current_target}
+                )
+
+                conditionalProbabilities[current_target] = validConditionedNodes
+
+                # Question: is any already solved variable selected for the second time? Does the program need to address this issue
+                # by forcing the set to not contain any of such variables?
+
+        self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
+        self.mechanismVariables = mechanismVariables
+        self.conditionalProbabilities = conditionalProbabilities
+        self.debugOrder = debugOrder
+        logger.debug("Test completed")
+
+    def _find_d_separator_set(
+        self,
+        current_target: Node,
+        current_targets: list[Node],
+        intervention_latent: Node,
+        intervention: Node,
+    ):
+        ancestors: list[Node] = self.graph.find_ancestors(current_target)
+        conditionable_ancestors: list[Node] = []
+
+        for ancestor in ancestors:
+            # Question: does it need to not be the intervention?
+            if ancestor.cardinality > 0 and ancestor.label != current_target.label:
+                conditionable_ancestors.append(ancestor)
+
+        always_conditioned_nodes: list[Node] = current_targets.copy()
+        if current_target in always_conditioned_nodes:
+            always_conditioned_nodes.remove(current_target)
+
+        if intervention_latent in always_conditioned_nodes:
+            always_conditioned_nodes.remove(intervention_latent)
+
+        return self._test_all_conditioned_sets(
+            conditionable_ancestors,
+            always_conditioned_nodes,
+            ancestors,
+            intervention_latent,
+            current_target,
+            intervention,
+        )
+
+    # TODO: I suggest rename it
+    def _test_all_conditioned_sets(
+        self,
+        conditionable_ancestors: list[Node],
+        conditioned_nodes: list[Node],
+        ancestors: list[Node],
+        intervention_latent: Node,
+        current_target: Node,
+        intervention: Node,
+    ):
+        # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
+        for no_of_possibilities in range(pow(2, len(conditionable_ancestors))):
+            current_conditionable_ancestors = self._get_current_conditionable_ancestors(
+                conditionable_ancestors, no_of_possibilities
+            )
+            current_conditioned_nodes: list[Node] = []
+            current_conditioned_nodes = (
+                conditioned_nodes + current_conditionable_ancestors
+            )
+
+            self.graph.build_moral(
+                consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
+            )
+            condition1 = self.graph.independency_moral(
+                node_2=intervention_latent, node_1=current_target
+            )
+
+            self.graph.build_moral(
+                consideredNodes=ancestors,
+                conditionedNodes=current_conditioned_nodes,
+                intervention_outgoing_edges_are_considered=False,
+                intervention=intervention,
+            )
+            condition2 = self.graph.independency_moral(
+                node_2=intervention, node_1=current_target
+            )
+            if condition1 and condition2:
+                valid_conditioned_nodes: list[Node] = []
+                logger.debug("The following set works:")
+                for node in current_conditioned_nodes:
+                    logger.debug(f"- {node.label}")
+                    valid_conditioned_nodes.append(node)
+        # Returns one of the valid subsets - Last instance of
+        # "valid_conditioned_nodes", for now.
+        return valid_conditioned_nodes
+
+    def _get_current_conditionable_ancestors(
+        self, conditionable_ancestors: list[Node], no_of_possibilities: int
+    ) -> list[Node]:
+        current_conditionable_ancestors: list[Node] = []
+        for i in range(len(conditionable_ancestors)):
+            if (no_of_possibilities >> i) % 2 == 1:
+                current_conditionable_ancestors.append(conditionable_ancestors[i])
+        return current_conditionable_ancestors

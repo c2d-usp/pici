@@ -61,7 +61,7 @@ class CausalModel:
         Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
         """
         # TODO: Usando nx é muito mais fácil
-        return self.graph.check_dseparation(
+        return self.graph.check_d_separation(
             get_node_list(self.graph.graphNodes, set_nodes_X),
             get_node_list(self.graph.graphNodes, set_nodes_Y),
             get_node_list(self.graph.graphNodes, set_nodes_Z),
