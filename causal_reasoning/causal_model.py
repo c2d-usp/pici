@@ -27,20 +27,21 @@ class CausalModel:
         self,
         data: DataFrame,
         edges: T,
+        custom_cardinalities: dict[T, int] | None = {},
         unobservables_labels: list[T] | T | None = [],
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
     ) -> None:
         self.data = data
 
-        # If it is a nx
+        # TODO: If it is a nx
         # Or str
         # or list of tuples
         # or one tuple
         edges = parse_edges(edges)
 
         unobservables_labels = parse_to_string_list(unobservables_labels)
-        self.graph: Graph = get_graph(edges=edges, unobservables=unobservables_labels)
+        self.graph: Graph = get_graph(edges=edges, unobservables=unobservables_labels, custom_cardinalities=custom_cardinalities)
         self.unobservables = [
             self.graph.graphNodes[unobservable_label]
             for unobservable_label in unobservables_labels
@@ -50,46 +51,23 @@ class CausalModel:
         )
         self.target = tuple_into_node(parse_tuple_str_int(target), self.graph)
 
-    def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
-
-    def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        more_interventions = list_tuples_into_list_nodes(interventions, self.graph)
-        if more_interventions is None:
-            return
-        for intervention in more_interventions:
-            if intervention not in self.interventions:
-                self.interventions.append(intervention)
-
-    def set_target(self, target: tuple[str, int]) -> None:
-        self.target = tuple_into_node(target, self.graph)
-
-    def single_intervention_query(self):
-        # builder_linear_problem(
-        gurobi_builder_linear_problem(
-            self.graph,
-            self.data,
-            self.interventions[0],
-            self.target,
+    def are_d_separated(
+        self,
+        set_nodes_X: list[str],
+        set_nodes_Y: list[str],
+        set_nodes_Z: list[str],
+    ) -> bool:
+        """
+        Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+        """
+        # TODO: Usando nx é muito mais fácil
+        return self.graph.check_dseparation(
+            get_node_list(self.graph.graphNodes, set_nodes_X),
+            get_node_list(self.graph.graphNodes, set_nodes_Y),
+            get_node_list(self.graph.graphNodes, set_nodes_Z),
         )
 
-    def multi_intervention_query(self):
-        raise NotImplementedError
-
-    def visualize_graph(self):
-        raise NotImplementedError
-
-    def add_unobservables(self, unobservables):
-        # This implies the whole graph re-creation
-        # Changes the intervention and target also (?)
-        raise NotImplementedError
-
-    def set_unobservables(self, unobservables):
-        # This implies the whole graph re-creation
-        # Changes the intervention and target also (?)
-        raise NotImplementedError
-
-    def inference_query(
+    def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ):
         interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
@@ -110,34 +88,44 @@ class CausalModel:
             return
         self.single_intervention_query()
 
-    def are_d_separated(
-        self,
-        set_nodes_X: list[str],
-        set_nodes_Y: list[str],
-        set_nodes_Z: list[str],
-    ) -> bool:
-        """
-        Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
-        """
-        # TODO: Usando nx é muito mais fácil,
-        # porém não tem o conceito de não observável.
-        # É possível atribuir atributos aos nós
-        # nx.set_node_attributes(G, {3: "unobservable", 4: "unobservable"}, "status")
-
-        # plt.figure(figsize=(6, 6))
-        # pos = nx.spring_layout(G)
-        # nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=2000, arrowsize=20)
-
-        # # Save the image
-        # plt.savefig("digraph.png", dpi=300, bbox_inches='tight')
-        # plt.show()
-        # a = nx.is_d_separator(G, set_nodes_X, set_nodes_Y, set_nodes_Z)
-        # print(f"A:::{a}")
-        return self.graph.check_dseparation(
-            get_node_list(self.graph.graphNodes, set_nodes_X),
-            get_node_list(self.graph.graphNodes, set_nodes_Y),
-            get_node_list(self.graph.graphNodes, set_nodes_Z),
+    def single_intervention_query(self):
+        builder_linear_problem(
+        # gurobi_builder_linear_problem(
+            self.graph,
+            self.data,
+            self.interventions[0],
+            self.target,
         )
+
+    def multi_intervention_query(self):
+        raise NotImplementedError
+
+    def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
+
+    def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        more_interventions = list_tuples_into_list_nodes(interventions, self.graph)
+        if more_interventions is None:
+            return
+        for intervention in more_interventions:
+            if intervention not in self.interventions:
+                self.interventions.append(intervention)
+
+    def set_target(self, target: tuple[str, int]) -> None:
+        self.target = tuple_into_node(target, self.graph)
+
+    def set_unobservables(self, unobservables):
+        # This implies the whole graph re-creation
+        # Changes the intervention and target also (?)
+        raise NotImplementedError
+
+    def add_unobservables(self, unobservables):
+        # This implies the whole graph re-creation
+        # Changes the intervention and target also (?)
+        raise NotImplementedError
+
+    def visualize_graph(self):
+        raise NotImplementedError
 
 
 def get_node(graphNodes: dict[str, Node], node_label: str):
