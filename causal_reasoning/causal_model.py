@@ -41,7 +41,11 @@ class CausalModel:
         edges = parse_edges(edges)
 
         unobservables_labels = parse_to_string_list(unobservables_labels)
-        self.graph: Graph = get_graph(edges=edges, unobservables=unobservables_labels, custom_cardinalities=custom_cardinalities)
+        self.graph: Graph = get_graph(
+            edges=edges,
+            unobservables=unobservables_labels,
+            custom_cardinalities=custom_cardinalities,
+        )
         self.unobservables = [
             self.graph.graphNodes[unobservable_label]
             for unobservable_label in unobservables_labels
@@ -90,7 +94,7 @@ class CausalModel:
 
     def single_intervention_query(self):
         builder_linear_problem(
-        # gurobi_builder_linear_problem(
+            # gurobi_builder_linear_problem(
             self.graph,
             self.data,
             self.interventions[0],

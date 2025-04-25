@@ -11,6 +11,7 @@ def parse_input_graph(
 ):
     return parse_default_graph(edges, latents_label, custom_cardinalities)
 
+
 def parse_default_graph(
     edge_tuples: list[tuple],
     latents_label: list[str],
@@ -60,6 +61,7 @@ def parse_default_graph(
             node_cardinalities[node_label] = 0 if node_label in latents_label else 2
     return number_of_nodes, children, node_cardinalities, parents, node_labels_set, dag
 
+
 def parse_edges(state):
     if isinstance(state, str):
         return edge_string_to_edge_tuples(state)
@@ -92,6 +94,7 @@ def parse_edges(state):
         return new_state
     raise Exception(f"Input format for {state} not recognized: {type(state)}")
 
+
 def edge_string_to_edge_tuples(edges: str) -> list[tuple]:
     edge_tuples = []
     edges_part = edges.split(",")
@@ -104,6 +107,7 @@ def edge_string_to_edge_tuples(edges: str) -> list[tuple]:
         edge_tuples.append((left, right))
     return edge_tuples
 
+
 def list_tuples_into_list_nodes(
     list_tuples_label_value: list[tuple[str, int]], graph: Graph
 ) -> list[Node] | None:
@@ -112,6 +116,7 @@ def list_tuples_into_list_nodes(
     if len(list_tuples_label_value) == 1:
         return [tuple_into_node(list_tuples_label_value[0], graph)]
     return [tuple_into_node(tuple, graph) for tuple in list_tuples_label_value]
+
 
 def tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | None:
     if tuple_label_value is None:
@@ -122,6 +127,7 @@ def tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | 
     graph.set_node_value(label, value)
     return graph.graphNodes[label]
 
+
 def parse_tuples_str_int_list(state):
     if isinstance(state, list):
         if all(isinstance(item, tuple) for item in state):
@@ -129,6 +135,7 @@ def parse_tuples_str_int_list(state):
     if isinstance(state, tuple):
         return [parse_tuple_str_int(state)]
     raise Exception(f"Input format for {state} not recognized.")
+
 
 def parse_tuple_str_int(state):
     if isinstance(state, tuple):
@@ -141,6 +148,7 @@ def parse_tuple_str_int(state):
             raise Exception(f"Tuple input format for {state} not recognized.")
         return (item_1, item_2)
     raise Exception(f"Input format for {state} not recognized: {type(state)}")
+
 
 def parse_to_string_list(state):
     if isinstance(state, str):

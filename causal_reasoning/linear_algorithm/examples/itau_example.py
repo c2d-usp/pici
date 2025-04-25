@@ -5,10 +5,11 @@ from scipy.optimize import linprog
 
 from causal_reasoning.causal_model import CausalModel, get_graph
 from causal_reasoning.graph.graph import Graph
-from causal_reasoning.linear_algorithm.mechanisms_generator import \
-    MechanismGenerator
+from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
 from causal_reasoning.linear_algorithm.probabilities_helper import (
-    find_conditional_probability, find_probability)
+    find_conditional_probability,
+    find_probability,
+)
 from causal_reasoning.utils._enum import Examples
 
 
@@ -16,11 +17,13 @@ def trim_decimal(precision: int, value: float):
     return round(pow(10, precision) * value) / pow(10, precision)
 
 
-def opt_problem(objFunction: list[float],
-               Aeq: list[list[float]],
-               Beq: list[float],
-               interval,
-               v: bool):
+def opt_problem(
+    objFunction: list[float],
+    Aeq: list[list[float]],
+    Beq: list[float],
+    interval,
+    v: bool,
+):
     lowerBoundSol = linprog(
         c=objFunction,
         A_ub=None,
@@ -28,14 +31,17 @@ def opt_problem(objFunction: list[float],
         A_eq=Aeq,
         b_eq=Beq,
         method="highs",
-        bounds=interval)
-    upperBoundSol = linprog(c=[-x for x in objFunction],
-                            A_ub=None,
-                            b_ub=None,
-                            A_eq=Aeq,
-                            b_eq=Beq,
-                            method="highs",
-                            bounds=interval)
+        bounds=interval,
+    )
+    upperBoundSol = linprog(
+        c=[-x for x in objFunction],
+        A_ub=None,
+        b_ub=None,
+        A_eq=Aeq,
+        b_eq=Beq,
+        method="highs",
+        bounds=interval,
+    )
 
     if lowerBoundSol.success:
         lowerBound = trim_decimal(3, lowerBoundSol.fun)
@@ -61,9 +67,9 @@ def opt_problem(objFunction: list[float],
 def main(dag: Graph):
 
     _, _, mechanism = MechanismGenerator.mechanisms_generator(
-        latentNode="U1", endogenousNodes=[
-            "Y", "X"])
-    
+        latentNode="U1", endogenousNodes=["Y", "X"]
+    )
+
     y0: int = 1
     x0: int = 1
     xRlt: dict[str, int] = {}
@@ -73,8 +79,7 @@ def main(dag: Graph):
     c: list[float] = []
     a: list[list[float]] = []
     b: list[float] = []
-    df: pd.DataFrame = pd.read_csv(
-        Examples.CSV_ITAU_EXAMPLE.value)
+    df: pd.DataFrame = pd.read_csv(Examples.CSV_ITAU_EXAMPLE.value)
 
     bounds: list[tuple[float]] = [(0, 1) for _ in range(len(mechanism))]
 
@@ -86,9 +91,8 @@ def main(dag: Graph):
             dRlt["D"] = d
             if mechanism[u]["X=" + str(x0) + ",D=" + str(d)] == y0:
                 coef += find_conditional_probability(
-                    dataFrame=df,
-                    targetRealization=dRlt,
-                    conditionRealization=xRlt)
+                    dataFrame=df, targetRealization=dRlt, conditionRealization=xRlt
+                )
         c.append(coef)
     a.append([1 for _ in range(len(mechanism))])
     b.append(1)
@@ -103,15 +107,14 @@ def main(dag: Graph):
                 dRlt["D"] = d
                 b.append(
                     find_conditional_probability(
-                        dataFrame=df,
-                        targetRealization=yRlt,
-                        conditionRealization=dxRlt) *
-                    find_probability(
-                        dataFrame=df,
-                        variableRealizations=xRlt))
+                        dataFrame=df, targetRealization=yRlt, conditionRealization=dxRlt
+                    )
+                    * find_probability(dataFrame=df, variableRealizations=xRlt)
+                )
                 for u in range(len(mechanism)):
-                    if (mechanism[u]["X=" + str(x) + ",D=" + str(d)]
-                            == y) and (mechanism[u][""] == x):
+                    if (mechanism[u]["X=" + str(x) + ",D=" + str(d)] == y) and (
+                        mechanism[u][""] == x
+                    ):
                         aux.append(1)
                     else:
                         aux.append(0)
@@ -141,7 +144,6 @@ if __name__ == "__main__":
         target_value=1,
     )
     dag = itau_model.graph
-
 
     # itau_input = (
     #     "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"

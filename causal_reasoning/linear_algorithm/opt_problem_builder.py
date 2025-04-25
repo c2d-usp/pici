@@ -24,8 +24,8 @@ def builder_linear_problem(
         intervention=intervention,
         target=target,
     )
-    objFG.find_linear_good_set() # Qual parte do grafo a gente vai considerar / Quais Nodes serão considerados? 
-    mechanisms = objFG.get_mechanisms_pruned() 
+    objFG.find_linear_good_set()  # Qual parte do grafo a gente vai considerar / Quais Nodes serão considerados?
+    mechanisms = objFG.get_mechanisms_pruned()
     # Quais são as variáveis exógenas que serão consideradas?
     # Com isso pegamos o número de variáveis que as exógenas podem assumir.
 

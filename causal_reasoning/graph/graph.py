@@ -30,7 +30,6 @@ class Graph:
         self.node_set = node_set
         self.topologicalOrderIndexes = topologicalOrderIndexes
 
-
     def find_ancestors(self, target_node: Node) -> list[Node]:
         self.currNodes.clear()
         self._clear_visited()
@@ -203,4 +202,3 @@ class Graph:
         for adj in node.moral_adjacency:
             if not adj.visited:
                 self._dfs_moral(adj)
-
