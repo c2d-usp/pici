@@ -92,8 +92,6 @@ def double_intervention():
     unobs = ["U1", "U2"]
     target = "Y"
     target_value = 1
-    intervention = "X"
-    intervention_value = 1
     csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
     df = pd.read_csv(csv_path)
 
@@ -102,7 +100,7 @@ def double_intervention():
         edges=edges,
         custom_cardinalities=cardinalities,
         unobservables_labels=unobs,
-        interventions=[(intervention, intervention_value), ("Z",1)],
+        interventions=[("X", 1), ("Z",1)],
         target=(target, target_value),
     )
 
