@@ -14,7 +14,7 @@ from causal_reasoning.linear_algorithm.probabilities_helper import (
 from causal_reasoning.new_types import MechanismType
 
 
-class MultiObjFunctionGenerator:
+class DoubleObjFunctionGenerator:
     """
     Given an intervention and a graph, this class finds a set of restrictions that can be used to build
     a linear objective function.

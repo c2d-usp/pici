@@ -3,7 +3,7 @@ from scipy.optimize import linprog
 import logging
 import gurobipy as gp
 
-from causal_reasoning.linear_algorithm.dual_obj_func_gen import MultiObjFunctionGenerator
+from causal_reasoning.linear_algorithm.dual_obj_func_gen import DoubleObjFunctionGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ def build_bi_linear_problem(
     interventions: tuple[Node],
     target: Node,
 ):
-    multiObjFG = MultiObjFunctionGenerator(
+    multiObjFG = DoubleObjFunctionGenerator(
         graph=graph,
         dataFrame=df,
         interventions=(interventions[0], interventions[1]),
