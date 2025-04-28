@@ -128,7 +128,7 @@ class CuttingStock:
                 self.solution[pattern] = round(var.x)
 
 
-def gurobi_builder_linear_problem(
+def gurobi_build_linear_problem(
     graph: Graph,
     df: pd.DataFrame,
     intervention: Node,

@@ -49,9 +49,9 @@ def discrete_iv_random():
         target=(iv_target, iv_target_value),
     )
 
-    print(
-        f">> Is Z d-separated from Y giving X? {iv_model.are_d_separated(['Z'], ['Y'], ['X'])}"
-    )
+    # print(
+    #     f">> Is Z d-separated from Y giving X? {iv_model.are_d_separated(['Z'], ['Y'], ['X'])}"
+    # )
     iv_model.inference_intervention_query()
 
 
@@ -60,7 +60,7 @@ def binary_itau_example():
         "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
     )
     itau_cardinalities = {
-        "X": 3,
+        "X": 2,
         "Y": 2,
         "D": 2,
         "E": 2,
@@ -86,6 +86,29 @@ def binary_itau_example():
     itau_model.inference_intervention_query()
 
 
+def double_intervention():
+    edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+    cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+    unobs = ["U1", "U2"]
+    target = "Y"
+    target_value = 1
+    intervention = "X"
+    intervention_value = 1
+    csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+    df = pd.read_csv(csv_path)
+
+    model = CausalModel(
+        data=df,
+        edges=edges,
+        custom_cardinalities=cardinalities,
+        unobservables_labels=unobs,
+        interventions=[(intervention, intervention_value), ("Z",1)],
+        target=(target, target_value),
+    )
+
+    print(f">> Is Z d-separated from Y giving X? {model.are_d_separated(['Z'], ['Y'], ['X'])}")
+    model.inference_intervention_query()
+
 def discrete_itau_example():
     raise NotImplementedError
 
@@ -95,8 +118,9 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     # binary_balke_pearl_example()
-    discrete_iv_random()
+    # discrete_iv_random()
     # binary_itau_example()
+    double_intervention()
 
 
 if __name__ == "__main__":
