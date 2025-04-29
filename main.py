@@ -1,4 +1,5 @@
 import pandas as pd
+import networkx as nx
 import logging
 
 from causal_reasoning.causal_model import CausalModel
@@ -21,9 +22,12 @@ def binary_balke_pearl_example():
         edges=balke_input,
         custom_cardinalities=balke_cardinalities,
         unobservables_labels=balke_unobs,
-        interventions=(balke_intervention, balke_intervention_value),
-        target=(balke_target, balke_target_value),
+        # interventions=(balke_intervention, balke_intervention_value),
+        # target=(balke_target, balke_target_value),
     )
+
+    balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
+    balke_model.set_target((balke_target, balke_target_value))
 
     # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(['Z'], ['Y'], ['X'])}")
     balke_model.inference_intervention_query()
@@ -115,11 +119,10 @@ def main():
 
     logging.basicConfig(level=logging.INFO)
 
-    # binary_balke_pearl_example()
+    binary_balke_pearl_example()
     # discrete_iv_random()
     # binary_itau_example()
-    double_intervention()
-
+    # double_intervention()
 
 if __name__ == "__main__":
     main()

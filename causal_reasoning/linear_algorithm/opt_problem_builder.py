@@ -20,7 +20,7 @@ def build_linear_problem(
     df: pd.DataFrame,
     intervention: Node,
     target: Node,
-):
+) -> tuple[str, str]:
     objFG = ObjFunctionGenerator(
         graph=graph,
         dataFrame=df,
@@ -67,7 +67,10 @@ def build_linear_problem(
         method="highs",
         bounds=intervals,
     )
-    lowerBound = lowerBoundSol.fun
+    if lowerBoundSol is None or lowerBoundSol.fun is None:
+        lowerBound = None
+    else:
+        lowerBound = lowerBoundSol.fun
 
     upperBoundSol = linprog(
         c=[-x for x in objFunctionCoefficients],
@@ -78,12 +81,16 @@ def build_linear_problem(
         method="highs",
         bounds=intervals,
     )
-    upperBound = -upperBoundSol.fun
+    if upperBoundSol is None or upperBoundSol.fun is None:
+        upperBound = None
+    else:
+        upperBound = -upperBoundSol.fun
 
     logger.info(
         f"Causal query: P({target.label}={target.value}|do({intervention.label}={intervention.value}))"
     )
     logger.info(f"Bounds: {lowerBound} <= P <= {upperBound}")
+    return str(lowerBound), str(upperBound)
 
 
 def build_bi_linear_problem(

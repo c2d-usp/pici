@@ -1,0 +1,320 @@
+P(OutageIncident=0|do(MemoryUsageHigh=0))
+0.06238961979522183 <= P <= 0.19756712935153578
+Inference time taken: 0.326720 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(MemoryUsageHigh=0))
+0.7018293065984074 <= P <= 0.8516227257679181
+Inference time taken: 0.275545 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(MemoryUsageHigh=1))
+0.06238961979522183 <= P <= 0.19756712935153578
+Inference time taken: 0.245376 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(MemoryUsageHigh=1))
+0.7018293065984074 <= P <= 0.8516227257679181
+Inference time taken: 0.204754 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(MemoryUsageHigh=0))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.008572 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(MemoryUsageHigh=0))
+0.09850000000000002 <= P <= 0.09850000000000002
+Inference time taken: 0.012642 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(MemoryUsageHigh=1))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.011308 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(MemoryUsageHigh=1))
+0.09850000000000002 <= P <= 0.09850000000000002
+Inference time taken: 0.009658 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(MemoryUsageHigh=0))
+0.7622298065984073 <= P <= 0.9249146757679181
+Inference time taken: 0.022406 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(MemoryUsageHigh=0))
+0.7622298065984073 <= P <= 0.9249146757679181
+Inference time taken: 0.023580 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(MemoryUsageHigh=1))
+0.7622298065984073 <= P <= 0.9249146757679181
+Inference time taken: 0.020986 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(MemoryUsageHigh=1))
+0.7622298065984073 <= P <= 0.9249146757679181
+Inference time taken: 0.022073 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(MemoryUsageHigh=0))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.008760 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(MemoryUsageHigh=0))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.009284 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(MemoryUsageHigh=1))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.009071 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(MemoryUsageHigh=1))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.011560 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(OutageIncident=0))
+0.8374 <= P <= 0.8374
+Inference time taken: 0.011576 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(OutageIncident=0))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.009779 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(OutageIncident=1))
+0.8374 <= P <= 0.8374
+Inference time taken: 0.009409 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(OutageIncident=1))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.010253 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(OutageIncident=0))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.010476 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(OutageIncident=0))
+0.0985 <= P <= 0.0985
+Inference time taken: 0.010045 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(OutageIncident=1))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.009235 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(OutageIncident=1))
+0.0985 <= P <= 0.0985
+Inference time taken: 0.009483 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(OutageIncident=0))
+0.1787 <= P <= 0.1787
+Inference time taken: 0.010388 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(OutageIncident=0))
+0.1787 <= P <= 0.1787
+Inference time taken: 0.009675 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(OutageIncident=1))
+0.1787 <= P <= 0.1787
+Inference time taken: 0.012047 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(OutageIncident=1))
+0.1787 <= P <= 0.1787
+Inference time taken: 0.009296 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(OutageIncident=0))
+0.9121 <= P <= 0.9121
+Inference time taken: 0.009812 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(OutageIncident=0))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.009599 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(OutageIncident=1))
+0.9121 <= P <= 0.9121
+Inference time taken: 0.011085 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(OutageIncident=1))
+0.0879 <= P <= 0.0879
+Inference time taken: 0.009171 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(NewDeploy=0))
+0.24467005076142131 <= P <= 0.24467005076142131
+Inference time taken: 0.014432 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(NewDeploy=0))
+0.7553299492385787 <= P <= 0.7553299492385787
+Inference time taken: 0.013645 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(NewDeploy=1))
+0.24467005076142131 <= P <= 0.24467005076142131
+Inference time taken: 0.014476 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(NewDeploy=1))
+0.7553299492385787 <= P <= 0.7553299492385787
+Inference time taken: 0.013891 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(NewDeploy=0))
+0.3065989847715736 <= P <= 0.3065989847715736
+Inference time taken: 0.094666 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(NewDeploy=0))
+0.6934010152284265 <= P <= 0.6934010152284265
+Inference time taken: 0.081971 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(NewDeploy=1))
+0.3065989847715736 <= P <= 0.3065989847715736
+Inference time taken: 0.089161 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(NewDeploy=1))
+0.6934010152284265 <= P <= 0.6934010152284265
+Inference time taken: 0.087817 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(NewDeploy=0))
+0.3065989847715736 <= P <= 0.3065989847715736
+Inference time taken: 0.053139 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(NewDeploy=0))
+0.6934010152284265 <= P <= 0.6934010152284265
+Inference time taken: 0.050421 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(NewDeploy=1))
+0.3065989847715736 <= P <= 0.3065989847715736
+Inference time taken: 0.048115 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(NewDeploy=1))
+0.6934010152284265 <= P <= 0.6934010152284265
+Inference time taken: 0.046932 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(NewDeploy=0))
+0.10761421319796954 <= P <= 0.10761421319796954
+Inference time taken: 0.007599 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(NewDeploy=0))
+0.8923857868020304 <= P <= 0.8923857868020304
+Inference time taken: 0.008485 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(NewDeploy=1))
+0.10761421319796954 <= P <= 0.10761421319796954
+Inference time taken: 0.006914 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(NewDeploy=1))
+0.8923857868020304 <= P <= 0.8923857868020304
+Inference time taken: 0.007626 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(ServiceCrash=0))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.036126 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(ServiceCrash=0))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.037962 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(ServiceCrash=1))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.039223 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(ServiceCrash=1))
+0.1626 <= P <= 0.1626
+Inference time taken: 0.039356 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(ServiceCrash=0))
+0.0 <= P <= -0.0
+Inference time taken: 0.483825 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(ServiceCrash=0))
+0.92075815 <= P <= 0.92075815
+Inference time taken: 0.482838 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(ServiceCrash=1))
+0.0 <= P <= -0.0
+Inference time taken: 0.494623 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(ServiceCrash=1))
+0.92075815 <= P <= 0.92075815
+Inference time taken: 0.436110 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(ServiceCrash=0))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.009771 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(ServiceCrash=0))
+0.0985 <= P <= 0.0985
+Inference time taken: 0.009100 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(ServiceCrash=1))
+0.9015 <= P <= 0.9015
+Inference time taken: 0.009813 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(ServiceCrash=1))
+0.0985 <= P <= 0.0985
+Inference time taken: 0.008481 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(ServiceCrash=0))
+0.9121000000000001 <= P <= 0.9121000000000001
+Inference time taken: 0.009575 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(ServiceCrash=0))
+0.08790000000000002 <= P <= 0.08790000000000002
+Inference time taken: 0.010073 seconds
+---------------------------------------------------------
+P(MemoryLeak=0|do(ServiceCrash=1))
+0.9121000000000001 <= P <= 0.9121000000000001
+Inference time taken: 0.010390 seconds
+---------------------------------------------------------
+P(MemoryLeak=1|do(ServiceCrash=1))
+0.08790000000000002 <= P <= 0.08790000000000002
+Inference time taken: 0.010097 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(MemoryLeak=0))
+0.016024459613196814 <= P <= 0.016024459613196814
+Inference time taken: 0.018719 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(MemoryLeak=0))
+0.08247554038680319 <= P <= 0.08247554038680319
+Inference time taken: 0.019675 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=0|do(MemoryLeak=1))
+0.016024459613196814 <= P <= 0.016024459613196814
+Inference time taken: 0.018782 seconds
+---------------------------------------------------------
+P(MemoryUsageHigh=1|do(MemoryLeak=1))
+0.08247554038680319 <= P <= 0.08247554038680319
+Inference time taken: 0.018526 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(MemoryLeak=0))
+0.023196245733788392 <= P <= 0.023196245733788392
+Inference time taken: 0.085507 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(MemoryLeak=0))
+0.07530375426621161 <= P <= 0.07530375426621161
+Inference time taken: 0.088583 seconds
+---------------------------------------------------------
+P(OutageIncident=0|do(MemoryLeak=1))
+0.023196245733788392 <= P <= 0.023196245733788392
+Inference time taken: 0.092436 seconds
+---------------------------------------------------------
+P(OutageIncident=1|do(MemoryLeak=1))
+0.07530375426621161 <= P <= 0.07530375426621161
+Inference time taken: 0.099086 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(MemoryLeak=0))
+0.09849999999999999 <= P <= 0.09849999999999999
+Inference time taken: 0.008119 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(MemoryLeak=0))
+0.09849999999999999 <= P <= 0.09849999999999999
+Inference time taken: 0.007932 seconds
+---------------------------------------------------------
+P(NewDeploy=0|do(MemoryLeak=1))
+0.09849999999999999 <= P <= 0.09849999999999999
+Inference time taken: 0.008199 seconds
+---------------------------------------------------------
+P(NewDeploy=1|do(MemoryLeak=1))
+0.09849999999999999 <= P <= 0.09849999999999999
+Inference time taken: 0.007837 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(MemoryLeak=0))
+0.023196245733788392 <= P <= 0.023196245733788392
+Inference time taken: 0.033384 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(MemoryLeak=0))
+0.07530375426621161 <= P <= 0.07530375426621161
+Inference time taken: 0.033245 seconds
+---------------------------------------------------------
+P(ServiceCrash=0|do(MemoryLeak=1))
+0.023196245733788392 <= P <= 0.023196245733788392
+Inference time taken: 0.035250 seconds
+---------------------------------------------------------
+P(ServiceCrash=1|do(MemoryLeak=1))
+0.07530375426621161 <= P <= 0.07530375426621161
+Inference time taken: 0.027395 seconds
+---------------------------------------------------------

@@ -50,10 +50,16 @@ class CausalModel:
             self.graph.graphNodes[unobservable_label]
             for unobservable_label in unobservables_labels
         ]
-        self.interventions = list_tuples_into_list_nodes(
-            parse_tuples_str_int_list(interventions), self.graph
-        )
-        self.target = tuple_into_node(parse_tuple_str_int(target), self.graph)
+        # TODO:
+        if interventions:
+            interventions = list_tuples_into_list_nodes(
+                parse_tuples_str_int_list(interventions), self.graph
+            )
+        self.interventions = interventions
+
+        if target:
+            target = tuple_into_node(parse_tuple_str_int(target), self.graph)
+        self.target = target
 
     def are_d_separated(
         self,
@@ -73,7 +79,7 @@ class CausalModel:
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
-    ):
+    ) -> tuple[str, str]:
         interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
@@ -89,14 +95,14 @@ class CausalModel:
 
         if len(self.interventions) > 2:
             self.multi_intervention_query()
-            return
+            return ("None", "None")
         elif len(self.interventions) > 1:
             self.double_intervention_query()
-            return
-        self.single_intervention_query()
+            return ("None", "None")
+        return self.single_intervention_query()
 
-    def single_intervention_query(self):
-        build_linear_problem(
+    def single_intervention_query(self) -> tuple[str, str]:
+        return build_linear_problem(
             # gurobi_build_linear_problem(
             self.graph,
             self.data,
