@@ -1,1152 +1,792 @@
-P(MS-B_Latency=0|do(Outage=0))
-0.785 <= P <= 0.785
-Inference time taken: 0.037113 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(Outage=0))
-0.215 <= P <= 0.215
-Inference time taken: 0.024482 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(Outage=1))
-0.785 <= P <= 0.785
-Inference time taken: 0.025716 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(Outage=1))
-0.215 <= P <= 0.215
-Inference time taken: 0.025856 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(Outage=0))
-0.157 <= P <= 0.157
-Inference time taken: 0.025137 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(Outage=0))
-0.157 <= P <= 0.157
-Inference time taken: 0.024291 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(Outage=1))
-0.157 <= P <= 0.157
-Inference time taken: 0.023606 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(Outage=1))
-0.157 <= P <= 0.157
-Inference time taken: 0.022262 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(Outage=0))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.021240 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(Outage=0))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.023777 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(Outage=1))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.019934 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(Outage=1))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.022742 seconds
----------------------------------------------------------
-P(DB_Change=0|do(Outage=0))
-0.9499 <= P <= 0.9499
-Inference time taken: 0.022610 seconds
----------------------------------------------------------
-P(DB_Change=1|do(Outage=0))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.020879 seconds
----------------------------------------------------------
-P(DB_Change=0|do(Outage=1))
-0.9499 <= P <= 0.9499
-Inference time taken: 0.022933 seconds
----------------------------------------------------------
-P(DB_Change=1|do(Outage=1))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.021931 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(Outage=0))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.026460 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(Outage=0))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.023524 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(Outage=1))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.021990 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(Outage=1))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.021962 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(Outage=0))
-0.149 <= P <= 0.149
-Inference time taken: 0.021837 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(Outage=0))
-0.149 <= P <= 0.149
-Inference time taken: 0.022390 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(Outage=1))
-0.149 <= P <= 0.149
-Inference time taken: 0.025465 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(Outage=1))
-0.149 <= P <= 0.149
-Inference time taken: 0.024931 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(Outage=0))
-0.8228 <= P <= 0.8228
-Inference time taken: 0.027798 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(Outage=0))
-0.1772 <= P <= 0.1772
-Inference time taken: 0.022388 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(Outage=1))
-0.8228 <= P <= 0.8228
-Inference time taken: 0.023605 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(Outage=1))
-0.1772 <= P <= 0.1772
-Inference time taken: 0.024556 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(Outage=0))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.025829 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(Outage=0))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.023974 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(Outage=1))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.024443 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(Outage=1))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.021990 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-B_Latency=0))
-0.2667560074579983 <= P <= 0.2667560074579983
-Inference time taken: 5.649254 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-B_Latency=0))
-0.7112571571024795 <= P <= 0.7112571571024795
-Inference time taken: 6.678467 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-B_Latency=1))
-0.2667560074579983 <= P <= 0.2667560074579983
-Inference time taken: 5.853676 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-B_Latency=1))
-0.7112571571024795 <= P <= 0.7112571571024795
-Inference time taken: 6.008854 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-B_Latency=0))
-0.40481203326329485 <= P <= 0.40481203326329485
-Inference time taken: 0.148970 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-B_Latency=0))
-0.5951879667367053 <= P <= 0.5951879667367053
-Inference time taken: 0.152549 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-B_Latency=1))
-0.40481203326329485 <= P <= 0.40481203326329485
-Inference time taken: 0.148617 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-B_Latency=1))
-0.5951879667367053 <= P <= 0.5951879667367053
-Inference time taken: 0.169330 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-B_Latency=0))
-0.3269724754900344 <= P <= 0.3269724754900344
-Inference time taken: 0.047809 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-B_Latency=0))
-0.6730275245099655 <= P <= 0.6730275245099655
-Inference time taken: 0.049709 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-B_Latency=1))
-0.3269724754900344 <= P <= 0.3269724754900344
-Inference time taken: 0.050519 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-B_Latency=1))
-0.6730275245099655 <= P <= 0.6730275245099655
-Inference time taken: 0.052000 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-B_Latency=0))
-0.9499 <= P <= 0.9499
-Inference time taken: 0.011757 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-B_Latency=0))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.010164 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-B_Latency=1))
-0.9499 <= P <= 0.9499
-Inference time taken: 0.009805 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-B_Latency=1))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.009627 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-B_Latency=0))
-0.19270000000000004 <= P <= 0.19270000000000004
-Inference time taken: 0.010769 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-B_Latency=0))
-0.19270000000000004 <= P <= 0.19270000000000004
-Inference time taken: 0.009800 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-B_Latency=1))
-0.19270000000000004 <= P <= 0.19270000000000004
-Inference time taken: 0.010091 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-B_Latency=1))
-0.19270000000000004 <= P <= 0.19270000000000004
-Inference time taken: 0.009064 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-B_Latency=0))
-0.6217493225882841 <= P <= 0.6217493225882841
-Inference time taken: 0.421413 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-B_Latency=0))
-0.37825067741171614 <= P <= 0.37825067741171614
-Inference time taken: 0.464321 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-B_Latency=1))
-0.6217493225882841 <= P <= 0.6217493225882841
-Inference time taken: 0.598212 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-B_Latency=1))
-0.37825067741171614 <= P <= 0.37825067741171614
-Inference time taken: 0.420595 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-B_Latency=0))
-0.519147232379111 <= P <= 0.519147232379111
-Inference time taken: 0.154771 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-B_Latency=0))
-0.48085276762088913 <= P <= 0.48085276762088913
-Inference time taken: 0.146248 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-B_Latency=1))
-0.519147232379111 <= P <= 0.519147232379111
-Inference time taken: 0.149962 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-B_Latency=1))
-0.48085276762088913 <= P <= 0.48085276762088913
-Inference time taken: 0.145026 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-B_Latency=0))
-0.3747437628638108 <= P <= 0.3747437628638108
-Inference time taken: 0.065626 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-B_Latency=0))
-0.625256237136189 <= P <= 0.625256237136189
-Inference time taken: 0.045610 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-B_Latency=1))
-0.3747437628638108 <= P <= 0.3747437628638108
-Inference time taken: 0.046339 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-B_Latency=1))
-0.625256237136189 <= P <= 0.625256237136189
-Inference time taken: 0.054156 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Error=0))
-0.0 <= P <= -0.0
-Inference time taken: 2.986441 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Error=0))
-0.6907133737367483 <= P <= 0.6907133737367483
-Inference time taken: 2.799331 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Error=1))
-0.0 <= P <= -0.0
-Inference time taken: 2.922176 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Error=1))
-0.6907133737367483 <= P <= 0.6907133737367483
-Inference time taken: 2.793458 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Error=0))
-0.7849999999999999 <= P <= 0.7849999999999999
-Inference time taken: 0.008614 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Error=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.008305 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Error=1))
-0.7849999999999999 <= P <= 0.7849999999999999
-Inference time taken: 0.008671 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Error=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.008453 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Error=0))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.008794 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Error=0))
-0.19359999999999997 <= P <= 0.19359999999999997
-Inference time taken: 0.008214 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Error=1))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.008764 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Error=1))
-0.19359999999999997 <= P <= 0.19359999999999997
-Inference time taken: 0.009348 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Error=0))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.010724 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Error=0))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.008798 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Error=1))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.008404 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Error=1))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.010026 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Error=0))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.008444 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Error=0))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.010111 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Error=1))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.008257 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Error=1))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.010428 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Error=0))
-0.851 <= P <= 0.851
-Inference time taken: 0.009520 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Error=0))
-0.149 <= P <= 0.149
-Inference time taken: 0.010859 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Error=1))
-0.851 <= P <= 0.851
-Inference time taken: 0.009610 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Error=1))
-0.149 <= P <= 0.149
-Inference time taken: 0.008375 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Error=0))
-0.8227999999999999 <= P <= 0.8227999999999999
-Inference time taken: 0.008918 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Error=0))
-0.1772 <= P <= 0.1772
-Inference time taken: 0.007960 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Error=1))
-0.8227999999999999 <= P <= 0.8227999999999999
-Inference time taken: 0.009058 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Error=1))
-0.1772 <= P <= 0.1772
-Inference time taken: 0.008607 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Error=0))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.008179 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Error=0))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.009015 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Error=1))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.009296 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Error=1))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.009392 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 14.058165 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 14.167079 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 15.581058 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 15.103506 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Latency=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.010588 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Latency=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009576 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Latency=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009454 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Latency=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009200 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Latency=0))
-0.843 <= P <= 0.843
-Inference time taken: 0.008799 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Latency=0))
-0.157 <= P <= 0.157
-Inference time taken: 0.009462 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Latency=1))
-0.843 <= P <= 0.843
-Inference time taken: 0.009876 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Latency=1))
-0.157 <= P <= 0.157
-Inference time taken: 0.008841 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Latency=0))
-0.9499000000000001 <= P <= 0.9499000000000001
-Inference time taken: 0.009156 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Latency=0))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.009822 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Latency=1))
-0.9499000000000001 <= P <= 0.9499000000000001
-Inference time taken: 0.010283 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Latency=1))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.008400 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 0.051394 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 0.050175 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 0.056317 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 0.091181 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 1.305395 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 1.316204 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 1.282525 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 1.318787 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 0.430497 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Latency=0))
-None <= P <= None
-Inference time taken: 0.428113 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 0.431228 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Latency=1))
-None <= P <= None
-Inference time taken: 0.473702 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Latency=0))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.008828 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Latency=0))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.010181 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Latency=1))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.010011 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Latency=1))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.008378 seconds
----------------------------------------------------------
-P(Outage=0|do(DB_Change=0))
-0.49482516448584307 <= P <= 0.49482516448584307
-Inference time taken: 2.172002 seconds
----------------------------------------------------------
-P(Outage=1|do(DB_Change=0))
-0.49918554651441827 <= P <= 0.49918554651441827
-Inference time taken: 2.172413 seconds
----------------------------------------------------------
-P(Outage=0|do(DB_Change=1))
-0.49482516448584307 <= P <= 0.49482516448584307
-Inference time taken: 2.162235 seconds
----------------------------------------------------------
-P(Outage=1|do(DB_Change=1))
-0.49918554651441827 <= P <= 0.49918554651441827
-Inference time taken: 2.274401 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(DB_Change=0))
-0.3772455089820359 <= P <= 0.3772455089820359
-Inference time taken: 0.014356 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(DB_Change=0))
-0.6227544910179641 <= P <= 0.6227544910179641
-Inference time taken: 0.013932 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(DB_Change=1))
-0.3772455089820359 <= P <= 0.3772455089820359
-Inference time taken: 0.014552 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(DB_Change=1))
-0.6227544910179641 <= P <= 0.6227544910179641
-Inference time taken: 0.015159 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(DB_Change=0))
-0.6247504990019962 <= P <= 0.6247504990019962
-Inference time taken: 0.093366 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(DB_Change=0))
-0.375249500998004 <= P <= 0.375249500998004
-Inference time taken: 0.087056 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(DB_Change=1))
-0.6247504990019962 <= P <= 0.6247504990019962
-Inference time taken: 0.093110 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(DB_Change=1))
-0.375249500998004 <= P <= 0.375249500998004
-Inference time taken: 0.086883 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(DB_Change=0))
-0.5848303393213573 <= P <= 0.5848303393213573
-Inference time taken: 0.030451 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(DB_Change=0))
-0.4151696606786427 <= P <= 0.4151696606786427
-Inference time taken: 0.035577 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(DB_Change=1))
-0.5848303393213573 <= P <= 0.5848303393213573
-Inference time taken: 0.032406 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(DB_Change=1))
-0.4151696606786427 <= P <= 0.4151696606786427
-Inference time taken: 0.033381 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(DB_Change=0))
-0.1816367265469062 <= P <= 0.1816367265469062
-Inference time taken: 0.006990 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(DB_Change=0))
-0.8183632734530939 <= P <= 0.8183632734530939
-Inference time taken: 0.006309 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(DB_Change=1))
-0.1816367265469062 <= P <= 0.1816367265469062
-Inference time taken: 0.006741 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(DB_Change=1))
-0.8183632734530939 <= P <= 0.8183632734530939
-Inference time taken: 0.007366 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(DB_Change=0))
-0.7345309381237525 <= P <= 0.7345309381237525
-Inference time taken: 0.234802 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(DB_Change=0))
-0.2654690618762475 <= P <= 0.2654690618762475
-Inference time taken: 0.219164 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(DB_Change=1))
-0.7345309381237525 <= P <= 0.7345309381237525
-Inference time taken: 0.219166 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(DB_Change=1))
-0.2654690618762475 <= P <= 0.2654690618762475
-Inference time taken: 0.223038 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(DB_Change=0))
-0.6746506986027944 <= P <= 0.6746506986027944
-Inference time taken: 0.093764 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(DB_Change=0))
-0.3253493013972055 <= P <= 0.3253493013972055
-Inference time taken: 0.080771 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(DB_Change=1))
-0.6746506986027944 <= P <= 0.6746506986027944
-Inference time taken: 0.080869 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(DB_Change=1))
-0.3253493013972055 <= P <= 0.3253493013972055
-Inference time taken: 0.090276 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(DB_Change=0))
-0.6107784431137724 <= P <= 0.6107784431137724
-Inference time taken: 0.041025 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(DB_Change=0))
-0.3892215568862276 <= P <= 0.3892215568862276
-Inference time taken: 0.040724 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(DB_Change=1))
-0.6107784431137724 <= P <= 0.6107784431137724
-Inference time taken: 0.032997 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(DB_Change=1))
-0.3892215568862276 <= P <= 0.3892215568862276
-Inference time taken: 0.034483 seconds
----------------------------------------------------------
-P(Outage=0|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 14.316672 seconds
----------------------------------------------------------
-P(Outage=1|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 14.683462 seconds
----------------------------------------------------------
-P(Outage=0|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 14.399422 seconds
----------------------------------------------------------
-P(Outage=1|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 14.233926 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(DB_Latency=0))
-0.19715368490441665 <= P <= 0.19715368490441665
-Inference time taken: 0.021927 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(DB_Latency=0))
-0.8028463150955834 <= P <= 0.8028463150955834
-Inference time taken: 0.021166 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(DB_Latency=1))
-0.19715368490441665 <= P <= 0.19715368490441665
-Inference time taken: 0.021815 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(DB_Latency=1))
-0.8028463150955834 <= P <= 0.8028463150955834
-Inference time taken: 0.023814 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(DB_Latency=0))
-0.5241385761371128 <= P <= 0.5241385761371128
-Inference time taken: 0.162470 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(DB_Latency=0))
-0.47586142386288727 <= P <= 0.47586142386288727
-Inference time taken: 0.179992 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(DB_Latency=1))
-0.5241385761371128 <= P <= 0.5241385761371128
-Inference time taken: 0.178895 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(DB_Latency=1))
-0.47586142386288727 <= P <= 0.47586142386288727
-Inference time taken: 0.199244 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.178538 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.158853 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.157766 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.154475 seconds
----------------------------------------------------------
-P(DB_Change=0|do(DB_Latency=0))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.009249 seconds
----------------------------------------------------------
-P(DB_Change=1|do(DB_Latency=0))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.010338 seconds
----------------------------------------------------------
-P(DB_Change=0|do(DB_Latency=1))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.008873 seconds
----------------------------------------------------------
-P(DB_Change=1|do(DB_Latency=1))
-0.050100000000000006 <= P <= 0.050100000000000006
-Inference time taken: 0.009816 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.723091 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.692788 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.705117 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.749003 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.261569 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(DB_Latency=0))
-None <= P <= None
-Inference time taken: 0.260889 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.241928 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(DB_Latency=1))
-None <= P <= None
-Inference time taken: 0.257436 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(DB_Latency=0))
-0.5130200988793673 <= P <= 0.5130200988793673
-Inference time taken: 0.057883 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(DB_Latency=0))
-0.4869799011206327 <= P <= 0.4869799011206327
-Inference time taken: 0.060710 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(DB_Latency=1))
-0.5130200988793673 <= P <= 0.5130200988793673
-Inference time taken: 0.061430 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(DB_Latency=1))
-0.4869799011206327 <= P <= 0.4869799011206327
-Inference time taken: 0.053283 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Crash=0))
-0.0 <= P <= -0.0
-Inference time taken: 2.759238 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Crash=0))
-0.7360315792010849 <= P <= 0.7360315792010849
-Inference time taken: 2.776439 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Crash=1))
-0.0 <= P <= -0.0
-Inference time taken: 2.765099 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Crash=1))
-0.7360315792010849 <= P <= 0.7360315792010849
-Inference time taken: 2.733227 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Crash=0))
-0.785 <= P <= 0.785
-Inference time taken: 0.010175 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Crash=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009346 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Crash=1))
-0.785 <= P <= 0.785
-Inference time taken: 0.009501 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Crash=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.008633 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Crash=0))
-0.843 <= P <= 0.843
-Inference time taken: 0.008244 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Crash=0))
-0.157 <= P <= 0.157
-Inference time taken: 0.008657 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Crash=1))
-0.843 <= P <= 0.843
-Inference time taken: 0.008486 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Crash=1))
-0.157 <= P <= 0.157
-Inference time taken: 0.008674 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Crash=0))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.008758 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Crash=0))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.008273 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Crash=1))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.008708 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Crash=1))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.010546 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Crash=0))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.009766 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Crash=0))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.010613 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Crash=1))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.010087 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Crash=1))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.008113 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Crash=0))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.008867 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Crash=0))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.008515 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Crash=1))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.010359 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Crash=1))
-0.1927 <= P <= 0.1927
-Inference time taken: 0.009443 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Crash=0))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.009897 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Crash=0))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.008513 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-A_Crash=1))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.010803 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-A_Crash=1))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.008774 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Crash=0))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.009928 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Crash=0))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.009236 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Crash=1))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.010221 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Crash=1))
-0.1471 <= P <= 0.1471
-Inference time taken: 0.009665 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Threads=0))
-0.17120593141190849 <= P <= 0.17120593141190849
-Inference time taken: 3.309433 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Threads=0))
-0.7270531008843136 <= P <= 0.7270531008843136
-Inference time taken: 3.205852 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-A_Threads=1))
-0.17120593141190849 <= P <= 0.17120593141190849
-Inference time taken: 3.403244 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-A_Threads=1))
-0.7270531008843136 <= P <= 0.7270531008843136
-Inference time taken: 4.822541 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Threads=0))
-0.785 <= P <= 0.785
-Inference time taken: 0.010489 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Threads=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.010346 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-A_Threads=1))
-0.785 <= P <= 0.785
-Inference time taken: 0.011999 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-A_Threads=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.008743 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Threads=0))
-0.843 <= P <= 0.843
-Inference time taken: 0.012425 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Threads=0))
-0.15699999999999997 <= P <= 0.15699999999999997
-Inference time taken: 0.011008 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-A_Threads=1))
-0.843 <= P <= 0.843
-Inference time taken: 0.010439 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-A_Threads=1))
-0.15699999999999997 <= P <= 0.15699999999999997
-Inference time taken: 0.010550 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Threads=0))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.010039 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Threads=0))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.009776 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-A_Threads=1))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.010525 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-A_Threads=1))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.008783 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Threads=0))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.009972 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Threads=0))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.009511 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-A_Threads=1))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.011309 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-A_Threads=1))
-0.0501 <= P <= 0.0501
-Inference time taken: 0.010686 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Threads=0))
-0.8072999999999999 <= P <= 0.8072999999999999
-Inference time taken: 0.009901 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Threads=0))
-0.19269999999999998 <= P <= 0.19269999999999998
-Inference time taken: 0.010229 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-A_Threads=1))
-0.8072999999999999 <= P <= 0.8072999999999999
-Inference time taken: 0.012290 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-A_Threads=1))
-0.19269999999999998 <= P <= 0.19269999999999998
-Inference time taken: 0.010931 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Threads=0))
-0.1991487580455219 <= P <= 0.1991487580455219
-Inference time taken: 0.285535 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Threads=0))
-0.7938389230699983 <= P <= 0.7938389230699983
-Inference time taken: 0.283858 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-A_Threads=1))
-0.1991487580455219 <= P <= 0.1991487580455219
-Inference time taken: 0.285569 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-A_Threads=1))
-0.7938389230699983 <= P <= 0.7938389230699983
-Inference time taken: 0.298123 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Threads=0))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.010617 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Threads=0))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.008993 seconds
----------------------------------------------------------
-P(MS-B_Error=0|do(MS-A_Threads=1))
-0.8529 <= P <= 0.8529
-Inference time taken: 0.010168 seconds
----------------------------------------------------------
-P(MS-B_Error=1|do(MS-A_Threads=1))
-0.14709999999999998 <= P <= 0.14709999999999998
-Inference time taken: 0.009937 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-B_Error=0))
-0.11979938387455237 <= P <= 0.11979938387455237
-Inference time taken: 3.380369 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-B_Error=0))
-0.6997397217886162 <= P <= 0.6997397217886162
-Inference time taken: 3.336212 seconds
----------------------------------------------------------
-P(Outage=0|do(MS-B_Error=1))
-0.11979938387455237 <= P <= 0.11979938387455237
-Inference time taken: 3.195181 seconds
----------------------------------------------------------
-P(Outage=1|do(MS-B_Error=1))
-0.6997397217886162 <= P <= 0.6997397217886162
-Inference time taken: 3.239174 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-B_Error=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009589 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-B_Error=0))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.008461 seconds
----------------------------------------------------------
-P(MS-B_Latency=0|do(MS-B_Error=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.010344 seconds
----------------------------------------------------------
-P(MS-B_Latency=1|do(MS-B_Error=1))
-0.21499999999999997 <= P <= 0.21499999999999997
-Inference time taken: 0.009109 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-B_Error=0))
-0.16570672084120475 <= P <= 0.16570672084120475
-Inference time taken: 0.107473 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-B_Error=0))
-0.8342932791587953 <= P <= 0.8342932791587953
-Inference time taken: 0.103987 seconds
----------------------------------------------------------
-P(MS-A_Error=0|do(MS-B_Error=1))
-0.16570672084120475 <= P <= 0.16570672084120475
-Inference time taken: 0.120575 seconds
----------------------------------------------------------
-P(MS-A_Error=1|do(MS-B_Error=1))
-0.8342932791587953 <= P <= 0.8342932791587953
-Inference time taken: 0.108461 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-B_Error=0))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.011042 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-B_Error=0))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.011593 seconds
----------------------------------------------------------
-P(MS-A_Latency=0|do(MS-B_Error=1))
-0.8064 <= P <= 0.8064
-Inference time taken: 0.009228 seconds
----------------------------------------------------------
-P(MS-A_Latency=1|do(MS-B_Error=1))
-0.1936 <= P <= 0.1936
-Inference time taken: 0.009588 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-B_Error=0))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.008787 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-B_Error=0))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.009179 seconds
----------------------------------------------------------
-P(DB_Change=0|do(MS-B_Error=1))
-0.9498999999999999 <= P <= 0.9498999999999999
-Inference time taken: 0.010582 seconds
----------------------------------------------------------
-P(DB_Change=1|do(MS-B_Error=1))
-0.05009999999999999 <= P <= 0.05009999999999999
-Inference time taken: 0.009871 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-B_Error=0))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.009512 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-B_Error=0))
-0.19269999999999998 <= P <= 0.19269999999999998
-Inference time taken: 0.009627 seconds
----------------------------------------------------------
-P(DB_Latency=0|do(MS-B_Error=1))
-0.8073 <= P <= 0.8073
-Inference time taken: 0.009036 seconds
----------------------------------------------------------
-P(DB_Latency=1|do(MS-B_Error=1))
-0.19269999999999998 <= P <= 0.19269999999999998
-Inference time taken: 0.008386 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-B_Error=0))
-0.8509999999999999 <= P <= 0.8509999999999999
-Inference time taken: 0.008814 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-B_Error=0))
-0.14899999999999997 <= P <= 0.14899999999999997
-Inference time taken: 0.008466 seconds
----------------------------------------------------------
-P(MS-A_Crash=0|do(MS-B_Error=1))
-0.8509999999999999 <= P <= 0.8509999999999999
-Inference time taken: 0.009052 seconds
----------------------------------------------------------
-P(MS-A_Crash=1|do(MS-B_Error=1))
-0.14899999999999997 <= P <= 0.14899999999999997
-Inference time taken: 0.008643 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-B_Error=0))
-0.8228 <= P <= 0.8228
-Inference time taken: 0.009418 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-B_Error=0))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.009546 seconds
----------------------------------------------------------
-P(MS-A_Threads=0|do(MS-B_Error=1))
-0.8228 <= P <= 0.8228
-Inference time taken: 0.008987 seconds
----------------------------------------------------------
-P(MS-A_Threads=1|do(MS-B_Error=1))
-0.17719999999999997 <= P <= 0.17719999999999997
-Inference time taken: 0.010734 seconds
+PS = P(DB_Latency=1|do(MS-A_Crash=1))
+0.1927 <= PS <= 0.1927
+PS Inference time taken: 0.010914 seconds
+----
+PN = P(DB_Latency=0|do(MS-A_Crash=0))
+0.8073 <= PN <= 0.8073
+PN Inference time taken: 0.023605 seconds
+----
+PNS = P(DB_Latency|do(MS-A_Crash))
+0.8073 <= PNS <= 0.8073
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(MS-A_Crash=1))
+0.21499999999999997 <= PS <= 0.21499999999999997
+PS Inference time taken: 0.009758 seconds
+----
+PN = P(MS-B_Latency=0|do(MS-A_Crash=0))
+0.785 <= PN <= 0.785
+PN Inference time taken: 0.009377 seconds
+----
+PNS = P(MS-B_Latency|do(MS-A_Crash))
+0.785 <= PNS <= 0.785
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(MS-A_Crash=1))
+0.157 <= PS <= 0.157
+PS Inference time taken: 0.008657 seconds
+----
+PN = P(MS-A_Error=0|do(MS-A_Crash=0))
+0.843 <= PN <= 0.843
+PN Inference time taken: 0.008595 seconds
+----
+PNS = P(MS-A_Error|do(MS-A_Crash))
+0.843 <= PNS <= 0.843
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(MS-A_Crash=1))
+0.17719999999999997 <= PS <= 0.17719999999999997
+PS Inference time taken: 0.009812 seconds
+----
+PN = P(MS-A_Threads=0|do(MS-A_Crash=0))
+0.17719999999999997 <= PN <= 0.17719999999999997
+PN Inference time taken: 0.009611 seconds
+----
+PNS = P(MS-A_Threads|do(MS-A_Crash))
+0.17719999999999997 <= PNS <= 0.17719999999999997
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-A_Crash=1))
+0.05009999999999999 <= PS <= 0.05009999999999999
+PS Inference time taken: 0.009482 seconds
+----
+PN = P(DB_Change=0|do(MS-A_Crash=0))
+0.9498999999999999 <= PN <= 0.9498999999999999
+PN Inference time taken: 0.009622 seconds
+----
+PNS = P(DB_Change|do(MS-A_Crash))
+0.9498999999999999 <= PNS <= 0.9498999999999999
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(MS-A_Crash=1))
+0.1471 <= PS <= 0.1471
+PS Inference time taken: 0.012774 seconds
+----
+PN = P(MS-B_Error=0|do(MS-A_Crash=0))
+0.8529 <= PN <= 0.8529
+PN Inference time taken: 0.010097 seconds
+----
+PNS = P(MS-B_Error|do(MS-A_Crash))
+0.8529 <= PNS <= 0.8529
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(MS-A_Crash=1))
+0.1936 <= PS <= 0.1936
+PS Inference time taken: 0.009902 seconds
+----
+PN = P(MS-A_Latency=0|do(MS-A_Crash=0))
+0.8064 <= PN <= 0.8064
+PN Inference time taken: 0.011824 seconds
+----
+PNS = P(MS-A_Latency|do(MS-A_Crash))
+0.8064 <= PNS <= 0.8064
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-A_Crash=1))
+0.7360315792010849 <= PS <= 0.7360315792010849
+PS Inference time taken: 3.582314 seconds
+----
+PN = P(Outage=0|do(MS-A_Crash=0))
+0.0 <= PN <= -0.0
+PN Inference time taken: 3.272061 seconds
+----
+PNS = P(Outage|do(MS-A_Crash))
+0.0 <= PNS <= -0.0
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(DB_Latency=1))
+None <= PS <= None
+PS Inference time taken: 1.407085 seconds
+----
+PN = P(MS-A_Crash=0|do(DB_Latency=0))
+None <= PN <= None
+PN Inference time taken: 1.606101 seconds
+----
+PNS = P(MS-A_Crash|do(DB_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(DB_Latency=1))
+0.8028463150955834 <= PS <= 0.8028463150955834
+PS Inference time taken: 0.021043 seconds
+----
+PN = P(MS-B_Latency=0|do(DB_Latency=0))
+0.19715368490441665 <= PN <= 0.19715368490441665
+PN Inference time taken: 0.021830 seconds
+----
+PNS = P(MS-B_Latency|do(DB_Latency))
+0.19715368490441665 <= PNS <= 0.19715368490441665
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(DB_Latency=1))
+0.47586142386288727 <= PS <= 0.47586142386288727
+PS Inference time taken: 0.147385 seconds
+----
+PN = P(MS-A_Error=0|do(DB_Latency=0))
+0.5241385761371128 <= PN <= 0.5241385761371128
+PN Inference time taken: 0.152089 seconds
+----
+PNS = P(MS-A_Error|do(DB_Latency))
+0.5241385761371128 <= PNS <= 0.5241385761371128
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(DB_Latency=1))
+None <= PS <= None
+PS Inference time taken: 0.407569 seconds
+----
+PN = P(MS-A_Threads=0|do(DB_Latency=0))
+None <= PN <= None
+PN Inference time taken: 0.466259 seconds
+----
+PNS = P(MS-A_Threads|do(DB_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(DB_Change=1|do(DB_Latency=1))
+0.050100000000000006 <= PS <= 0.050100000000000006
+PS Inference time taken: 0.017147 seconds
+----
+PN = P(DB_Change=0|do(DB_Latency=0))
+0.050100000000000006 <= PN <= 0.050100000000000006
+PN Inference time taken: 0.010774 seconds
+----
+PNS = P(DB_Change|do(DB_Latency))
+0.050100000000000006 <= PNS <= 0.050100000000000006
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(DB_Latency=1))
+0.4869799011206327 <= PS <= 0.4869799011206327
+PS Inference time taken: 0.058676 seconds
+----
+PN = P(MS-B_Error=0|do(DB_Latency=0))
+0.5130200988793673 <= PN <= 0.5130200988793673
+PN Inference time taken: 0.082916 seconds
+----
+PNS = P(MS-B_Error|do(DB_Latency))
+0.5130200988793673 <= PNS <= 0.5130200988793673
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(DB_Latency=1))
+None <= PS <= None
+PS Inference time taken: 0.165398 seconds
+----
+PN = P(MS-A_Latency=0|do(DB_Latency=0))
+None <= PN <= None
+PN Inference time taken: 0.155859 seconds
+----
+PNS = P(MS-A_Latency|do(DB_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(Outage=1|do(DB_Latency=1))
+None <= PS <= None
+PS Inference time taken: 18.614792 seconds
+----
+PN = P(Outage=0|do(DB_Latency=0))
+None <= PN <= None
+PN Inference time taken: 13.800517 seconds
+----
+PNS = P(Outage|do(DB_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(MS-B_Latency=1))
+0.3782506774117162 <= PS <= 0.3782506774117162
+PS Inference time taken: 0.404666 seconds
+----
+PN = P(MS-A_Crash=0|do(MS-B_Latency=0))
+0.621749322588284 <= PN <= 0.621749322588284
+PN Inference time taken: 0.394377 seconds
+----
+PNS = P(MS-A_Crash|do(MS-B_Latency))
+0.621749322588284 <= PNS <= 0.621749322588284
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(MS-B_Latency=1))
+0.19270000000000004 <= PS <= 0.19270000000000004
+PS Inference time taken: 0.011334 seconds
+----
+PN = P(DB_Latency=0|do(MS-B_Latency=0))
+0.19270000000000004 <= PN <= 0.19270000000000004
+PN Inference time taken: 0.009556 seconds
+----
+PNS = P(DB_Latency|do(MS-B_Latency))
+0.19270000000000004 <= PNS <= 0.19270000000000004
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(MS-B_Latency=1))
+0.5951879667367053 <= PS <= 0.5951879667367053
+PS Inference time taken: 0.158829 seconds
+----
+PN = P(MS-A_Error=0|do(MS-B_Latency=0))
+0.40481203326329485 <= PN <= 0.40481203326329485
+PN Inference time taken: 0.159674 seconds
+----
+PNS = P(MS-A_Error|do(MS-B_Latency))
+0.40481203326329485 <= PNS <= 0.40481203326329485
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(MS-B_Latency=1))
+0.48085276762088913 <= PS <= 0.48085276762088913
+PS Inference time taken: 0.149527 seconds
+----
+PN = P(MS-A_Threads=0|do(MS-B_Latency=0))
+0.519147232379111 <= PN <= 0.519147232379111
+PN Inference time taken: 0.154513 seconds
+----
+PNS = P(MS-A_Threads|do(MS-B_Latency))
+0.519147232379111 <= PNS <= 0.519147232379111
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-B_Latency=1))
+0.050100000000000006 <= PS <= 0.050100000000000006
+PS Inference time taken: 0.009915 seconds
+----
+PN = P(DB_Change=0|do(MS-B_Latency=0))
+0.9499 <= PN <= 0.9499
+PN Inference time taken: 0.012454 seconds
+----
+PNS = P(DB_Change|do(MS-B_Latency))
+0.9499 <= PNS <= 0.9499
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(MS-B_Latency=1))
+0.625256237136189 <= PS <= 0.625256237136189
+PS Inference time taken: 0.046495 seconds
+----
+PN = P(MS-B_Error=0|do(MS-B_Latency=0))
+0.3747437628638108 <= PN <= 0.3747437628638108
+PN Inference time taken: 0.062691 seconds
+----
+PNS = P(MS-B_Error|do(MS-B_Latency))
+0.3747437628638108 <= PNS <= 0.3747437628638108
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(MS-B_Latency=1))
+0.6730275245099655 <= PS <= 0.6730275245099655
+PS Inference time taken: 0.054701 seconds
+----
+PN = P(MS-A_Latency=0|do(MS-B_Latency=0))
+0.3269724754900344 <= PN <= 0.3269724754900344
+PN Inference time taken: 0.047707 seconds
+----
+PNS = P(MS-A_Latency|do(MS-B_Latency))
+0.3269724754900344 <= PNS <= 0.3269724754900344
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-B_Latency=1))
+0.7131179436068037 <= PS <= 0.7131179436068037
+PS Inference time taken: 5.468341 seconds
+----
+PN = P(Outage=0|do(MS-B_Latency=0))
+0.26662935198612864 <= PN <= 0.26662935198612864
+PN Inference time taken: 5.539553 seconds
+----
+PNS = P(Outage|do(MS-B_Latency))
+0.26662935198612864 <= PNS <= 0.26662935198612864
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(MS-A_Error=1))
+0.149 <= PS <= 0.149
+PS Inference time taken: 0.008573 seconds
+----
+PN = P(MS-A_Crash=0|do(MS-A_Error=0))
+0.851 <= PN <= 0.851
+PN Inference time taken: 0.009977 seconds
+----
+PNS = P(MS-A_Crash|do(MS-A_Error))
+0.851 <= PNS <= 0.851
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(MS-A_Error=1))
+0.1927 <= PS <= 0.1927
+PS Inference time taken: 0.010317 seconds
+----
+PN = P(DB_Latency=0|do(MS-A_Error=0))
+0.8073 <= PN <= 0.8073
+PN Inference time taken: 0.009314 seconds
+----
+PNS = P(DB_Latency|do(MS-A_Error))
+0.8073 <= PNS <= 0.8073
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(MS-A_Error=1))
+0.21499999999999997 <= PS <= 0.21499999999999997
+PS Inference time taken: 0.008984 seconds
+----
+PN = P(MS-B_Latency=0|do(MS-A_Error=0))
+0.7849999999999999 <= PN <= 0.7849999999999999
+PN Inference time taken: 0.010584 seconds
+----
+PNS = P(MS-B_Latency|do(MS-A_Error))
+0.7849999999999999 <= PNS <= 0.7849999999999999
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(MS-A_Error=1))
+0.1772 <= PS <= 0.1772
+PS Inference time taken: 0.010290 seconds
+----
+PN = P(MS-A_Threads=0|do(MS-A_Error=0))
+0.8227999999999999 <= PN <= 0.8227999999999999
+PN Inference time taken: 0.010468 seconds
+----
+PNS = P(MS-A_Threads|do(MS-A_Error))
+0.8227999999999999 <= PNS <= 0.8227999999999999
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-A_Error=1))
+0.05009999999999999 <= PS <= 0.05009999999999999
+PS Inference time taken: 0.009626 seconds
+----
+PN = P(DB_Change=0|do(MS-A_Error=0))
+0.9498999999999999 <= PN <= 0.9498999999999999
+PN Inference time taken: 0.009136 seconds
+----
+PNS = P(DB_Change|do(MS-A_Error))
+0.9498999999999999 <= PNS <= 0.9498999999999999
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(MS-A_Error=1))
+0.14709999999999998 <= PS <= 0.14709999999999998
+PS Inference time taken: 0.009546 seconds
+----
+PN = P(MS-B_Error=0|do(MS-A_Error=0))
+0.14709999999999998 <= PN <= 0.14709999999999998
+PN Inference time taken: 0.010003 seconds
+----
+PNS = P(MS-B_Error|do(MS-A_Error))
+0.14709999999999998 <= PNS <= 0.14709999999999998
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(MS-A_Error=1))
+0.19359999999999997 <= PS <= 0.19359999999999997
+PS Inference time taken: 0.011769 seconds
+----
+PN = P(MS-A_Latency=0|do(MS-A_Error=0))
+0.8064 <= PN <= 0.8064
+PN Inference time taken: 0.009411 seconds
+----
+PNS = P(MS-A_Latency|do(MS-A_Error))
+0.8064 <= PNS <= 0.8064
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-A_Error=1))
+0.6907133737367483 <= PS <= 0.6907133737367483
+PS Inference time taken: 2.901465 seconds
+----
+PN = P(Outage=0|do(MS-A_Error=0))
+0.0 <= PN <= -0.0
+PN Inference time taken: 2.917268 seconds
+----
+PNS = P(Outage|do(MS-A_Error))
+0.0 <= PNS <= -0.0
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(MS-A_Threads=1))
+0.7938389230699983 <= PS <= 0.7938389230699983
+PS Inference time taken: 0.279801 seconds
+----
+PN = P(MS-A_Crash=0|do(MS-A_Threads=0))
+0.19914875804552187 <= PN <= 0.19914875804552187
+PN Inference time taken: 0.287229 seconds
+----
+PNS = P(MS-A_Crash|do(MS-A_Threads))
+0.19914875804552187 <= PNS <= 0.19914875804552187
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(MS-A_Threads=1))
+0.19269999999999998 <= PS <= 0.19269999999999998
+PS Inference time taken: 0.011179 seconds
+----
+PN = P(DB_Latency=0|do(MS-A_Threads=0))
+0.8072999999999999 <= PN <= 0.8072999999999999
+PN Inference time taken: 0.009558 seconds
+----
+PNS = P(DB_Latency|do(MS-A_Threads))
+0.8072999999999999 <= PNS <= 0.8072999999999999
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(MS-A_Threads=1))
+0.21499999999999997 <= PS <= 0.21499999999999997
+PS Inference time taken: 0.009281 seconds
+----
+PN = P(MS-B_Latency=0|do(MS-A_Threads=0))
+0.785 <= PN <= 0.785
+PN Inference time taken: 0.011397 seconds
+----
+PNS = P(MS-B_Latency|do(MS-A_Threads))
+0.785 <= PNS <= 0.785
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(MS-A_Threads=1))
+0.15699999999999997 <= PS <= 0.15699999999999997
+PS Inference time taken: 0.008184 seconds
+----
+PN = P(MS-A_Error=0|do(MS-A_Threads=0))
+0.843 <= PN <= 0.843
+PN Inference time taken: 0.010793 seconds
+----
+PNS = P(MS-A_Error|do(MS-A_Threads))
+0.843 <= PNS <= 0.843
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-A_Threads=1))
+0.0501 <= PS <= 0.0501
+PS Inference time taken: 0.009775 seconds
+----
+PN = P(DB_Change=0|do(MS-A_Threads=0))
+0.9498999999999999 <= PN <= 0.9498999999999999
+PN Inference time taken: 0.010149 seconds
+----
+PNS = P(DB_Change|do(MS-A_Threads))
+0.9498999999999999 <= PNS <= 0.9498999999999999
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(MS-A_Threads=1))
+0.14709999999999998 <= PS <= 0.14709999999999998
+PS Inference time taken: 0.009722 seconds
+----
+PN = P(MS-B_Error=0|do(MS-A_Threads=0))
+0.8529 <= PN <= 0.8529
+PN Inference time taken: 0.011887 seconds
+----
+PNS = P(MS-B_Error|do(MS-A_Threads))
+0.8529 <= PNS <= 0.8529
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(MS-A_Threads=1))
+0.1936 <= PS <= 0.1936
+PS Inference time taken: 0.011170 seconds
+----
+PN = P(MS-A_Latency=0|do(MS-A_Threads=0))
+0.1936 <= PN <= 0.1936
+PN Inference time taken: 0.010418 seconds
+----
+PNS = P(MS-A_Latency|do(MS-A_Threads))
+0.1936 <= PNS <= 0.1936
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-A_Threads=1))
+0.7396992883066936 <= PS <= 0.7396992883066936
+PS Inference time taken: 3.366633 seconds
+----
+PN = P(Outage=0|do(MS-A_Threads=0))
+0.1478248712407596 <= PN <= 0.1478248712407596
+PN Inference time taken: 3.274700 seconds
+----
+PNS = P(Outage|do(MS-A_Threads))
+0.1478248712407596 <= PNS <= 0.1478248712407596
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(DB_Change=1))
+0.2654690618762475 <= PS <= 0.2654690618762475
+PS Inference time taken: 0.232253 seconds
+----
+PN = P(MS-A_Crash=0|do(DB_Change=0))
+0.7345309381237525 <= PN <= 0.7345309381237525
+PN Inference time taken: 0.236180 seconds
+----
+PNS = P(MS-A_Crash|do(DB_Change))
+0.7345309381237525 <= PNS <= 0.7345309381237525
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(DB_Change=1))
+0.8183632734530939 <= PS <= 0.8183632734530939
+PS Inference time taken: 0.006393 seconds
+----
+PN = P(DB_Latency=0|do(DB_Change=0))
+0.1816367265469062 <= PN <= 0.1816367265469062
+PN Inference time taken: 0.007598 seconds
+----
+PNS = P(DB_Latency|do(DB_Change))
+0.1816367265469062 <= PNS <= 0.1816367265469062
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(DB_Change=1))
+0.6227544910179641 <= PS <= 0.6227544910179641
+PS Inference time taken: 0.013631 seconds
+----
+PN = P(MS-B_Latency=0|do(DB_Change=0))
+0.3772455089820359 <= PN <= 0.3772455089820359
+PN Inference time taken: 0.015109 seconds
+----
+PNS = P(MS-B_Latency|do(DB_Change))
+0.3772455089820359 <= PNS <= 0.3772455089820359
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(DB_Change=1))
+0.375249500998004 <= PS <= 0.375249500998004
+PS Inference time taken: 0.099729 seconds
+----
+PN = P(MS-A_Error=0|do(DB_Change=0))
+0.6247504990019962 <= PN <= 0.6247504990019962
+PN Inference time taken: 0.096110 seconds
+----
+PNS = P(MS-A_Error|do(DB_Change))
+0.6247504990019962 <= PNS <= 0.6247504990019962
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(DB_Change=1))
+0.3253493013972055 <= PS <= 0.3253493013972055
+PS Inference time taken: 0.098690 seconds
+----
+PN = P(MS-A_Threads=0|do(DB_Change=0))
+0.6746506986027944 <= PN <= 0.6746506986027944
+PN Inference time taken: 0.098637 seconds
+----
+PNS = P(MS-A_Threads|do(DB_Change))
+0.6746506986027944 <= PNS <= 0.6746506986027944
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(DB_Change=1))
+0.3892215568862276 <= PS <= 0.3892215568862276
+PS Inference time taken: 0.033826 seconds
+----
+PN = P(MS-B_Error=0|do(DB_Change=0))
+0.6107784431137724 <= PN <= 0.6107784431137724
+PN Inference time taken: 0.036658 seconds
+----
+PNS = P(MS-B_Error|do(DB_Change))
+0.6107784431137724 <= PNS <= 0.6107784431137724
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(DB_Change=1))
+0.4151696606786427 <= PS <= 0.4151696606786427
+PS Inference time taken: 0.036241 seconds
+----
+PN = P(MS-A_Latency=0|do(DB_Change=0))
+0.5848303393213573 <= PN <= 0.5848303393213573
+PN Inference time taken: 0.034180 seconds
+----
+PNS = P(MS-A_Latency|do(DB_Change))
+0.5848303393213573 <= PNS <= 0.5848303393213573
+---------------------------------------------------------
+PS = P(Outage=1|do(DB_Change=1))
+0.49452908472359425 <= PS <= 0.49452908472359425
+PS Inference time taken: 2.375896 seconds
+----
+PN = P(Outage=0|do(DB_Change=0))
+0.4955405652236118 <= PN <= 0.4955405652236118
+PN Inference time taken: 2.384386 seconds
+----
+PNS = P(Outage|do(DB_Change))
+0.4955405652236118 <= PNS <= 0.4955405652236118
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(MS-B_Error=1))
+0.14899999999999997 <= PS <= 0.14899999999999997
+PS Inference time taken: 0.009562 seconds
+----
+PN = P(MS-A_Crash=0|do(MS-B_Error=0))
+0.8509999999999999 <= PN <= 0.8509999999999999
+PN Inference time taken: 0.009752 seconds
+----
+PNS = P(MS-A_Crash|do(MS-B_Error))
+0.8509999999999999 <= PNS <= 0.8509999999999999
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(MS-B_Error=1))
+0.19269999999999998 <= PS <= 0.19269999999999998
+PS Inference time taken: 0.009965 seconds
+----
+PN = P(DB_Latency=0|do(MS-B_Error=0))
+0.8073 <= PN <= 0.8073
+PN Inference time taken: 0.009438 seconds
+----
+PNS = P(DB_Latency|do(MS-B_Error))
+0.8073 <= PNS <= 0.8073
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(MS-B_Error=1))
+0.21499999999999997 <= PS <= 0.21499999999999997
+PS Inference time taken: 0.010275 seconds
+----
+PN = P(MS-B_Latency=0|do(MS-B_Error=0))
+0.21499999999999997 <= PN <= 0.21499999999999997
+PN Inference time taken: 0.011284 seconds
+----
+PNS = P(MS-B_Latency|do(MS-B_Error))
+0.21499999999999997 <= PNS <= 0.21499999999999997
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(MS-B_Error=1))
+0.8342932791587953 <= PS <= 0.8342932791587953
+PS Inference time taken: 0.131882 seconds
+----
+PN = P(MS-A_Error=0|do(MS-B_Error=0))
+0.16570672084120475 <= PN <= 0.16570672084120475
+PN Inference time taken: 0.118741 seconds
+----
+PNS = P(MS-A_Error|do(MS-B_Error))
+0.16570672084120475 <= PNS <= 0.16570672084120475
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(MS-B_Error=1))
+0.17719999999999997 <= PS <= 0.17719999999999997
+PS Inference time taken: 0.010345 seconds
+----
+PN = P(MS-A_Threads=0|do(MS-B_Error=0))
+0.8228 <= PN <= 0.8228
+PN Inference time taken: 0.010499 seconds
+----
+PNS = P(MS-A_Threads|do(MS-B_Error))
+0.8228 <= PNS <= 0.8228
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-B_Error=1))
+0.05009999999999999 <= PS <= 0.05009999999999999
+PS Inference time taken: 0.012201 seconds
+----
+PN = P(DB_Change=0|do(MS-B_Error=0))
+0.9498999999999999 <= PN <= 0.9498999999999999
+PN Inference time taken: 0.009744 seconds
+----
+PNS = P(DB_Change|do(MS-B_Error))
+0.9498999999999999 <= PNS <= 0.9498999999999999
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(MS-B_Error=1))
+0.1936 <= PS <= 0.1936
+PS Inference time taken: 0.010593 seconds
+----
+PN = P(MS-A_Latency=0|do(MS-B_Error=0))
+0.8064 <= PN <= 0.8064
+PN Inference time taken: 0.011151 seconds
+----
+PNS = P(MS-A_Latency|do(MS-B_Error))
+0.8064 <= PNS <= 0.8064
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-B_Error=1))
+0.6992698450510075 <= PS <= 0.6992698450510075
+PS Inference time taken: 3.434518 seconds
+----
+PN = P(Outage=0|do(MS-B_Error=0))
+0.12103404336219106 <= PN <= 0.12103404336219106
+PN Inference time taken: 3.273969 seconds
+----
+PNS = P(Outage|do(MS-B_Error))
+0.12103404336219106 <= PNS <= 0.12103404336219106
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(MS-A_Latency=1))
+None <= PS <= None
+PS Inference time taken: 1.358178 seconds
+----
+PN = P(MS-A_Crash=0|do(MS-A_Latency=0))
+None <= PN <= None
+PN Inference time taken: 1.318638 seconds
+----
+PNS = P(MS-A_Crash|do(MS-A_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(MS-A_Latency=1))
+None <= PS <= None
+PS Inference time taken: 0.053817 seconds
+----
+PN = P(DB_Latency=0|do(MS-A_Latency=0))
+None <= PN <= None
+PN Inference time taken: 0.051142 seconds
+----
+PNS = P(DB_Latency|do(MS-A_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(MS-A_Latency=1))
+0.21499999999999997 <= PS <= 0.21499999999999997
+PS Inference time taken: 0.010498 seconds
+----
+PN = P(MS-B_Latency=0|do(MS-A_Latency=0))
+0.21499999999999997 <= PN <= 0.21499999999999997
+PN Inference time taken: 0.009463 seconds
+----
+PNS = P(MS-B_Latency|do(MS-A_Latency))
+0.21499999999999997 <= PNS <= 0.21499999999999997
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(MS-A_Latency=1))
+0.157 <= PS <= 0.157
+PS Inference time taken: 0.009447 seconds
+----
+PN = P(MS-A_Error=0|do(MS-A_Latency=0))
+0.843 <= PN <= 0.843
+PN Inference time taken: 0.009762 seconds
+----
+PNS = P(MS-A_Error|do(MS-A_Latency))
+0.843 <= PNS <= 0.843
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(MS-A_Latency=1))
+None <= PS <= None
+PS Inference time taken: 0.477169 seconds
+----
+PN = P(MS-A_Threads=0|do(MS-A_Latency=0))
+None <= PN <= None
+PN Inference time taken: 0.466776 seconds
+----
+PNS = P(MS-A_Threads|do(MS-A_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(DB_Change=1|do(MS-A_Latency=1))
+0.0501 <= PS <= 0.0501
+PS Inference time taken: 0.009310 seconds
+----
+PN = P(DB_Change=0|do(MS-A_Latency=0))
+0.9499000000000001 <= PN <= 0.9499000000000001
+PN Inference time taken: 0.010153 seconds
+----
+PNS = P(DB_Change|do(MS-A_Latency))
+0.9499000000000001 <= PNS <= 0.9499000000000001
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(MS-A_Latency=1))
+0.1471 <= PS <= 0.1471
+PS Inference time taken: 0.010690 seconds
+----
+PN = P(MS-B_Error=0|do(MS-A_Latency=0))
+0.8529 <= PN <= 0.8529
+PN Inference time taken: 0.009153 seconds
+----
+PNS = P(MS-B_Error|do(MS-A_Latency))
+0.8529 <= PNS <= 0.8529
+---------------------------------------------------------
+PS = P(Outage=1|do(MS-A_Latency=1))
+None <= PS <= None
+PS Inference time taken: 14.523861 seconds
+----
+PN = P(Outage=0|do(MS-A_Latency=0))
+None <= PN <= None
+PN Inference time taken: 14.479067 seconds
+----
+PNS = P(Outage|do(MS-A_Latency))
+PNS == None
+---------------------------------------------------------
+PS = P(MS-A_Crash=1|do(Outage=1))
+0.149 <= PS <= 0.149
+PS Inference time taken: 0.025552 seconds
+----
+PN = P(MS-A_Crash=0|do(Outage=0))
+0.149 <= PN <= 0.149
+PN Inference time taken: 0.026785 seconds
+----
+PNS = P(MS-A_Crash|do(Outage))
+0.149 <= PNS <= 0.149
+---------------------------------------------------------
+PS = P(DB_Latency=1|do(Outage=1))
+0.1927 <= PS <= 0.1927
+PS Inference time taken: 0.022903 seconds
+----
+PN = P(DB_Latency=0|do(Outage=0))
+0.8073 <= PN <= 0.8073
+PN Inference time taken: 0.030726 seconds
+----
+PNS = P(DB_Latency|do(Outage))
+0.8073 <= PNS <= 0.8073
+---------------------------------------------------------
+PS = P(MS-B_Latency=1|do(Outage=1))
+0.215 <= PS <= 0.215
+PS Inference time taken: 0.023345 seconds
+----
+PN = P(MS-B_Latency=0|do(Outage=0))
+0.785 <= PN <= 0.785
+PN Inference time taken: 0.022935 seconds
+----
+PNS = P(MS-B_Latency|do(Outage))
+0.785 <= PNS <= 0.785
+---------------------------------------------------------
+PS = P(MS-A_Error=1|do(Outage=1))
+0.157 <= PS <= 0.157
+PS Inference time taken: 0.029962 seconds
+----
+PN = P(MS-A_Error=0|do(Outage=0))
+0.157 <= PN <= 0.157
+PN Inference time taken: 0.024181 seconds
+----
+PNS = P(MS-A_Error|do(Outage))
+0.157 <= PNS <= 0.157
+---------------------------------------------------------
+PS = P(MS-A_Threads=1|do(Outage=1))
+0.1772 <= PS <= 0.1772
+PS Inference time taken: 0.023115 seconds
+----
+PN = P(MS-A_Threads=0|do(Outage=0))
+0.8228 <= PN <= 0.8228
+PN Inference time taken: 0.023947 seconds
+----
+PNS = P(MS-A_Threads|do(Outage))
+0.8228 <= PNS <= 0.8228
+---------------------------------------------------------
+PS = P(DB_Change=1|do(Outage=1))
+0.0501 <= PS <= 0.0501
+PS Inference time taken: 0.024891 seconds
+----
+PN = P(DB_Change=0|do(Outage=0))
+0.9499 <= PN <= 0.9499
+PN Inference time taken: 0.022605 seconds
+----
+PNS = P(DB_Change|do(Outage))
+0.9499 <= PNS <= 0.9499
+---------------------------------------------------------
+PS = P(MS-B_Error=1|do(Outage=1))
+0.1471 <= PS <= 0.1471
+PS Inference time taken: 0.023252 seconds
+----
+PN = P(MS-B_Error=0|do(Outage=0))
+0.8529 <= PN <= 0.8529
+PN Inference time taken: 0.024242 seconds
+----
+PNS = P(MS-B_Error|do(Outage))
+0.8529 <= PNS <= 0.8529
+---------------------------------------------------------
+PS = P(MS-A_Latency=1|do(Outage=1))
+0.1936 <= PS <= 0.1936
+PS Inference time taken: 0.021064 seconds
+----
+PN = P(MS-A_Latency=0|do(Outage=0))
+0.8064 <= PN <= 0.8064
+PN Inference time taken: 0.023152 seconds
+----
+PNS = P(MS-A_Latency|do(Outage))
+0.8064 <= PNS <= 0.8064
 ---------------------------------------------------------
