@@ -67,7 +67,14 @@ def build_linear_problem(
         method="highs",
         bounds=intervals,
     )
-    if lowerBoundSol is None or lowerBoundSol.fun is None:
+    print("Success:", lowerBoundSol.success)
+    print("Status:", lowerBoundSol.status)
+    print("Message:", lowerBoundSol.message)
+    if lowerBoundSol is None:
+        print(f"lowerBoundSol is None")
+        lowerBound = None
+    elif lowerBoundSol.fun is None:
+        print(f"lowerBoundSol.fun is None")
         lowerBound = None
     else:
         lowerBound = lowerBoundSol.fun
@@ -81,8 +88,15 @@ def build_linear_problem(
         method="highs",
         bounds=intervals,
     )
-    if upperBoundSol is None or upperBoundSol.fun is None:
+    print("Success:", upperBoundSol.success)
+    print("Status:", upperBoundSol.status)
+    print("Message:", upperBoundSol.message)
+    if upperBoundSol is None:
         upperBound = None
+        print(f"upperBoundSol is None")
+    elif upperBoundSol.fun is None:
+        upperBound = None
+        print(f"upperBoundSol.fun is None")
     else:
         upperBound = -upperBoundSol.fun
 

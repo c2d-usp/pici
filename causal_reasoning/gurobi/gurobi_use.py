@@ -133,7 +133,7 @@ def gurobi_build_linear_problem(
     df: pd.DataFrame,
     intervention: Node,
     target: Node,
-):
+) -> tuple[str, str]:
     objFG = ObjFunctionGenerator(
         graph=graph,
         dataFrame=df,
@@ -163,8 +163,8 @@ def gurobi_build_linear_problem(
     master.setup(probs, decisionMatrix, objFunctionCoefficients, modelSenseMin)
 
     master.model.optimize()
-    duals = master.model.getAttr("pi", master.constrs)
-    logger.info(f"duals: {duals}")
+    # duals = master.model.getAttr("pi", master.constrs)
+    # logger.info(f"duals: {duals}")
     if master.model.Status == gp.GRB.OPTIMAL: # OPTIMAL
             lower = master.model.objVal
             logger.info(f"Minimal solution found!\nMIN Query: {lower}")
@@ -175,8 +175,8 @@ def gurobi_build_linear_problem(
     master.setup(probs, decisionMatrix, objFunctionCoefficients, modelSenseMax)
 
     master.model.optimize()
-    duals = master.model.getAttr("pi", master.constrs)
-    logger.info(f"duals: {duals}")
+    # duals = master.model.getAttr("pi", master.constrs)
+    # logger.info(f"duals: {duals}")
     if master.model.Status == gp.GRB.OPTIMAL: # OPTIMAL
             upper = master.model.objVal
             logger.info(f"Maximal solution found!\nMAX Query: {upper}")
@@ -185,3 +185,4 @@ def gurobi_build_linear_problem(
         upper = None
     
     logger.info(f"Query interval = [{lower, upper}]")
+    return str(lower), str(upper)

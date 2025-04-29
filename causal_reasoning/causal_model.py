@@ -102,8 +102,8 @@ class CausalModel:
         return self.single_intervention_query()
 
     def single_intervention_query(self) -> tuple[str, str]:
-        return build_linear_problem(
-            # gurobi_build_linear_problem(
+        # return build_linear_problem(
+        return gurobi_build_linear_problem(
             self.graph,
             self.data,
             self.interventions[0],
