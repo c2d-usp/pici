@@ -1,8 +1,20 @@
 from pyomo.environ import (
-    ConcreteModel, Var, Objective, ConstraintList, SolverFactory, value, NonNegativeReals
+    ConcreteModel,
+    Var,
+    Objective,
+    ConstraintList,
+    SolverFactory,
+    value,
+    NonNegativeReals,
 )
 
-def solve_bounds_with_pyomo(objFunctionCoefficients: list[float], decisionMatrix: list[list[int]], probs: list[float], intervals: list[tuple[int, int]]):
+
+def solve_bounds_with_pyomo(
+    objFunctionCoefficients: list[float],
+    decisionMatrix: list[list[int]],
+    probs: list[float],
+    intervals: list[tuple[int, int]],
+):
     num_vars = len(objFunctionCoefficients)
     num_constraints = len(decisionMatrix)
 
@@ -17,7 +29,9 @@ def solve_bounds_with_pyomo(objFunctionCoefficients: list[float], decisionMatrix
             model.x[i].setub(ub)
 
         # Objective
-        model.obj = Objective(expr=sum(obj_coeffs[i] * model.x[i] for i in range(num_vars)), sense=1)
+        model.obj = Objective(
+            expr=sum(obj_coeffs[i] * model.x[i] for i in range(num_vars)), sense=1
+        )
 
         # Equality constraints
         model.constraints = ConstraintList()

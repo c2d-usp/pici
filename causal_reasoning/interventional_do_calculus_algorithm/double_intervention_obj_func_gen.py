@@ -74,7 +74,9 @@ class DoubleInterventionObjFunctionGenerator:
         )
         return mechanisms_1, mechanisms_2
 
-    def build_objective_function(self, mechanisms_1: MechanismType, mechanisms_2: MechanismType) -> list[float]:
+    def build_objective_function(
+        self, mechanisms_1: MechanismType, mechanisms_2: MechanismType
+    ) -> list[float]:
         """
         Intermediate step: remove useless endogenous variables in the mechanisms creation?
         Must be called after generate restrictions. Returns the objective function with the following encoding
@@ -100,7 +102,7 @@ class DoubleInterventionObjFunctionGenerator:
                 self.intervention_1.latentParent,
                 self.intervention_2,
                 self.intervention_2.latentParent,
-                self.target
+                self.target,
             }
         )
 
@@ -116,14 +118,14 @@ class DoubleInterventionObjFunctionGenerator:
         TODO: Check the order of "inputCases": it should be the same as the order of the spaces, which is the same as in debugOrder.
         TODO: the case in which the summandNodes is empty (e.g Balke Pearl) has a very ugly fix
         """
-        
+
         # Pensar se é melhor uni ou bi dimensional
         objFunctionCoefficients: list[list[float]] = []
         for i in range(len(mechanisms_1)):
             objFunctionCoefficients.append([])
             for j in range(len(mechanisms_2)):
-                objFunctionCoefficients[i].append(0)    
-                
+                objFunctionCoefficients[i].append(0)
+
         # INICIALIZAR com len(u) e len(w)
         # [
         # [9 8 7 6 5]
@@ -222,7 +224,9 @@ class DoubleInterventionObjFunctionGenerator:
                             )
                             partialCoefficient *= conditionalProbability
 
-                        logger.debug(f"current partial coefficient: {partialCoefficient}")
+                        logger.debug(
+                            f"current partial coefficient: {partialCoefficient}"
+                        )
                         if partialCoefficient == 0:
                             break
 
@@ -293,7 +297,12 @@ class DoubleInterventionObjFunctionGenerator:
                 # Acrescentar checagens
                 logger.debug("------- Case 3: Find d-separator set")
                 validConditionedNodes = self._find_d_separator_set(
-                    current_target, current_targets, interventionLatent_1, interventionLatent_2, intervention_1, intervention_2
+                    current_target,
+                    current_targets,
+                    interventionLatent_1,
+                    interventionLatent_2,
+                    intervention_1,
+                    intervention_2,
                 )
 
                 current_targets = list(
@@ -383,7 +392,7 @@ class DoubleInterventionObjFunctionGenerator:
             condition1_2 = self.graph.independency_moral(
                 node_2=intervention_latent_2, node_1=current_target
             )
-            
+
             self.graph.build_moral(
                 consideredNodes=ancestors,
                 conditionedNodes=current_conditioned_nodes,

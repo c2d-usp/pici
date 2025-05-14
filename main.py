@@ -5,32 +5,44 @@ import logging
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
 
+
 def model_2():
     edges_list_2 = [
         ("DB_Change", "DB_Latency"),
-        ("DB_Latency", "MS-B_Latency"), 
-        ("MS-B_Latency", "MS-B_Error"), 
+        ("DB_Latency", "MS-B_Latency"),
+        ("MS-B_Latency", "MS-B_Error"),
         ("MS-B_Latency", "MS-A_Latency"),
-        ("MS-B_Error", "MS-A_Error"), 
-        ("MS-A_Latency", "MS-A_Threads"), 
-        ("MS-A_Threads", "MS-A_Crash"), 
-        ("MS-A_Error", "Outage"), 
-        ("MS-A_Crash", "Outage"), 
-        ("HeavyTraffic", "DB_Latency"), 
+        ("MS-B_Error", "MS-A_Error"),
+        ("MS-A_Latency", "MS-A_Threads"),
+        ("MS-A_Threads", "MS-A_Crash"),
+        ("MS-A_Error", "Outage"),
+        ("MS-A_Crash", "Outage"),
+        ("HeavyTraffic", "DB_Latency"),
         ("HeavyTraffic", "MS-A_Latency"),
         # UNOBS
-        ('Unob_helper_1', 'DB_Change'),
-        ('Unob_helper_2', 'MS-B_Latency'),
-        ('Unob_helper_3', 'MS-B_Error'),
-        ('Unob_helper_4', 'MS-A_Error'),
-        ('Unob_helper_5', 'MS-A_Threads'),
-        ('Unob_helper_6', 'MS-A_Crash'),
-        ('Unob_helper_7', 'Outage'),
+        ("Unob_helper_1", "DB_Change"),
+        ("Unob_helper_2", "MS-B_Latency"),
+        ("Unob_helper_3", "MS-B_Error"),
+        ("Unob_helper_4", "MS-A_Error"),
+        ("Unob_helper_5", "MS-A_Threads"),
+        ("Unob_helper_6", "MS-A_Crash"),
+        ("Unob_helper_7", "Outage"),
     ]
 
-    latent_nodes_2 = ['HeavyTraffic', 'Unob_helper_1', 'Unob_helper_2', 'Unob_helper_3', 'Unob_helper_4', 'Unob_helper_5', 'Unob_helper_6', 'Unob_helper_7']
+    latent_nodes_2 = [
+        "HeavyTraffic",
+        "Unob_helper_1",
+        "Unob_helper_2",
+        "Unob_helper_3",
+        "Unob_helper_4",
+        "Unob_helper_5",
+        "Unob_helper_6",
+        "Unob_helper_7",
+    ]
     edges_2 = nx.DiGraph(edges_list_2)
-    df_medium_scale_incident = pd.read_csv("./bracis_tests/medium_scale_outage_incident_seed42.csv", index_col=0)
+    df_medium_scale_incident = pd.read_csv(
+        "./bracis_tests/medium_scale_outage_incident_seed42.csv", index_col=0
+    )
     model_2 = CausalModel(
         data=df_medium_scale_incident,
         edges=edges_2,
@@ -39,7 +51,7 @@ def model_2():
     intervention_1 = "MS-A_Latency"
     intervention_2 = "DB_Latency"
     target = "Outage"
-    
+
     model_2.set_interventions([(intervention_1, 0)])
     model_2.set_target((target, 0))
     print(f"{intervention_1}: PN = {model_2.inference_intervention_query()}")
@@ -48,7 +60,6 @@ def model_2():
     model_2.set_target((target, 1))
     print(f"{intervention_1}: PS = {model_2.inference_intervention_query()}")
 
-
     model_2.set_interventions([(intervention_2, 0)])
     model_2.set_target((target, 0))
     print(f"{intervention_2}: PN = {model_2.inference_intervention_query()}")
@@ -56,6 +67,7 @@ def model_2():
     model_2.set_interventions([(intervention_2, 1)])
     model_2.set_target((target, 1))
     print(f"{intervention_2}: PS = {model_2.inference_intervention_query()}")
+
 
 def binary_balke_pearl_example():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
@@ -155,12 +167,15 @@ def double_intervention():
         edges=edges,
         custom_cardinalities=cardinalities,
         unobservables_labels=unobs,
-        interventions=[("X", 1), ("Z",1)],
+        interventions=[("X", 1), ("Z", 1)],
         target=(target, target_value),
     )
 
-    print(f">> Is Z d-separated from Y giving X? {model.are_d_separated(['Z'], ['Y'], ['X'])}")
+    print(
+        f">> Is Z d-separated from Y giving X? {model.are_d_separated(['Z'], ['Y'], ['X'])}"
+    )
     model.inference_intervention_query()
+
 
 def discrete_itau_example():
     raise NotImplementedError
@@ -175,6 +190,7 @@ def main():
     # binary_itau_example()
     # double_intervention()
     model_2()
+
 
 if __name__ == "__main__":
     main()

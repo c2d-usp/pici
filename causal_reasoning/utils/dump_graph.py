@@ -44,5 +44,3 @@ def draw_graph(graph: nx.Graph, node_colors: list = None):
         font_size=12,  # Font size for labels
         arrowsize=20,  # Arrow size for edges
     )
-
-
