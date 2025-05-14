@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.gurobi.gurobi_use import gurobi_build_linear_problem
-from causal_reasoning.linear_algorithm.opt_problem_builder import build_bi_linear_problem, build_linear_problem
+from causal_reasoning.interventional_do_calculus_algorithm.opt_problem_builder import build_bi_linear_problem, build_linear_problem
 from causal_reasoning.utils.parser import (
     list_tuples_into_list_nodes,
     parse_edges,
