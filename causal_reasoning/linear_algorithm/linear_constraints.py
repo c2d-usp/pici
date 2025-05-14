@@ -3,10 +3,10 @@ import pandas as pd
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.linear_algorithm.mechanisms_generator import MechanismGenerator
-from causal_reasoning.linear_algorithm.probabilities_helper import (
+from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability,
 )
-from causal_reasoning.new_types import MechanismType
+from causal_reasoning.utils.types import MechanismType
 
 
 def create_dict_index(parents: list[Node], rlt: list[int], indexerList: list[Node]):

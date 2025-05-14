@@ -9,10 +9,10 @@ def parse_input_graph(
     latents_label: list[str],
     custom_cardinalities: dict[str, int],
 ):
-    return parse_default_graph(edges, latents_label, custom_cardinalities)
+    return _parse_default_graph(edges, latents_label, custom_cardinalities)
 
 
-def parse_default_graph(
+def _parse_default_graph(
     edge_tuples: list[tuple],
     latents_label: list[str],
     custom_cardinalities: dict[str, int] = {},
@@ -64,7 +64,7 @@ def parse_default_graph(
 
 def parse_edges(state):
     if isinstance(state, str):
-        return edge_string_to_edge_tuples(state)
+        return _edge_string_to_edge_tuples(state)
     if isinstance(state, list):
         if not all(isinstance(item, tuple) for item in state):
             raise Exception(f"Input format for {state} not recognized.")
@@ -95,7 +95,7 @@ def parse_edges(state):
     raise Exception(f"Input format for {state} not recognized: {type(state)}")
 
 
-def edge_string_to_edge_tuples(edges: str) -> list[tuple]:
+def _edge_string_to_edge_tuples(edges: str) -> list[tuple]:
     edge_tuples = []
     edges_part = edges.split(",")
 

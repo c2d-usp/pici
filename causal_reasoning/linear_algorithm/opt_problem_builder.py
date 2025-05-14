@@ -3,7 +3,7 @@ from scipy.optimize import linprog
 import logging
 import gurobipy as gp
 
-from causal_reasoning.linear_algorithm.dual_obj_func_gen import DoubleObjFunctionGenerator
+from causal_reasoning.linear_algorithm.double_intervention_obj_func_gen import DoubleInterventionObjFunctionGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ def build_bi_linear_problem(
     interventions: tuple[Node],
     target: Node,
 ):
-    multiObjFG = DoubleObjFunctionGenerator(
+    multiObjFG = DoubleInterventionObjFunctionGenerator(
         graph=graph,
         dataFrame=df,
         interventions=(interventions[0], interventions[1]),
@@ -150,8 +150,6 @@ def build_bi_linear_problem(
         mechanisms=mechanisms_2,
     )
 
-    # Dupla intervenção pode virar binomial.
-    # c_i u_i ==> c_i_j * u_i * w_j (para intervenções em c components diferentes)
     objFunctionCoefficients: list[list[float]] = multiObjFG.build_objective_function(mechanisms_1, mechanisms_2)
 
     model = gp.Model("linear")
