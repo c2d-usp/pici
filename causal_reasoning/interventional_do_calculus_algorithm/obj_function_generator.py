@@ -1,8 +1,10 @@
+import copy
 import logging
 
 logger = logging.getLogger(__name__)
 
 import pandas as pd
+import networkx as nx
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -200,15 +202,13 @@ class ObjFunctionGenerator:
             for tg in current_targets:
                 logger.debug(f"- {tg.label}")
 
-            # ARROYO-> TODO: check if the topological order is reversed.
             current_target = (
                 self.graph.get_closest_node_from_leaf_in_the_topological_order(
                     current_targets
                 )
             )
             logger.debug(f"__>>{current_target.label}<<__")
-            if current_target in current_targets:
-                current_targets.remove(current_target)
+            current_targets.remove(current_target)
             debugOrder.append(current_target)
             logger.debug(f"Current target: {current_target.label}")
 
@@ -225,16 +225,17 @@ class ObjFunctionGenerator:
                         current_targets.append(parent)
             else:
                 logger.debug("------- Case 3: Find d-separator set")
-                validConditionedNodes = self._find_d_separator_set(
+                valid_d_separator_set = self._find_d_separator_set(
                     current_target, current_targets, interventionLatent, intervention
                 )
 
+                # TODO: Não usa mais o intervention?
                 current_targets = list(
-                    (set(current_targets) | set(validConditionedNodes))
+                    (set(current_targets) | set(valid_d_separator_set))
                     - {intervention, current_target}
                 )
 
-                conditionalProbabilities[current_target] = validConditionedNodes
+                conditionalProbabilities[current_target] = valid_d_separator_set
 
                 # Question: is any already solved variable selected for the second time? Does the program need to address this issue
                 # by forcing the set to not contain any of such variables?
@@ -252,14 +253,6 @@ class ObjFunctionGenerator:
         intervention_latent: Node,
         intervention: Node,
     ):
-        ancestors: list[Node] = self.graph.find_ancestors(current_target)
-        conditionable_ancestors: list[Node] = []
-
-        for ancestor in ancestors:
-            # Question: does it need to not be the intervention?
-            if ancestor.cardinality > 0 and ancestor.label != current_target.label:
-                conditionable_ancestors.append(ancestor)
-
         always_conditioned_nodes: list[Node] = current_targets.copy()
         if current_target in always_conditioned_nodes:
             always_conditioned_nodes.remove(current_target)
@@ -267,7 +260,18 @@ class ObjFunctionGenerator:
         if intervention_latent in always_conditioned_nodes:
             always_conditioned_nodes.remove(intervention_latent)
 
-        return self._test_all_conditioned_sets(
+        ancestors: list[Node] = self.graph.find_ancestors(current_target)
+        conditionable_ancestors: list[Node] = []
+        for ancestor in ancestors:
+            # Question: does it need to not be the intervention?
+            if (
+                ancestor.cardinality > 0
+                and ancestor.label != current_target.label
+                and ancestor not in always_conditioned_nodes
+            ):
+                conditionable_ancestors.append(ancestor)
+
+        return self._get_possible_d_separator_set(
             conditionable_ancestors,
             always_conditioned_nodes,
             ancestors,
@@ -276,12 +280,10 @@ class ObjFunctionGenerator:
             intervention,
         )
 
-    # TODO: I suggest rename it
-    def _test_all_conditioned_sets(
+    def _get_possible_d_separator_set(
         self,
         conditionable_ancestors: list[Node],
         conditioned_nodes: list[Node],
-        ancestors: list[Node],
         intervention_latent: Node,
         current_target: Node,
         intervention: Node,
@@ -295,32 +297,32 @@ class ObjFunctionGenerator:
             current_conditioned_nodes = (
                 conditioned_nodes + current_conditionable_ancestors
             )
+            
+            current_conditioned_nodes_labels = [node.label for node in current_conditioned_nodes]
+            condition1 = nx.is_d_separator(G=self.graph.DAG, x= { current_target.label }, y = { intervention_latent.label }, z = set(current_conditioned_nodes_labels))
 
-            self.graph.build_moral(
-                consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
-            )
-            condition1 = self.graph.independency_moral(
-                node_2=intervention_latent, node_1=current_target
-            )
+            if intervention in current_conditioned_nodes:
+                condition2 = True
+            else:
+                operatedDigraph = copy.deepcopy(self.graph.DAG)
+                outgoing_edgesX = list(self.graph.DAG.out_edges(intervention.label))
+                operatedDigraph.remove_edges_from(outgoing_edgesX)
+                condition2 = nx.is_d_separator(G=operatedDigraph, x = {current_target.label}, y = {intervention.label}, z = set(current_conditioned_nodes_labels))
 
-            self.graph.build_moral(
-                consideredNodes=ancestors,
-                conditionedNodes=current_conditioned_nodes,
-                intervention_outgoing_edges_are_considered=False,
-                intervention=intervention,
-            )
-            condition2 = self.graph.independency_moral(
-                node_2=intervention, node_1=current_target
-            )
             if condition1 and condition2:
-                valid_conditioned_nodes: list[Node] = []
+                valid_d_separator_set: list[Node] = []
                 logger.debug("The following set works:")
                 for node in current_conditioned_nodes:
                     logger.debug(f"- {node.label}")
-                    valid_conditioned_nodes.append(node)
+                    valid_d_separator_set.append(node)
+                break
+
+        if len(valid_d_separator_set) <= 0:
+            logger.error("Failure: Could not find a separator set")
+
         # Returns one of the valid subsets - Last instance of
-        # "valid_conditioned_nodes", for now.
-        return valid_conditioned_nodes
+        # "valid_d_separator_set", for now.
+        return valid_d_separator_set
 
     def _get_current_conditionable_ancestors(
         self, conditionable_ancestors: list[Node], no_of_possibilities: int

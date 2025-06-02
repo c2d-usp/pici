@@ -101,7 +101,7 @@ class MechanismGenerator:
         logger.debug("Check if the mechanism dictionary is working as expected:")
         for mechanismDict in mechanismDicts:
             for key in mechanismDict:
-                logger.debug(f"key: {key} & val: {mechanismDict[key]}")
+                logger.debug(f"key: {key} & val: {mechanismDict[key]} ")
             logger.debug("------------")
 
         """
