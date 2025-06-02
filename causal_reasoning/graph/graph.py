@@ -62,14 +62,13 @@ class Graph:
     def get_closest_node_from_leaf_in_the_topological_order(
         self, nodes: list[Node]
     ) -> Node:
-        higher_idx = 0
-        higher_node = ""
-        for node in nodes:
-            idx = self.topologicalOrderIndexes[node]
-            if idx >= higher_idx:
-                higher_idx = idx
-                higher_node = node
-        return higher_node
+        n = len(self.topologicalOrder) - 1
+        for j in range(n, -1, -1):
+            if self.topologicalOrder[j] in nodes:
+                return self.topologicalOrder[j]                    
+
+        # TODO: BETTER ERROR HANDLING
+        raise Exception(f"Node not found")
 
     def build_moral(
         self,
