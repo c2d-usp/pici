@@ -1,5 +1,6 @@
 import pandas as pd
 import networkx as nx
+# from pgmpy.models import BayesianNetwork
 import logging
 
 from causal_reasoning.causal_model import CausalModel
@@ -92,7 +93,7 @@ def binary_balke_pearl_example():
     balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
     balke_model.set_target((balke_target, balke_target_value))
 
-    # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(['Z'], ['Y'], ['X'])}")
+    print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(balke_model.graph.DAG, ['Z'], ['Y'], ['X'])}")
     balke_model.inference_intervention_query()
 
 

@@ -13,6 +13,7 @@ scipy = "^1.15.2"
 networkx = "^3.4.2"
 matplotlib = "^3.10.1"
 gurobipy = "^12.0.1"
+pgmpy = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

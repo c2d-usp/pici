@@ -59,34 +59,6 @@ class Graph:
         self.graphNodes[node_label].value = node_value
         return self.graphNodes[node_label]
 
-    def check_d_separation(
-        self,
-        set_nodes_1: list[Node],
-        set_nodes_2: list[Node],
-        conditioned_nodes: list[Node],
-    ) -> bool:
-        """
-        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
-        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
-        """
-
-        self.build_moral(
-            consideredNodes=list(self.node_set),
-            conditionedNodes=conditioned_nodes,
-        )
-
-        self._clear_visited()
-        for node in set_nodes_1:
-            if not node.visited:
-                self._dfs_moral(node)
-
-        areDseparated = True
-        for node in set_nodes_2:
-            if node.visited:
-                areDseparated = False
-                break
-        return areDseparated
-
     def get_closest_node_from_leaf_in_the_topological_order(
         self, nodes: list[Node]
     ) -> Node:

@@ -66,19 +66,18 @@ class CausalModel:
 
     def are_d_separated(
         self,
+        G: nx.DiGraph,
         set_nodes_X: list[str],
         set_nodes_Y: list[str],
         set_nodes_Z: list[str],
     ) -> bool:
         """
         Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+
+        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
+        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
         """
-        # TODO: Usando nx é muito mais fácil
-        return self.graph.check_d_separation(
-            get_node_list(self.graph.graphNodes, set_nodes_X),
-            get_node_list(self.graph.graphNodes, set_nodes_Y),
-            get_node_list(self.graph.graphNodes, set_nodes_Z),
-        )
+        return nx.is_d_separator(G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z))
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
