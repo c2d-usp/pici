@@ -274,7 +274,6 @@ class ObjFunctionGenerator:
         return self._get_possible_d_separator_set(
             conditionable_ancestors,
             always_conditioned_nodes,
-            ancestors,
             intervention_latent,
             current_target,
             intervention,

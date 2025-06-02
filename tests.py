@@ -17,18 +17,25 @@ class TestInferenceAlgorithm(unittest.TestCase):
         balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
         balke_df = pd.read_csv(balke_csv_path)
 
-        balke_model = CausalModel(
+        model = CausalModel(
             data=balke_df,
             edges=balke_input,
             custom_cardinalities=balke_cardinalities,
             unobservables_labels=balke_unobs,
         )
 
-        balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
-        balke_model.set_target((balke_target, balke_target_value))
+        model.set_interventions([(balke_intervention, balke_intervention_value)])
+        model.set_target((balke_target, balke_target_value))
 
-        self.assertFalse(balke_model.are_d_separated(['Z'], ['Y'], ['X']))
-        # balke_model.inference_intervention_query()
+        self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
+        expected_lower, expected_upper = (0.45000000000000007, 0.5199999999999999)
+        expected_lower = round(expected_lower, 3)
+        expected_upper = round(expected_upper, 3)
+        lower, upper = model.inference_intervention_query()
+        lower = round(float(lower), 3)
+        upper = round(float(upper), 3)
+        self.assertEqual(lower, expected_lower)
+        self.assertEqual(upper, expected_upper)
 
 
     def test_discrete_iv_random(self):
@@ -42,7 +49,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         iv_csv_path = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
         iv_df = pd.read_csv(iv_csv_path)
 
-        iv_model = CausalModel(
+        model = CausalModel(
             data=iv_df,
             edges=iv_input,
             custom_cardinalities=iv_cardinalities,
@@ -51,8 +58,15 @@ class TestInferenceAlgorithm(unittest.TestCase):
             target=(iv_target, iv_target_value),
         )
 
-        self.assertFalse(iv_model.are_d_separated(['Z'], ['Y'], ['X']))
-        # iv_model.inference_intervention_query()
+        self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
+        expected_lower, expected_upper =(0.17221135029354206, 0.8160779537149818)
+        expected_lower = round(expected_lower, 3)
+        expected_upper = round(expected_upper, 3)
+        lower, upper = model.inference_intervention_query()
+        lower = round(float(lower), 3)
+        upper = round(float(upper), 3)
+        self.assertEqual(lower, expected_lower)
+        self.assertEqual(upper, expected_upper)
 
 
     def test_binary_itau_example(self):
@@ -75,7 +89,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
         itau_df = pd.read_csv(itau_csv_path)
 
-        itau_model = CausalModel(
+        model = CausalModel(
             data=itau_df,
             edges=itau_input,
             custom_cardinalities=itau_cardinalities,
@@ -83,8 +97,15 @@ class TestInferenceAlgorithm(unittest.TestCase):
             interventions=(itau_intervention, 1),
             target=(itau_target, 1),
         )
-        self.assertFalse(itau_model.are_d_separated(['E'], ['X'], ['D']))
-        # itau_model.inference_intervention_query()
+        self.assertFalse(model.are_d_separated(['E'], ['X'], ['D']))
+        expected_lower, expected_upper =(0.3570355041940286, 0.8560355041940286)
+        expected_lower = round(expected_lower, 3)
+        expected_upper = round(expected_upper, 3)
+        lower, upper = model.inference_intervention_query()
+        lower = round(float(lower), 3)
+        upper = round(float(upper), 3)
+        self.assertEqual(lower, expected_lower)
+        self.assertEqual(upper, expected_upper)
 
 
     def test_double_intervention_binary_balke_pearl(self):
@@ -106,7 +127,15 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
         self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
-        # model.inference_intervention_query()
+        # TODO: RE-DO BUILD MORAL
+        # expected_lower, expected_upper =(0.07680001854838515, 0.09309998464330864)
+        # expected_lower = round(expected_lower, 3)
+        # expected_upper = round(expected_upper, 3)
+        # lower, upper = model.inference_intervention_query()
+        # lower = round(float(lower), 3)
+        # upper = round(float(upper), 3)
+        # self.assertEqual(lower, expected_lower)
+        # self.assertEqual(upper, expected_upper)
 
     def test_simple_counfoundness(self):
         edges = "U1 -> X, U1 -> Y"
