@@ -127,15 +127,14 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
         self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
-        # TODO: RE-DO BUILD MORAL
-        # expected_lower, expected_upper =(0.07680001854838515, 0.09309998464330864)
-        # expected_lower = round(expected_lower, 3)
-        # expected_upper = round(expected_upper, 3)
-        # lower, upper = model.inference_intervention_query()
-        # lower = round(float(lower), 3)
-        # upper = round(float(upper), 3)
-        # self.assertEqual(lower, expected_lower)
-        # self.assertEqual(upper, expected_upper)
+        expected_lower, expected_upper =(0.07680001854838515, 0.09309998464330864)
+        expected_lower = round(expected_lower, 3)
+        expected_upper = round(expected_upper, 3)
+        lower, upper = model.inference_intervention_query()
+        lower = round(float(lower), 3)
+        upper = round(float(upper), 3)
+        self.assertEqual(lower, expected_lower)
+        self.assertEqual(upper, expected_upper)
 
     def test_simple_counfoundness(self):
         edges = "U1 -> X, U1 -> Y"

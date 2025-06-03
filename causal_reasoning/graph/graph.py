@@ -70,62 +70,6 @@ class Graph:
         # TODO: BETTER ERROR HANDLING
         raise Exception(f"Node not found")
 
-    def build_moral(
-        self,
-        consideredNodes: list[Node],
-        conditionedNodes: list[Node],
-        intervention_outgoing_edges_are_considered=True,
-        intervention: Node = None,
-    ):
-        """
-        Builds the moral graph, considering only part of the nodes.
-        intervention_outgoing_edges_are_considered: if true, the outgoing edges of the intervention should be considered.
-        are_intervention_outgoing_edges_considered of the intervention
-        """
-        for node in self.node_set:
-            node.moral_adjacency = []
-
-            if node not in consideredNodes:
-                continue
-
-            if node in conditionedNodes:
-                for parent1 in node.parents:
-                    if (
-                        not intervention_outgoing_edges_are_considered
-                        and parent1 == intervention
-                    ):
-                        continue
-                    for parent2 in node.parents:
-                        if (
-                            not intervention_outgoing_edges_are_considered
-                            and parent2 == intervention
-                        ):
-                            continue
-
-                        if parent1 in conditionedNodes and parent2 in consideredNodes:
-                            if parent2 not in parent1.moral_adjacency:
-                                parent1.moral_adjacency.append(parent2)
-                            if parent1 not in parent2.moral_adjacency:
-                                parent2.moral_adjacency.append(parent1)
-            else:
-                if (
-                    not intervention_outgoing_edges_are_considered
-                    and node == intervention
-                ):
-                    continue
-
-                for child in node.children:
-                    if child in consideredNodes and child not in conditionedNodes:
-                        if node not in child.moral_adjacency:
-                            child.moral_adjacency.append(node)
-                        if child not in node.moral_adjacency:
-                            node.moral_adjacency.append(child)
-
-    def independency_moral(self, node_1: Node, node_2: Node) -> bool:
-        self._clear_visited()
-        self._dfs_moral(node_1)
-        return not node_2.visited
-
     # Not Used
     def find_cComponents(self):
         for node in self.node_set:
@@ -166,10 +110,3 @@ class Graph:
         for parent in node.parents:
             if not parent.visited:
                 self._dfs_ancestor(parent)
-
-    def _dfs_moral(self, node: Node):
-        node.visited = True
-
-        for adj in node.moral_adjacency:
-            if not adj.visited:
-                self._dfs_moral(adj)
