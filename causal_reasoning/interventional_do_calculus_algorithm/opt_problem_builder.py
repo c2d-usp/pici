@@ -60,8 +60,6 @@ def build_linear_problem(
         logger.debug(f" = {probs[i]}")
     intervals = [(0, 1) for _ in range(len(decisionMatrix[0]))]
 
-    # lowerBound, upperBound = causal_reasoning.column_generation.pyomo_use(objFunctionCoefficients, decisionMatrix, probs, intervals)
-
     lowerBoundSol = linprog(
         c=objFunctionCoefficients,
         A_ub=None,

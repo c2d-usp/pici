@@ -15,5 +15,4 @@ class Node:
         self.label: str = label
         self.cardinality: int = cardinality
         self.visited: bool = False
-        self.moral_adjacency: list[Node] = []
         self.value: int = None
