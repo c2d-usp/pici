@@ -1,6 +1,7 @@
 import unittest
 
 import pandas as pd
+import networkx as nx
 
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
@@ -149,6 +150,66 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
         self.assertTrue(model.are_d_separated_in_complete_graph(['X'], ['Y'], ['U1']))
+    
+    def test_incident(self):
+        edges_list_2 = [
+            ("DB_Change", "DB_Latency"),
+            ("DB_Latency", "MS-B_Latency"),
+            ("MS-B_Latency", "MS-B_Error"),
+            ("MS-B_Latency", "MS-A_Latency"),
+            ("MS-B_Error", "MS-A_Error"),
+            ("MS-A_Latency", "MS-A_Threads"),
+            ("MS-A_Threads", "MS-A_Crash"),
+            ("MS-A_Error", "Outage"),
+            ("MS-A_Crash", "Outage"),
+            ("HeavyTraffic", "MS-B_Latency"),
+            ("HeavyTraffic", "MS-A_Latency"),
+            # UNOBS
+            ("Unob_helper_1", "DB_Change"),
+            ("Unob_helper_2", "DB_Latency"),
+            ("Unob_helper_3", "MS-B_Error"),
+            ("Unob_helper_4", "MS-A_Error"),
+            ("Unob_helper_5", "MS-A_Threads"),
+            ("Unob_helper_6", "MS-A_Crash"),
+            ("Unob_helper_7", "Outage"),
+        ]
+
+        latent_nodes_2 = [
+            "HeavyTraffic",
+            "Unob_helper_1",
+            "Unob_helper_2",
+            "Unob_helper_3",
+            "Unob_helper_4",
+            "Unob_helper_5",
+            "Unob_helper_6",
+            "Unob_helper_7",
+        ]
+        edges_2 = nx.DiGraph(edges_list_2)
+        df_medium_scale_incident = pd.read_csv(
+            Examples.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
+        )
+        model = CausalModel(
+            data=df_medium_scale_incident,
+            edges=edges_2,
+            unobservables_labels=latent_nodes_2,
+        )
+        self.assertTrue(model.are_d_separated_in_complete_graph(['MS-A_Latency'], ['DB_Change'], ['DB_Latency']))
+
+        # model_2.set_interventions([(intervention_1, 0)])
+        # model_2.set_target((target, 0))
+        # print(f"{intervention_1}: PN = {model_2.inference_intervention_query()}")
+
+        # model_2.set_interventions([(intervention_1, 1)])
+        # model_2.set_target((target, 1))
+        # print(f"{intervention_1}: PS = {model_2.inference_intervention_query()}")
+
+        # model_2.set_interventions([(intervention_2, 0)])
+        # model_2.set_target((target, 0))
+        # print(f"{intervention_2}: PN = {model_2.inference_intervention_query()}")
+
+        # model_2.set_interventions([(intervention_2, 1)])
+        # model_2.set_target((target, 1))
+        # print(f"{intervention_2}: PS = {model_2.inference_intervention_query()}")
 
 if __name__ == '__main__':
     unittest.main()
