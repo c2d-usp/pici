@@ -90,8 +90,9 @@ def binary_balke_pearl_example():
         target=(balke_target, balke_target_value),
     )
 
-    balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
-    balke_model.set_target((balke_target, balke_target_value))
+    # balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
+    # balke_model.set_target((balke_target, balke_target_value))
+    print(balke_model.are_d_separated_in_intervened_graph(['Z'], ['Y'], ['X']))
 
     # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'], balke_model.graph.DAG)}")
     balke_model.inference_intervention_query()

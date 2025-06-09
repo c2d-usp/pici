@@ -98,7 +98,7 @@ class CausalModel:
         operated_digraph = copy.deepcopy(G)
         interventions_outgoing_edges = []
         for intervention in self.interventions:
-            interventions_outgoing_edges.extend(list(G.out_edges(intervention.label)))
+            interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
         return nx.is_d_separator(G=operated_digraph, x=set(set_nodes_X), y=set(set_nodes_Y), z=set(set_nodes_Z))
 
@@ -146,6 +146,11 @@ class CausalModel:
 
     def multi_intervention_query(self):
         raise NotImplementedError
+
+    def is_identifiable(self):
+        # backdoor
+        # frontdoor
+        pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
         self.interventions = list_tuples_into_list_nodes(interventions, self.graph)

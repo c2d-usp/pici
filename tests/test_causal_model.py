@@ -37,6 +37,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
         self.assertEqual(upper, expected_upper)
+        self.assertTrue(model.are_d_separated_in_intervened_graph(['Z'], ['Y'], ['X']))
 
 
     def test_discrete_iv_random(self):
@@ -107,7 +108,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
         self.assertEqual(upper, expected_upper)
-
+        model.set_interventions([('D', 1)])
+        self.assertTrue(model.are_d_separated_in_intervened_graph(['E'], ['Y'], ['D']))
 
     def test_double_intervention_binary_balke_pearl(self):
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
