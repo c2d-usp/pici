@@ -27,7 +27,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         model.set_interventions([(balke_intervention, balke_intervention_value)])
         model.set_target((balke_target, balke_target_value))
 
-        self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
+        self.assertFalse(model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X']))
         expected_lower, expected_upper = (0.45000000000000007, 0.5199999999999999)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
@@ -58,7 +58,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
             target=(iv_target, iv_target_value),
         )
 
-        self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
+        self.assertFalse(model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X']))
         expected_lower, expected_upper =(0.17221135029354206, 0.8160779537149818)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
@@ -97,7 +97,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
             interventions=(itau_intervention, 1),
             target=(itau_target, 1),
         )
-        self.assertFalse(model.are_d_separated(['E'], ['X'], ['D']))
+        self.assertFalse(model.are_d_separated_in_complete_graph(['E'], ['X'], ['D']))
         expected_lower, expected_upper =(0.3570355041940286, 0.8560355041940286)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
@@ -126,7 +126,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
             target=(target, target_value),
         )
 
-        self.assertFalse(model.are_d_separated(['Z'], ['Y'], ['X']))
+        self.assertFalse(model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X']))
         expected_lower, expected_upper =(0.07680001854838515, 0.09309998464330864)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
@@ -148,7 +148,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
             unobservables_labels=unobs,
         )
 
-        self.assertTrue(model.are_d_separated(['X'], ['Y'], ['U1']))
+        self.assertTrue(model.are_d_separated_in_complete_graph(['X'], ['Y'], ['U1']))
 
 if __name__ == '__main__':
     unittest.main()

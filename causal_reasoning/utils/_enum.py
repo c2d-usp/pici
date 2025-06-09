@@ -10,6 +10,7 @@ class Examples(Enum):
     CSV_ITAU_EXAMPLE = "causal_reasoning/data/itau.csv"
     CSV_BALKE_PEARL_EXAMPLE = "causal_reasoning/data/balke_pearl.csv"
     CSV_DISCRETE_IV_RANDOM_EXAMPLE = "causal_reasoning/data/random_probabilities.csv"
+    MEDIUM_SCALE_OUTAGE_INCIDENT="causal_reasoning/data/medium_scale_outage_incident_seed42.csv"
     CSV_N1M1="causal_reasoning/data/n1_m1_scaling_case.csv"
     CSV_N2M1="causal_reasoning/data/n2_m1_scaling_case.csv"
     CSV_N3M1="causal_reasoning/data/n3_m1_scaling_case.csv"
