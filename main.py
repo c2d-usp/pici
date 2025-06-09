@@ -18,11 +18,11 @@ def incident_model():
         ("MS-A_Threads", "MS-A_Crash"),
         ("MS-A_Error", "Outage"),
         ("MS-A_Crash", "Outage"),
-        ("HeavyTraffic", "DB_Latency"),
+        ("HeavyTraffic", "MS-B_Latency"),
         ("HeavyTraffic", "MS-A_Latency"),
         # UNOBS
         ("Unob_helper_1", "DB_Change"),
-        ("Unob_helper_2", "MS-B_Latency"),
+        ("Unob_helper_2", "DB_Latency"),
         ("Unob_helper_3", "MS-B_Error"),
         ("Unob_helper_4", "MS-A_Error"),
         ("Unob_helper_5", "MS-A_Threads"),
@@ -42,7 +42,7 @@ def incident_model():
     ]
     edges_2 = nx.DiGraph(edges_list_2)
     df_medium_scale_incident = pd.read_csv(
-        Examples.MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
+        Examples.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
     )
     model_2 = CausalModel(
         data=df_medium_scale_incident,
