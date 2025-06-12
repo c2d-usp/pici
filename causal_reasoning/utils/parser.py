@@ -90,7 +90,7 @@ def pair_to_valid_tuple(left, right):
     if isinstance(right, (str, int)):
         right = str(right)
     if not isinstance(left, str) or not isinstance(right, str):
-        raise Exception(f"Input format for ({left}, {right}) not recognized.")
+        raise ValueError(f"Input format for ({left}, {right}) not recognized.")
     return (left, right)
 
 def _edge_string_to_edge_tuples(edges: str) -> list[tuple]:
