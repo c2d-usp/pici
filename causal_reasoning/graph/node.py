@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 class Node:
     def __init__(
         self,
