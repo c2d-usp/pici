@@ -3,7 +3,6 @@ import networkx as nx
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 
-#Pra que serve essa função? Extensibilidade?
 def parse_input_graph(
     edges: list[tuple[str, str]],
     latents_label: list[str],
