@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import gurobi_build_linear_problem
+from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import (
+    gurobi_build_linear_problem,
+)
 from causal_reasoning.interventional_do_calculus_algorithm.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
@@ -82,7 +84,9 @@ class CausalModel:
         """
         if G is None:
             G = self.graph.DAG
-        return nx.is_d_separator(G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z))
+        return nx.is_d_separator(
+            G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z)
+        )
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
@@ -152,13 +156,21 @@ class CausalModel:
         # Changes the intervention and target also (?)
         raise NotImplementedError
 
-    def generate_graph_image(self, output_path=f"{DirectoriesPath.IMAGES_PATH.value}graph.png"):
+    def generate_graph_image(
+        self, output_path=f"{DirectoriesPath.IMAGES_PATH.value}graph.png"
+    ):
         """
         Draw the graph using networkx.
         """
-        # TODO: Change 'target' to 'targets'. 
+        # TODO: Change 'target' to 'targets'.
         # plot_graph_image handles already with targets
-        plot_graph_image(graph=self.graph.DAG, unobservables=self.unobservables, interventions=self.interventions, targets=[self.target], output_path=output_path)
+        plot_graph_image(
+            graph=self.graph.DAG,
+            unobservables=self.unobservables,
+            interventions=self.interventions,
+            targets=[self.target],
+            output_path=output_path,
+        )
 
 
 def get_node(graphNodes: dict[str, Node], node_label: str):

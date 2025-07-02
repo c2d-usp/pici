@@ -11,20 +11,22 @@ def plot_graph_image(
     unobservables: list[Node],
     interventions: list[Node],
     targets: list[Node],
-    output_path:str=f"{DirectoriesPath.IMAGES_PATH.value}graph.png",
+    output_path: str = f"{DirectoriesPath.IMAGES_PATH.value}graph.png",
 ) -> None:
     node_labels = [str(node) for node in graph.nodes()]
     unobservables_labels = [node.label for node in unobservables]
     interventions_labels = [node.label for node in interventions]
     targets_labels = [node.label for node in targets]
 
-    node_colors = define_node_colors(node_labels, unobservables_labels, interventions_labels, targets_labels)
+    node_colors = define_node_colors(
+        node_labels, unobservables_labels, interventions_labels, targets_labels
+    )
 
     legend_labels = {
-        "Interventions":PlotGraphColors.INTERVENTIONS.value,
-        "Targets":PlotGraphColors.TARGETS.value,
-        "Unobservables":PlotGraphColors.UNOBSERVABLES.value,
-        "Observables":PlotGraphColors.OBSERVABLES.value,
+        "Interventions": PlotGraphColors.INTERVENTIONS.value,
+        "Targets": PlotGraphColors.TARGETS.value,
+        "Unobservables": PlotGraphColors.UNOBSERVABLES.value,
+        "Observables": PlotGraphColors.OBSERVABLES.value,
     }
 
     plt.figure(figsize=(8, 6))
@@ -40,7 +42,6 @@ def plot_graph_image(
         arrowsize=20,
     )
 
-
     if legend_labels:
         legend_handles = [
             mpatches.Patch(color=color, label=label)
@@ -48,10 +49,10 @@ def plot_graph_image(
         ]
         plt.legend(
             handles=legend_handles,
-            loc='upper left',
+            loc="upper left",
             bbox_to_anchor=(1.02, 1),
             borderaxespad=0.0,
-            frameon=True
+            frameon=True,
         )
 
     plt.tight_layout()
@@ -60,7 +61,10 @@ def plot_graph_image(
 
 
 def define_node_colors(
-    node_labels: list[str], unobservables_labels: list[str], interventions_labels: list[str], targets_labels: list[str]
+    node_labels: list[str],
+    unobservables_labels: list[str],
+    interventions_labels: list[str],
+    targets_labels: list[str],
 ) -> list:
     node_colors = []
     for node in node_labels:

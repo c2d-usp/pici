@@ -65,7 +65,7 @@ class Graph:
         n = len(self.topologicalOrder) - 1
         for j in range(n, -1, -1):
             if self.topologicalOrder[j] in nodes:
-                return self.topologicalOrder[j]                    
+                return self.topologicalOrder[j]
 
         # TODO: BETTER ERROR HANDLING
         raise Exception(f"Node not found")

@@ -1,5 +1,6 @@
 import pandas as pd
 import networkx as nx
+
 # from pgmpy.models import BayesianNetwork
 import logging
 
