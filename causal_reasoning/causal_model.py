@@ -3,6 +3,9 @@ import networkx as nx
 from pandas import DataFrame
 import logging
 
+from causal_reasoning.utils._enum import DirectoriesPath
+from causal_reasoning.utils.graph_plotter import plot_graph_image
+
 logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
@@ -149,8 +152,13 @@ class CausalModel:
         # Changes the intervention and target also (?)
         raise NotImplementedError
 
-    def visualize_graph(self):
-        raise NotImplementedError
+    def generate_graph_image(self, output_path=f"{DirectoriesPath.IMAGES_PATH.value}graph.png"):
+        """
+        Draw the graph using networkx.
+        """
+        # TODO: Change 'target' to 'targets'. 
+        # plot_graph_image handles already with targets
+        plot_graph_image(graph=self.graph.DAG, unobservables=self.unobservables, interventions=self.interventions, targets=[self.target], output_path=output_path)
 
 
 def get_node(graphNodes: dict[str, Node], node_label: str):
