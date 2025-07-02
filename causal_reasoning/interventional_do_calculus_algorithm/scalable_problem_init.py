@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from causal_reasoning.utils._enum import Examples
+from causal_reasoning.utils._enum import DataExamplesPaths
 from causal_reasoning.utils.probabilities_helper import find_conditional_probability2, find_probability2
 
 class InitScalable:
@@ -102,11 +102,11 @@ class InitScalable:
         return parametric_columns
 
 def testEmpirical():
-    itau_csv_path = Examples.CSV_2SCALING.value; df = pd.read_csv(itau_csv_path)
+    copilot_csv_path = DataExamplesPaths.CSV_2SCALING.value; df = pd.read_csv(copilot_csv_path)
     #print("--- Test empiricials ---")
     InitScalable.calculateEmpiricals(M=1,N=2,df=df,DBG=True)
 def testBetaVars():
-    itau_csv_path = Examples.CSV_2SCALING.value; df = pd.read_csv(itau_csv_path)
+    copilot_csv_path = DataExamplesPaths.CSV_2SCALING.value; df = pd.read_csv(copilot_csv_path)
     #print("\n\n --- Test Gamma variables --- ")        
     betaVarsBits, betaVarsCoeffObjSubproblem = InitScalable.defineGammaUAuxiliaryVariables(M=2, N=2, df=df, interventionValue=1, targetValue=1, DBG = False)
     
