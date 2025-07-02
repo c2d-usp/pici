@@ -1,7 +1,13 @@
 import unittest
-
+import sys
+import os
 import pandas as pd
 import networkx as nx
+
+THIS_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import Examples
@@ -17,7 +23,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         balke_target_value = 1
         balke_intervention = "X"
         balke_intervention_value = 1
-        balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        rel_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        balke_csv_path = os.path.join(PROJECT_ROOT, rel_path)
         balke_df = pd.read_csv(balke_csv_path)
 
         model = CausalModel(
@@ -50,7 +57,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         iv_target_value = 1
         iv_intervention = "X"
         iv_intervention_value = 1
-        iv_csv_path = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
+        rel = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
+        iv_csv_path = os.path.join(PROJECT_ROOT, rel)
         iv_df = pd.read_csv(iv_csv_path)
 
         model = CausalModel(
@@ -90,7 +98,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         itau_unobs = ["U1", "U2", "U3"]
         itau_target = "Y"
         itau_intervention = "X"
-        itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
+        rel = Examples.CSV_ITAU_EXAMPLE.value
+        itau_csv_path = os.path.join(PROJECT_ROOT, rel)
         itau_df = pd.read_csv(itau_csv_path)
 
         model = CausalModel(
@@ -119,7 +128,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         unobs = ["U1", "U2"]
         target = "Y"
         target_value = 1
-        csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        rel_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -144,7 +154,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
     def test_simple_counfoundness(self):
         edges = "U1 -> X, U1 -> Y"
         unobs = ["U1"]
-        csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        rel_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -189,8 +200,10 @@ class TestInferenceAlgorithm(unittest.TestCase):
             "Unob_helper_7",
         ]
         edges_2 = nx.DiGraph(edges_list_2)
+        rel_path = Examples.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df_medium_scale_incident = pd.read_csv(
-            Examples.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
+            csv_path, index_col=0
         )
         model = CausalModel(
             data=df_medium_scale_incident,
@@ -219,7 +232,8 @@ class TestMNCases(unittest.TestCase):
     def test_m_1_n_1(self):
         edges = genGraph(N=1, M=1)
         unobs = ["U1", "U2", "U3"]
-        csv_path = Examples.CSV_N1M1.value
+        rel = Examples.CSV_N1M1.value
+        csv_path = os.path.join(PROJECT_ROOT, rel)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -234,13 +248,14 @@ class TestMNCases(unittest.TestCase):
             model.set_interventions([("X", intervention_value)])
             model.set_target(("Y", target_value))
             lower, upper = model.inference_intervention_query()
-            self.assertGreater(float(lower), true_value(1, 1, target_value, intervention_value, df))
-            self.assertLess(float(upper), true_value(1, 1, target_value, intervention_value, df))
+            self.assertGreaterEqual(float(upper), true_value(1, 1, target_value, intervention_value, df))
+            self.assertLessEqual(float(lower), true_value(1, 1, target_value, intervention_value, df))
     
     def test_m_1_n_2(self):
         edges = genGraph(N=2, M=1)
         unobs = ["U1", "U2", "U3"]
-        csv_path = Examples.CSV_N2M1.value
+        rel_path = Examples.CSV_N2M1.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -255,13 +270,14 @@ class TestMNCases(unittest.TestCase):
             model.set_interventions([("X", intervention_value)])
             model.set_target(("Y", target_value))
             lower, upper = model.inference_intervention_query()
-            self.assertGreater(float(lower), true_value(2, 1, target_value, intervention_value, df))
-            self.assertLess(float(upper), true_value(2, 1, target_value, intervention_value, df))
+            self.assertGreaterEqual(float(upper), true_value(2, 1, target_value, intervention_value, df))
+            self.assertLessEqual(float(lower), true_value(2, 1, target_value, intervention_value, df))
 
     def test_m_1_n_3(self):
         edges = genGraph(N=3, M=1)
         unobs = ["U1", "U2", "U3"]
-        csv_path = Examples.CSV_N3M1.value
+        rel_path = Examples.CSV_N3M1.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -276,13 +292,14 @@ class TestMNCases(unittest.TestCase):
             model.set_interventions([("X", intervention_value)])
             model.set_target(("Y", target_value))
             lower, upper = model.inference_intervention_query()
-            self.assertGreater(float(lower), true_value(3, 1, target_value, intervention_value, df))
-            self.assertLess(float(upper), true_value(3, 1, target_value, intervention_value, df))
+            self.assertGreaterEqual(float(upper), true_value(3, 1, target_value, intervention_value, df))
+            self.assertLessEqual(float(lower), true_value(3, 1, target_value, intervention_value, df))
 
     def test_m_1_n_4(self):
         edges = genGraph(N=4, M=1)
         unobs = ["U1", "U2", "U3"]
-        csv_path = Examples.CSV_N4M1.value
+        rel_path = Examples.CSV_N4M1.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -297,13 +314,14 @@ class TestMNCases(unittest.TestCase):
             model.set_interventions([("X", intervention_value)])
             model.set_target(("Y", target_value))
             lower, upper = model.inference_intervention_query()
-            self.assertGreater(float(lower), true_value(4, 1, target_value, intervention_value, df))
-            self.assertLess(float(upper), true_value(4, 1, target_value, intervention_value, df))
+            self.assertGreaterEqual(float(upper), true_value(4, 1, target_value, intervention_value, df))
+            self.assertLessEqual(float(lower), true_value(4, 1, target_value, intervention_value, df))
 
     def test_m_2_n_1(self):
         edges = genGraph(N=1, M=2)
         unobs = ["U1", "U2", "U3"]
-        csv_path = Examples.CSV_N1M2.value
+        rel_path = Examples.CSV_N1M2.value
+        csv_path = os.path.join(PROJECT_ROOT, rel_path)
         df = pd.read_csv(csv_path)
 
         model = CausalModel(
@@ -318,13 +336,8 @@ class TestMNCases(unittest.TestCase):
             model.set_interventions([("X", intervention_value)])
             model.set_target(("Y", target_value))
             lower, upper = model.inference_intervention_query()
-            self.assertGreater(float(lower), true_value(1, 2, target_value, intervention_value, df))
-            self.assertLess(float(upper), true_value(1, 2, target_value, intervention_value, df))   
-    
-    
-
-
-
+            self.assertGreaterEqual(float(upper), true_value(1, 2, target_value, intervention_value, df))
+            self.assertLessEqual(float(lower), true_value(1, 2, target_value, intervention_value, df))   
     
 
 if __name__ == '__main__':
