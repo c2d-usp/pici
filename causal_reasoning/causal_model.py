@@ -157,7 +157,7 @@ class CausalModel:
         raise NotImplementedError
 
     def generate_graph_image(
-        self, output_path=f"{DirectoriesPath.IMAGES_PATH.value}graph.png"
+        self, file_name="graph.png"
     ):
         """
         Draw the graph using networkx.
@@ -169,7 +169,7 @@ class CausalModel:
             unobservables=self.unobservables,
             interventions=self.interventions,
             targets=[self.target],
-            output_path=output_path,
+            output_path=f"{DirectoriesPath.IMAGES_PATH.value}{file_name}",
         )
 
 
