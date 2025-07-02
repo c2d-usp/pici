@@ -57,8 +57,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         iv_target_value = 1
         iv_intervention = "X"
         iv_intervention_value = 1
-        rel = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
-        iv_csv_path = os.path.join(PROJECT_ROOT, rel)
+        rel_path = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
+        iv_csv_path = os.path.join(PROJECT_ROOT, rel_path)
         iv_df = pd.read_csv(iv_csv_path)
 
         model = CausalModel(
@@ -98,8 +98,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         itau_unobs = ["U1", "U2", "U3"]
         itau_target = "Y"
         itau_intervention = "X"
-        rel = Examples.CSV_ITAU_EXAMPLE.value
-        itau_csv_path = os.path.join(PROJECT_ROOT, rel)
+        rel_path = Examples.CSV_ITAU_EXAMPLE.value
+        itau_csv_path = os.path.join(PROJECT_ROOT, rel_path)
         itau_df = pd.read_csv(itau_csv_path)
 
         model = CausalModel(
@@ -229,115 +229,51 @@ class TestInferenceAlgorithm(unittest.TestCase):
         # print(f"{intervention_2}: PS = {model_2.inference_intervention_query()}")
 
 class TestMNCases(unittest.TestCase):
-    def test_m_1_n_1(self):
-        edges = genGraph(N=1, M=1)
+    def test_intervention_queries_via_subtests(self):
+        cases = [
+            (1, 1, Examples.CSV_N1M1),
+            (2, 1, Examples.CSV_N2M1),
+            (3, 1, Examples.CSV_N3M1),
+            (4, 1, Examples.CSV_N4M1),
+            (1, 2, Examples.CSV_N1M2),
+        ]
         unobs = ["U1", "U2", "U3"]
-        rel = Examples.CSV_N1M1.value
-        csv_path = os.path.join(PROJECT_ROOT, rel)
-        df = pd.read_csv(csv_path)
+        interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            unobservables_labels=unobs,
-        )
+        for N, M, csv_example in cases:
+            with self.subTest(N=N, M=M):
+                edges = genGraph(N=N, M=M)
+                csv_path = os.path.join(PROJECT_ROOT, csv_example.value)
+                df = pd.read_csv(csv_path)
 
-        self.assertFalse(model.are_d_separated_in_complete_graph(['X'], ['Y'], ['U1', 'U2', 'U3']))
-        tuple_target_inter = [(0,0),(0,1),(1,0),(1,1)]
-        for target_value, intervention_value in tuple_target_inter:
-            model.set_interventions([("X", intervention_value)])
-            model.set_target(("Y", target_value))
-            lower, upper = model.inference_intervention_query()
-            self.assertGreaterEqual(float(upper), true_value(1, 1, target_value, intervention_value, df))
-            self.assertLessEqual(float(lower), true_value(1, 1, target_value, intervention_value, df))
-    
-    def test_m_1_n_2(self):
-        edges = genGraph(N=2, M=1)
-        unobs = ["U1", "U2", "U3"]
-        rel_path = Examples.CSV_N2M1.value
-        csv_path = os.path.join(PROJECT_ROOT, rel_path)
-        df = pd.read_csv(csv_path)
+                model = CausalModel(
+                    data=df,
+                    edges=edges,
+                    unobservables_labels=unobs,
+                )
 
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            unobservables_labels=unobs,
-        )
+                self.assertFalse(
+                    model.are_d_separated_in_complete_graph(['X'], ['Y'], unobs),
+                    msg=f"d-separation failed for N={N}, M={M}"
+                )
 
-        self.assertFalse(model.are_d_separated_in_complete_graph(['X'], ['Y'], ['U1', 'U2', 'U3']))
-        tuple_target_inter = [(0,0),(0,1),(1,0),(1,1)]
-        for target_value, intervention_value in tuple_target_inter:
-            model.set_interventions([("X", intervention_value)])
-            model.set_target(("Y", target_value))
-            lower, upper = model.inference_intervention_query()
-            self.assertGreaterEqual(float(upper), true_value(2, 1, target_value, intervention_value, df))
-            self.assertLessEqual(float(lower), true_value(2, 1, target_value, intervention_value, df))
+                for target_value, intervention_value in interventions:
+                    with self.subTest(N=N, M=M,
+                                      target=target_value,
+                                      intervention=intervention_value):
+                        model.set_interventions([("X", intervention_value)])
+                        model.set_target(("Y", target_value))
+                        lower, upper = model.inference_intervention_query()
 
-    def test_m_1_n_3(self):
-        edges = genGraph(N=3, M=1)
-        unobs = ["U1", "U2", "U3"]
-        rel_path = Examples.CSV_N3M1.value
-        csv_path = os.path.join(PROJECT_ROOT, rel_path)
-        df = pd.read_csv(csv_path)
-
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            unobservables_labels=unobs,
-        )
-
-        self.assertFalse(model.are_d_separated_in_complete_graph(['X'], ['Y'], unobs))
-        tuple_target_inter = [(0,0), (0,1), (1,0), (1,1)]
-        for target_value, intervention_value in tuple_target_inter:
-            model.set_interventions([("X", intervention_value)])
-            model.set_target(("Y", target_value))
-            lower, upper = model.inference_intervention_query()
-            self.assertGreaterEqual(float(upper), true_value(3, 1, target_value, intervention_value, df))
-            self.assertLessEqual(float(lower), true_value(3, 1, target_value, intervention_value, df))
-
-    def test_m_1_n_4(self):
-        edges = genGraph(N=4, M=1)
-        unobs = ["U1", "U2", "U3"]
-        rel_path = Examples.CSV_N4M1.value
-        csv_path = os.path.join(PROJECT_ROOT, rel_path)
-        df = pd.read_csv(csv_path)
-
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            unobservables_labels=unobs,
-        )
-
-        self.assertFalse(model.are_d_separated_in_complete_graph(['X'], ['Y'], unobs))
-        tuple_target_inter = [(0,0), (0,1), (1,0), (1,1)]
-        for target_value, intervention_value in tuple_target_inter:
-            model.set_interventions([("X", intervention_value)])
-            model.set_target(("Y", target_value))
-            lower, upper = model.inference_intervention_query()
-            self.assertGreaterEqual(float(upper), true_value(4, 1, target_value, intervention_value, df))
-            self.assertLessEqual(float(lower), true_value(4, 1, target_value, intervention_value, df))
-
-    def test_m_2_n_1(self):
-        edges = genGraph(N=1, M=2)
-        unobs = ["U1", "U2", "U3"]
-        rel_path = Examples.CSV_N1M2.value
-        csv_path = os.path.join(PROJECT_ROOT, rel_path)
-        df = pd.read_csv(csv_path)
-
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            unobservables_labels=unobs,
-        )
-
-        self.assertFalse(model.are_d_separated_in_complete_graph(['X'], ['Y'], unobs))
-        tuple_target_inter = [(0,0), (0,1), (1,0), (1,1)]
-        for target_value, intervention_value in tuple_target_inter:
-            model.set_interventions([("X", intervention_value)])
-            model.set_target(("Y", target_value))
-            lower, upper = model.inference_intervention_query()
-            self.assertGreaterEqual(float(upper), true_value(1, 2, target_value, intervention_value, df))
-            self.assertLessEqual(float(lower), true_value(1, 2, target_value, intervention_value, df))   
+                        tv = true_value(N, M, target_value, intervention_value, df)
+                        self.assertGreaterEqual(
+                            float(upper), tv,
+                            msg=f"upper bound too low for N={N},M={M},Y={target_value},do(X={intervention_value})"
+                        )
+                        self.assertLessEqual(
+                            float(lower), tv,
+                            msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})"
+                        )   
     
 
 if __name__ == '__main__':
