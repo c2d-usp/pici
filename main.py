@@ -181,8 +181,8 @@ def double_intervention():
     print(
         f">> Is Z d-separated from Y giving X? {model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'])}"
     )
-    # model.inference_intervention_query()
     model.generate_graph_image("two_interventions.png")
+    # model.inference_intervention_query()
 
 
 def discrete_copilot_example():
