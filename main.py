@@ -93,7 +93,7 @@ def binary_balke_pearl_example():
 
     # balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
     # balke_model.set_target((balke_target, balke_target_value))
-    print(balke_model.are_d_separated_in_intervened_graph(['Z'], ['Y'], ['X']))
+    print(balke_model.are_d_separated_in_intervened_graph(["Z"], ["Y"], ["X"]))
 
     balke_model.generate_graph_image("balke.png")
 

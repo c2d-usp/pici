@@ -100,14 +100,21 @@ class CausalModel:
             G = self.graph.DAG
 
         if len(self.interventions) <= 0:
-            return self.are_d_separated_in_complete_graph(set_nodes_X,set_nodes_Y,set_nodes_Z,G)
+            return self.are_d_separated_in_complete_graph(
+                set_nodes_X, set_nodes_Y, set_nodes_Z, G
+            )
 
         operated_digraph = copy.deepcopy(G)
         interventions_outgoing_edges = []
         for intervention in self.interventions:
             interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
-        return nx.is_d_separator(G=operated_digraph, x=set(set_nodes_X), y=set(set_nodes_Y), z=set(set_nodes_Z))
+        return nx.is_d_separator(
+            G=operated_digraph,
+            x=set(set_nodes_X),
+            y=set(set_nodes_Y),
+            z=set(set_nodes_Z),
+        )
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
@@ -183,9 +190,7 @@ class CausalModel:
         # Changes the intervention and target also (?)
         raise NotImplementedError
 
-    def generate_graph_image(
-        self, file_name="graph.png"
-    ):
+    def generate_graph_image(self, file_name="graph.png"):
         """
         Draw the graph using networkx.
         """
