@@ -1,3 +1,4 @@
+import copy
 from typing import TypeVar
 import networkx as nx
 from pandas import DataFrame
@@ -69,7 +70,7 @@ class CausalModel:
             target = tuple_into_node(parse_tuple_str_int(target), self.graph)
         self.target = target
 
-    def are_d_separated(
+    def are_d_separated_in_complete_graph(
         self,
         set_nodes_X: list[str],
         set_nodes_Y: list[str],
@@ -88,6 +89,26 @@ class CausalModel:
             G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z)
         )
 
+    def are_d_separated_in_intervened_graph(
+        self,
+        set_nodes_X: list[str],
+        set_nodes_Y: list[str],
+        set_nodes_Z: list[str],
+        G: nx.DiGraph = None,
+    ) -> bool:
+        if G is None:
+            G = self.graph.DAG
+
+        if len(self.interventions) <= 0:
+            return self.are_d_separated_in_complete_graph(set_nodes_X,set_nodes_Y,set_nodes_Z,G)
+
+        operated_digraph = copy.deepcopy(G)
+        interventions_outgoing_edges = []
+        for intervention in self.interventions:
+            interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
+        operated_digraph.remove_edges_from(interventions_outgoing_edges)
+        return nx.is_d_separator(G=operated_digraph, x=set(set_nodes_X), y=set(set_nodes_Y), z=set(set_nodes_Z))
+
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> tuple[str, str]:
@@ -104,13 +125,14 @@ class CausalModel:
         if target_node is not None:
             self.target = target_node
 
-        if len(self.interventions) > 2:
+        if len(self.interventions) == 1:
+            return self.single_intervention_query()
+        elif len(self.interventions) == 2:
+            return self.double_intervention_query()
+        elif len(self.interventions) > 2:
             self.multi_intervention_query()
             return ("None", "None")
-        elif len(self.interventions) > 1:
-            self.double_intervention_query()
-            return ("None", "None")
-        return self.single_intervention_query()
+        raise Exception("None interventions found")
 
     def single_intervention_query(self) -> tuple[str, str]:
         # return build_linear_problem(
@@ -122,7 +144,7 @@ class CausalModel:
         )
 
     def double_intervention_query(self):
-        build_bi_linear_problem(
+        return build_bi_linear_problem(
             self.graph,
             self.data,
             self.interventions,
@@ -131,6 +153,11 @@ class CausalModel:
 
     def multi_intervention_query(self):
         raise NotImplementedError
+
+    def is_identifiable(self):
+        # backdoor
+        # frontdoor
+        pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
         self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
