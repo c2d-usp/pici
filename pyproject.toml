@@ -1,5 +1,5 @@
 [project]
-name = "causal_reasoning_DANIEL_LAWAND_SANDBOX"
+name = "causal_reasoning"
 version = "0.0.1"
 description = "Package for causal inference under partially observability"
 authors = [
@@ -8,6 +8,10 @@ authors = [
 license = "Apache-2.0"
 readme = "README.md"
 keywords = [ "causal inference" ]
+
+packages = [
+    { include = "causal_reasoning" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
