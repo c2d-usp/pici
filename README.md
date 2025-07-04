@@ -1,16 +1,17 @@
 Causal Reasoning (WIP)
 =======================
 ## Table of Contents
-1. [About](#about)  
-2. [Usage](#usage)  
-3. [How it works](#how-it-works)  
-4. [Developer Tools](#developer-tools)  
-   - [Virtual Environment](#virtual-environment)  
-   - [Running Examples](#running-examples)  
-   - [Linters](#linters)  
-     - [Black](#black)  
-     - [Isort](#isort)  
-   - [Unittest](#unittest)  
+1. [About](#about)
+2. [Usage](#usage)
+3. [How it works](#how-it-works)
+4. [Developer Tools](#developer-tools)
+   - [Install](#install)
+   - [Virtual Environment](#virtual-environment)
+   - [Running Examples](#running-examples)
+   - [Linters](#linters)
+     - [Black](#black)
+     - [Isort](#isort)
+   - [Unittest](#unittest)
 5. [Acknowledgements](#acknowledgements)
 
 
@@ -34,11 +35,19 @@ TODO: EXPLAIN THE THEORY AND METHODS.
 All development tools are managed with [Poetry](https://python-poetry.org/docs/).  
 To get started, install Poetry by following the [official instructions](https://python-poetry.org/docs/#installation), then activate the virtual environment.
 
+### Install
+
+- Install dependencies
+```bash
+poetry install
+```
+
+
 ### Virtual Environment
 
 Activate the virtual environment:
 
-- (On Linux) Activate poetry virtual environment
+- Activate poetry virtual environment
 ```bash
 eval $(poetry env activate)
 ```
