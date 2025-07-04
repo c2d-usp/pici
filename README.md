@@ -24,7 +24,46 @@ This project was based on the work of João Pedro Arroyo and João Gabriel on [G
 
 ## Usage
 
-TODO: SHOW HOW TO USE THE PACKAGE WITH PYPI.
+- Install the package
+```python
+pip install causal_reasoning
+```
+
+- Import the package
+```python
+import causal_reasoning
+```
+
+- Create a causal model:
+```python
+df = pd.read_csv(model_csv_path)
+edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+custom_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+unobservable_variables = ["U1", "U2"]
+
+model = causal_reasoning.causal_model.CausalModel(
+  data=df,
+  edges=edges,
+  custom_cardinalities=custom_cardinalities,
+  unobservables_labels=unobservable_variables,
+)
+```
+
+- Set target and intervetions
+```python
+model.set_interventions([('X', 1)])
+model.set_target(('Y', 1))
+```
+
+- Make the query
+```python
+lower_bound, upper_bound = model.inference_intervention_query()
+```
+Or you can pass the target and intervention as an argument: 
+
+```python
+lower_bound, upper_bound = model.inference_intervention_query([('X', 1)], ('Y', 1))
+```
 
 ## How it works
 
@@ -104,7 +143,7 @@ After running the command, save the file to apply the sorted imports.
 
 ### Unittest
 
-TODO
+TODO: EXPLAIN SOME UNITTESTS
 
 
 ## Acknowledgements
