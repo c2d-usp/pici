@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 from causal_reasoning.graph.node import Node
-from causal_reasoning.utils._enum import PlotGraphColors, DirectoriesPath
+from causal_reasoning.utils._enum import PlotGraphColors
 
 
 def plot_graph_image(
@@ -11,7 +11,7 @@ def plot_graph_image(
     unobservables: list[Node],
     interventions: list[Node],
     targets: list[Node],
-    output_path: str = f"{DirectoriesPath.IMAGES_PATH.value}graph.png",
+    output_path: str,
 ) -> None:
     node_labels = [str(node) for node in graph.nodes()]
     unobservables_labels = [node.label for node in unobservables]
