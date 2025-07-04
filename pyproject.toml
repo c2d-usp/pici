@@ -1,10 +1,13 @@
-[tool.poetry]
-name = "causal_reasoning"
-version = "0.1.0"
+[project]
+name = "causal_reasoning_DANIEL_LAWAND_SANDBOX"
+version = "0.0.1"
 description = "Package for causal inference under partially observability"
-authors = ["danlawand <daniel.lawand@gmail.com>"]
-license = ""
+authors = [
+    { name="Daniel Lawand", email="daniel.lawand@gmail.com" },
+    ]
+license = "Apache-2.0"
 readme = "README.md"
+keywords = [ "causal inference" ]
 
 [tool.poetry.dependencies]
 python = "^3.10"
