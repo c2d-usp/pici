@@ -4,11 +4,16 @@ import networkx as nx
 from pandas import DataFrame
 import logging
 
+from causal_reasoning.utils._enum import DirectoriesPath
+from causal_reasoning.utils.graph_plotter import plot_graph_image
+
 logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import gurobi_build_linear_problem
+from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import (
+    gurobi_build_linear_problem,
+)
 from causal_reasoning.interventional_do_calculus_algorithm.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
@@ -80,7 +85,9 @@ class CausalModel:
         """
         if G is None:
             G = self.graph.DAG
-        return nx.is_d_separator(G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z))
+        return nx.is_d_separator(
+            G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z)
+        )
 
     def are_d_separated_in_intervened_graph(
         self,
@@ -93,14 +100,21 @@ class CausalModel:
             G = self.graph.DAG
 
         if len(self.interventions) <= 0:
-            return self.are_d_separated_in_complete_graph(set_nodes_X,set_nodes_Y,set_nodes_Z,G)
+            return self.are_d_separated_in_complete_graph(
+                set_nodes_X, set_nodes_Y, set_nodes_Z, G
+            )
 
         operated_digraph = copy.deepcopy(G)
         interventions_outgoing_edges = []
         for intervention in self.interventions:
             interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
-        return nx.is_d_separator(G=operated_digraph, x=set(set_nodes_X), y=set(set_nodes_Y), z=set(set_nodes_Z))
+        return nx.is_d_separator(
+            G=operated_digraph,
+            x=set(set_nodes_X),
+            y=set(set_nodes_Y),
+            z=set(set_nodes_Z),
+        )
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
@@ -176,8 +190,19 @@ class CausalModel:
         # Changes the intervention and target also (?)
         raise NotImplementedError
 
-    def visualize_graph(self):
-        raise NotImplementedError
+    def generate_graph_image(self, file_name="graph.png"):
+        """
+        Draw the graph using networkx.
+        """
+        # TODO: Change 'target' to 'targets'.
+        # plot_graph_image handles already with targets
+        plot_graph_image(
+            graph=self.graph.DAG,
+            unobservables=self.unobservables,
+            interventions=self.interventions,
+            targets=[self.target],
+            output_path=f"{DirectoriesPath.IMAGES_PATH.value}{file_name}",
+        )
 
 
 def get_node(graphNodes: dict[str, Node], node_label: str):

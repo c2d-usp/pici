@@ -8,7 +8,9 @@ import networkx as nx
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.mechanisms_generator import MechanismGenerator
+from causal_reasoning.interventional_do_calculus_algorithm.mechanisms_generator import (
+    MechanismGenerator,
+)
 from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability,
     find_probability,
@@ -350,7 +352,7 @@ class DoubleInterventionObjFunctionGenerator:
         for ancestor in ancestors:
             # Question: does it need to not be the intervention?
             if (
-                ancestor.cardinality > 0 
+                ancestor.cardinality > 0
                 and ancestor.label != current_target.label
                 and ancestor not in always_conditioned_nodes
             ):
@@ -386,7 +388,9 @@ class DoubleInterventionObjFunctionGenerator:
                 conditioned_nodes + current_conditionable_ancestors
             )
 
-            current_conditioned_nodes_labels = [node.label for node in current_conditioned_nodes]
+            current_conditioned_nodes_labels = [
+                node.label for node in current_conditioned_nodes
+            ]
 
             # self.graph.build_moral(
             #     consideredNodes=ancestors, conditionedNodes=current_conditioned_nodes
@@ -397,7 +401,12 @@ class DoubleInterventionObjFunctionGenerator:
             # condition1_2 = self.graph.independency_moral(
             #     node_2=intervention_latent_2, node_1=current_target
             # )
-            intervention_1_first_condition = nx.is_d_separator(G=self.graph.DAG, x= { current_target.label }, y = { intervention_latent_1.label }, z = set(current_conditioned_nodes_labels))
+            intervention_1_first_condition = nx.is_d_separator(
+                G=self.graph.DAG,
+                x={current_target.label},
+                y={intervention_latent_1.label},
+                z=set(current_conditioned_nodes_labels),
+            )
 
             if intervention_1 in current_conditioned_nodes:
                 intervention_1_second_condition = True
@@ -405,8 +414,12 @@ class DoubleInterventionObjFunctionGenerator:
                 operatedDigraph = copy.deepcopy(self.graph.DAG)
                 outgoing_edgesX = list(self.graph.DAG.out_edges(intervention_1.label))
                 operatedDigraph.remove_edges_from(outgoing_edgesX)
-                intervention_1_second_condition = nx.is_d_separator(G=operatedDigraph, x = {current_target.label}, y = {intervention_1.label}, z = set(current_conditioned_nodes_labels))
-
+                intervention_1_second_condition = nx.is_d_separator(
+                    G=operatedDigraph,
+                    x={current_target.label},
+                    y={intervention_1.label},
+                    z=set(current_conditioned_nodes_labels),
+                )
 
             # self.graph.build_moral(
             #     consideredNodes=ancestors,
@@ -427,7 +440,12 @@ class DoubleInterventionObjFunctionGenerator:
             # condition2_2 = self.graph.independency_moral(
             #     node_2=intervention_2, node_1=current_target
             # )
-            intervention_2_first_condition = nx.is_d_separator(G=self.graph.DAG, x= { current_target.label }, y = { intervention_latent_2.label }, z = set(current_conditioned_nodes_labels))
+            intervention_2_first_condition = nx.is_d_separator(
+                G=self.graph.DAG,
+                x={current_target.label},
+                y={intervention_latent_2.label},
+                z=set(current_conditioned_nodes_labels),
+            )
 
             if intervention_2 in current_conditioned_nodes:
                 intervention_2_second_condition = True
@@ -435,10 +453,19 @@ class DoubleInterventionObjFunctionGenerator:
                 operatedDigraph = copy.deepcopy(self.graph.DAG)
                 outgoing_edgesX = list(self.graph.DAG.out_edges(intervention_2.label))
                 operatedDigraph.remove_edges_from(outgoing_edgesX)
-                intervention_2_second_condition = nx.is_d_separator(G=operatedDigraph, x = {current_target.label}, y = {intervention_2.label}, z = set(current_conditioned_nodes_labels))
+                intervention_2_second_condition = nx.is_d_separator(
+                    G=operatedDigraph,
+                    x={current_target.label},
+                    y={intervention_2.label},
+                    z=set(current_conditioned_nodes_labels),
+                )
 
-
-            if intervention_1_first_condition and intervention_1_second_condition and intervention_2_first_condition and intervention_2_second_condition:
+            if (
+                intervention_1_first_condition
+                and intervention_1_second_condition
+                and intervention_2_first_condition
+                and intervention_2_second_condition
+            ):
                 valid_d_separator_set: list[Node] = []
                 logger.debug("The following set works:")
                 for node in current_conditioned_nodes:

@@ -41,6 +41,7 @@ def find_probability(dataFrame: pd.DataFrame, variables: list[Node]):
     logger.debug(f"Total cases: {totalCases}")
     return compatibleCasesCount / totalCases
 
+
 def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
     conditions = pd.Series([True] * len(dataFrame), index=dataFrame.index)
     for variable_node in variables:
@@ -49,7 +50,7 @@ def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
 
 
 # TODO: Counting wit node instead of dict
-def find_conditional_probability2(        
+def find_conditional_probability2(
     dataFrame: pd.DataFrame,
     targetRealization: dict[str, int],
     conditionRealization: dict[str, int],
@@ -75,17 +76,17 @@ def find_conditional_probability2(
     )
     return targetAndConditionProbability / conditionProbability
 
+
 def find_probability2(dataFrame: pd.DataFrame, realizationDict: dict[str, int]):
     compatibleCasesCount = count_occurrences_2(dataFrame, realizationDict)
     totalCases = dataFrame.shape[0]
-    
+
     return compatibleCasesCount / totalCases
+
 
 def count_occurrences_2(dataFrame: pd.DataFrame, realizationDict: dict[str, int]):
     conditions = pd.Series([True] * len(dataFrame), index=dataFrame.index)
     for variable_str in realizationDict:
         conditions &= dataFrame[variable_str] == realizationDict[variable_str]
 
-    return dataFrame[conditions].shape[0] 
-
-
+    return dataFrame[conditions].shape[0]
