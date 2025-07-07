@@ -1,26 +1,19 @@
 import copy
+import logging
+
 import gurobipy as gp
 from gurobipy import GRB
-import logging
 
 logger = logging.getLogger(__name__)
 
 
-import sys
 import os
+import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-import pandas as pd
-from itertools import product
-
-from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability2,
-    find_probability2,
-)
-from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_init import (
-    InitScalable,
-)
+from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_init import \
+    InitScalable
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 
 BIG_M = 1e4
