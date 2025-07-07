@@ -155,16 +155,16 @@ def testBetaVars():
     )
 
     # for ind, betaVar in enumerate(betaVarsBits):
-    #     #print(f"For betaVar {ind}")
-    #     #print("Bit plus:")
+    #     print(f"For betaVar {ind}")
+    #     print("Bit plus:")
     #     for bitPlus in betaVar[0]:
     #       print(f"{bitPlus} ", end="")
-    #       print("\n")
+    #     print("\n")
 
     # #print("Bit minus:")
     # for bitMinus in betaVar[1]:
     #   print(f"{bitMinus} ", end="")
-    #   print("\n")
+    # print("\n")
 
     # print("Check coefficients:")
     checkCoefs: list[float] = []
