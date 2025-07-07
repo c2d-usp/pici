@@ -155,15 +155,15 @@ def testBetaVars():
     )
 
     # for ind, betaVar in enumerate(betaVarsBits):
-    #     #print(f"For betaVar {ind}")
-    #     #print("Bit plus:")
+    #     print(f"For betaVar {ind}")
+    #     print("Bit plus:")
     #     for bitPlus in betaVar[0]:
-    # print(f"{bitPlus} ", end="")
-    # print("\n")
+    #       print(f"{bitPlus} ", end="")
+    #     print("\n")
 
     # #print("Bit minus:")
     # for bitMinus in betaVar[1]:
-    # print(f"{bitMinus} ", end="")
+    #   print(f"{bitMinus} ", end="")
     # print("\n")
 
     # print("Check coefficients:")
@@ -182,14 +182,14 @@ def testBetaVars():
         checkCoefs.append(prob)
 
     # for ind, coef in enumerate(betaVarsCoeffObjSubproblem):
-    # print(f"#{ind} coef = {coef} | check = {checkCoefs[ind]}")
+    #   print(f"#{ind} coef = {coef} | check = {checkCoefs[ind]}")
 
 
 def testParametricColumns():
     parametricColumns = InitScalable.defineParametricColumn(M=2, N=2)
     # for index, row in enumerate(parametricColumns):
-    # print(f"Analyse row {index}")
-    # print(row)
+    #   print(f"Analyse row {index}")
+    #   print(row)
 
 
 if __name__ == "__main__":

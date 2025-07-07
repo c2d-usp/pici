@@ -1,149 +1,153 @@
-# Causal Reasoning (WIP)
+Causal Reasoning (WIP)
+=======================
+## Table of Contents
+1. [About](#about)
+2. [Usage](#usage)
+3. [How it works](#how-it-works)
+4. [Developer Tools](#developer-tools)
+   - [Install](#install)
+   - [Virtual Environment](#virtual-environment)
+   - [Running Examples](#running-examples)
+   - [Linters](#linters)
+     - [Black](#black)
+     - [Isort](#isort)
+   - [Unittest](#unittest)
+5. [Acknowledgements](#acknowledgements)
 
-This project was carried out with the support of Itaú Unibanco S.A., through the Itaú Scholarship Program (PBI).
 
-This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries) 
+## About
+
+Causal Reasoning is a causal inference package that can handle Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
+
+This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
 
 
-## Install Dependencies
-### Linux
-<a name="poetry"></a>
-#### Poetry
-We're using [poetry](https://python-poetry.org/docs/) as pyhton dependency management.
+## Usage
+
+- Install the package
+```python
+pip install causal_reasoning
+```
+
+- Import the package
+```python
+import causal_reasoning
+```
+
+- Create a causal model:
+```python
+df = pd.read_csv(model_csv_path)
+edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+custom_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+unobservable_variables = ["U1", "U2"]
+
+model = causal_reasoning.causal_model.CausalModel(
+  data=df,
+  edges=edges,
+  custom_cardinalities=custom_cardinalities,
+  unobservables_labels=unobservable_variables,
+)
+```
+
+- Set target and intervetions
+```python
+model.set_interventions([('X', 1)])
+model.set_target(('Y', 1))
+```
+
+- Make the query
+```python
+lower_bound, upper_bound = model.inference_intervention_query()
+```
+Or you can pass the target and intervention as an argument: 
+
+```python
+lower_bound, upper_bound = model.inference_intervention_query([('X', 1)], ('Y', 1))
+```
+
+## How it works
+
+TODO: EXPLAIN THE THEORY AND METHODS.
+
+## Developer tools
+
+All development tools are managed with [Poetry](https://python-poetry.org/docs/).  
+To get started, install Poetry by following the [official instructions](https://python-poetry.org/docs/#installation), then activate the virtual environment.
+
+### Install
 
 - Install dependencies
 ```bash
 poetry install
 ```
 
-## How to run
-### Linux
+
+### Virtual Environment
+
+Activate the virtual environment:
+
 - Activate poetry virtual environment
 ```bash
 eval $(poetry env activate)
 ```
 
-```bash
-python script.py
-```
-
-Example:
-```bash
-python causal_reasoning/example/scipy_example.py
-```
-The output should be:
-```
-Using the complete objective function, the results are:
-Lower bound: -0.23 - Upper bound: -0.15
-
-Using the complete objective function, the result for the positive query is:
-Lower bound: 0.45 - Upper bound: 0.52
-Using the complete objective function, the result for the negative query is:
-Lower bound: 0.67 - Upper bound: 0.68
-
-With the first method, we obtain the interval: [-0.23,-0.15]
-With the second method, we obtain the interval: [-0.23,-0.15]
-```
-
 - To exit the poetry virtual environment run:
-
 ```bash
 deactivate
 ```
-<br>
 
-## Sofwtare Engineering Best Practices
+### Running Examples
 
-There following tools are automatically installed with [poetry](#poetry).
-Therefore, you don't need to install them on your machine. 
-
-<a name="flake8"></a>
-### Flake8 
-**Flake8** is a powerful tool for enforcing style guidelines. It scans your code to identify deviations from PEP 8, such as improper indentation, excessive line lengths, and unused imports. By integrating Flake8 into your development workflow, you can maintain clean and consistent code, making it easier to read and maintain.
-
-Key Features:
-- **Syntax Checking:** Detects syntax errors that could cause your code to fail.
-- **Style Enforcement:** Ensures adherence to PEP 8 guidelines, promoting uniform coding practices.
-- **Plugin Support:** Extensible with plugins to add more checks or customize existing ones.
-
-Usage Example:
-
-```shell
-flake8 your_script.py
+Example:
+```bash
+python main.py
 ```
 
-Running this command will output any style violations or errors found in `your_script.py`, allowing you to address them promptly.
+You also can run unit tests:
+```bash
+python tests/test_causal_model.py
+```
 
-<br>
 
-<a name="black"></a>
-### Black 
-This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.  
+### Linters
+
+This project uses some linters to follow a code standardization that improves code consistency and cleanliness.
+
+#### Black
+
+This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.
 Black is an code formatter that ensures consistency by enforcing a uniform style.
 
 Usage Example:
 
-```shell
+```bash
 black your_script.py
 ```
 
 Running this command will change automatically.
 
-<br>
 
-### Imports
-
-<a name="isort"></a>
 #### Isort
-**isort** focuses specifically on the organization of import statements. It automatically sorts imports alphabetically and separates them into sections (standard library, third-party, and local imports), ensuring that your import statements are both orderly and compliant with best practices. This not only enhances readability but also helps prevent merge conflicts and import-related errors.
 
-Key Features:
-- **Automatic Sorting:** Organizes imports alphabetically and by category.
-- **Customization:** Allows configuration to match specific project requirements.
+**isort** focuses specifically on the organization of import statements.
+It automatically sorts imports alphabetically and separates them into sections (standard library, third-party, and local imports).
 
 Usage Example:
 
-isort is very easy to use. You can sort the imports in a Python file by running the following command in your terminal:
-
-```shell
+```bash
 isort your_script.py
-```
-
-Or for all files:
-```shell
-isort .
 ```
 
 After running the command, save the file to apply the sorted imports.
 
-**Example of isort in Action:**
 
-_Before isort:_
-```python
-import os
-import sys
-import requests
-from mymodule import myfunction
-import numpy as np
-```
+### Unittest
 
-_After isort:_
+TODO: EXPLAIN SOME UNITTESTS
 
-```python
-import os
-import sys
 
-import numpy as np
-import requests
+## Acknowledgements
+We thank the ICTi, Instituto de Ciência e Tecnologia Itaú, for providing key funding
+for this work through the C2D - Centro de Ciência de Dados at Universidade de São Paulo.
 
-from mymodule import myfunction
-```
-
-In this example, isort has organized the imports into three distinct sections:
-- **Standard Library Imports:** os, sys
-- **Third-Party Imports:** numpy, requests
-- **Local Application Imports:** mymodule
-
-This separation improves readability and maintainability of your code by clearly distinguishing between different types of dependencies.
-
-<br>
+Any opinions, findings, conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of Itaú Unibanco and Instituto de Ciência e Tecnologia Itaú. All data used in this study comply with the Brazilian General Data Protection Law.
