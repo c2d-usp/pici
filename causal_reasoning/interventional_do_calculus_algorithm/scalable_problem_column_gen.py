@@ -581,7 +581,7 @@ class ScalarProblem:
             minimum=minimum,
         )
 
-    def solve(self):
+    def solve(self, method = -1, presolve = -1, numeric_focus = -1, opt_tol = -1, fea_tol = -1):
         """
         Gurobi does not support branch-and-price, as this requires to add columns
         at local nodes of the search tree. A heuristic is used instead, where the
@@ -590,8 +590,26 @@ class ScalarProblem:
         solution could be overlooked, as additional columns are not generated at
         the local nodes of the search tree.
         """
+        self.master.model.params.Method = method
+        self.subproblem.model.params.Method = method
+
+        if presolve != -1:
+            self.master.model.Params.Presolve = presolve
+            self.subproblem.model.Params.Presolve = presolve
+        if numeric_focus != -1:
+            self.master.model.Params.NumericFocus = numeric_focus
+            self.subproblem.model.Params.NumericFocus = numeric_focus
+
+        if opt_tol != -1:
+            self.master.model.Params.OptimalityTol = opt_tol
+            self.subproblem.model.Params.OptimalityTol = opt_tol
+
+        if fea_tol != -1:
+            self.master.model.Params.FeasibilityTol = fea_tol
+            self.subproblem.model.Params.FeasibilityTol = fea_tol
+    
         numberIterations = self._generate_patterns()
-        self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)  # useless?
+        self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
         self.master.model.write("model.lp")
         self.master.model.write("model.mps")
