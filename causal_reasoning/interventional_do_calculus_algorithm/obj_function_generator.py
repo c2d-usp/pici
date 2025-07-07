@@ -229,10 +229,9 @@ class ObjFunctionGenerator:
                     current_target, current_targets, interventionLatent, intervention
                 )
 
-                # TODO: Não usa mais o intervention?
                 current_targets = list(
                     (set(current_targets) | set(valid_d_separator_set))
-                    - {intervention, current_target}
+                    - {current_target}
                 )
 
                 conditionalProbabilities[current_target] = valid_d_separator_set

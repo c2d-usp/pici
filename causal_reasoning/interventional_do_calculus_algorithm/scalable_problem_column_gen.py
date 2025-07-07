@@ -1,31 +1,24 @@
 import copy
+import logging
+
 import gurobipy as gp
 from gurobipy import GRB
-import logging
 
 logger = logging.getLogger(__name__)
 
 
-import sys
 import os
+import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-import pandas as pd
-from itertools import product
-
-from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability2,
-    find_probability2,
-)
-from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_init import (
-    InitScalable,
-)
+from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_init import \
+    InitScalable
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 
 BIG_M = 1e4
 DBG = False
-
+MAX_ITERACTIONS_ALLOWED = 2000
 
 class MasterProblem:
     def __init__(self):
@@ -91,7 +84,7 @@ class SubProblem:
         self,
         amountBitsPerCluster: int,
         amountBetaVarsPerX: int,
-        duals: list[float],
+        duals: dict[int, float],
         amountNonTrivialRestrictions: int,
         betaVarsCost: list[float],
         parametric_column: list[tuple[list[int]]],
@@ -541,8 +534,8 @@ class ScalarProblem:
             )
             self.columns_base.append(newColumn)
             counter += 1
-            if counter >= 10000:
-                raise TimeoutError(f"Too many iterations")
+            if counter >= MAX_ITERACTIONS_ALLOWED:
+                raise TimeoutError(f"Too many iterations (MAX:{MAX_ITERACTIONS_ALLOWED})")
             logger.info(f"Iteration Number = {counter}")
 
         return counter
@@ -588,7 +581,7 @@ class ScalarProblem:
             minimum=minimum,
         )
 
-    def solve(self):
+    def solve(self, method = -1, presolve = -1, numeric_focus = -1, opt_tol = -1, fea_tol = -1):
         """
         Gurobi does not support branch-and-price, as this requires to add columns
         at local nodes of the search tree. A heuristic is used instead, where the
@@ -597,8 +590,26 @@ class ScalarProblem:
         solution could be overlooked, as additional columns are not generated at
         the local nodes of the search tree.
         """
+        self.master.model.params.Method = method
+        self.subproblem.model.params.Method = method
+
+        if presolve != -1:
+            self.master.model.Params.Presolve = presolve
+            self.subproblem.model.Params.Presolve = presolve
+        if numeric_focus != -1:
+            self.master.model.Params.NumericFocus = numeric_focus
+            self.subproblem.model.Params.NumericFocus = numeric_focus
+
+        if opt_tol != -1:
+            self.master.model.Params.OptimalityTol = opt_tol
+            self.subproblem.model.Params.OptimalityTol = opt_tol
+
+        if fea_tol != -1:
+            self.master.model.Params.FeasibilityTol = fea_tol
+            self.subproblem.model.Params.FeasibilityTol = fea_tol
+    
         numberIterations = self._generate_patterns()
-        self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)  # useless?
+        self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
         self.master.model.write("model.lp")
         self.master.model.write("model.mps")

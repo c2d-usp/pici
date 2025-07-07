@@ -114,7 +114,7 @@ def build_bi_linear_problem(
     df: pd.DataFrame,
     interventions: tuple[Node],
     target: Node,
-):
+) -> tuple[str, str]:
     multiObjFG = DoubleInterventionObjFunctionGenerator(
         graph=graph,
         dataFrame=df,
@@ -223,3 +223,4 @@ def build_bi_linear_problem(
         upper = None
 
     logger.info(f"Query interval = [{lower, upper}]")
+    return str(lower), str(upper)
