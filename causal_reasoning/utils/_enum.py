@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class DirectoriesPath(Enum):
@@ -48,3 +48,7 @@ class PlotGraphColors(Enum):
 class OptimizersLabels(Enum):
     GUROBI = "gurobi"
     SCIPY = "scipy"
+
+class OptimizationDirection(Enum):
+    MINIMIZE = auto()
+    MAXIMIZE = auto()
