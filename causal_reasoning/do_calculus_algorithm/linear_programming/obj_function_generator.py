@@ -6,12 +6,15 @@ logger = logging.getLogger(__name__)
 import networkx as nx
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import \
-    MechanismGenerator
+from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import (
+    MechanismGenerator,
+)
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability, find_probability)
+    find_conditional_probability,
+    find_probability,
+)
 from causal_reasoning.utils.types import MechanismType
 
 
@@ -98,7 +101,7 @@ class ObjFunctionGenerator:
         TODO: Check the order of "inputCases": it should be the same as the order of the spaces, which is the same as in debugOrder.
         TODO: the case in which the summandNodes is empty (e.g Balke Pearl) has a very ugly fix
         """
-        objFunctionCoefficients: list[float] = []
+        obj_function_coefficients: list[float] = []
         logger.debug("Debug input cases:")
         logger.debug(f"Size of #inputs: {len(inputCases)}")
         logger.debug("first component:")
@@ -171,9 +174,9 @@ class ObjFunctionGenerator:
                 mechanismCoefficient += partialCoefficient
                 logger.debug(f"current coef = {mechanismCoefficient}")
 
-            objFunctionCoefficients.append(mechanismCoefficient)
+            obj_function_coefficients.append(mechanismCoefficient)
 
-        return objFunctionCoefficients
+        return obj_function_coefficients
 
     def find_linear_good_set(self):
         """

@@ -1,11 +1,11 @@
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import \
-    MechanismGenerator
+from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import (
+    MechanismGenerator,
+)
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.utils.probabilities_helper import \
-    find_conditional_probability
+from causal_reasoning.utils.probabilities_helper import find_conditional_probability
 from causal_reasoning.utils.types import MechanismType
 
 
@@ -35,7 +35,7 @@ def generate_constraints(
     usedVars: list[Node] = []
     productTerms: list[dict[Node, list[Node]]] = []
 
-    decisionMatrix: list[list[int]] = [[1 for _ in range(len(mechanisms))]]
+    decision_matrix: list[list[int]] = [[1 for _ in range(len(mechanisms))]]
 
     for node in topoOrder:
         if (unob in node.parents) and (node in consideredCcomp):
@@ -104,5 +104,5 @@ def generate_constraints(
                         coef *= 0
                         break
             aux.append(float(coef))
-        decisionMatrix.append(aux)
-    return probs, decisionMatrix
+        decision_matrix.append(aux)
+    return probs, decision_matrix

@@ -49,6 +49,13 @@ class OptimizersLabels(Enum):
     GUROBI = "gurobi"
     SCIPY = "scipy"
 
+
 class OptimizationDirection(Enum):
     MINIMIZE = auto()
     MAXIMIZE = auto()
+
+
+class GurobiParameters(Enum):
+    OUTPUT_SUPRESSED = 0
+    OUTPUT_VERBOSE = 1
+    DefaultObjectiveCoefficients = 1

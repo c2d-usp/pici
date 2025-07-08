@@ -3,17 +3,23 @@ import logging
 import gurobipy as gp
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.double_intervention_obj_func_gen import \
-    DoubleInterventionObjFunctionGenerator
+from causal_reasoning.do_calculus_algorithm.linear_programming.double_intervention_obj_func_gen import (
+    DoubleInterventionObjFunctionGenerator,
+)
 
 logger = logging.getLogger(__name__)
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.linear_constraints import \
-    generate_constraints
-from causal_reasoning.do_calculus_algorithm.linear_programming.obj_function_generator import \
-    ObjFunctionGenerator
+from causal_reasoning.do_calculus_algorithm.linear_programming.linear_constraints import (
+    generate_constraints,
+)
+from causal_reasoning.do_calculus_algorithm.linear_programming.obj_function_generator import (
+    ObjFunctionGenerator,
+)
 from causal_reasoning.do_calculus_algorithm.linear_programming.optimizers import (
-    Optimizer, choose_optimizer, compute_bounds)
+    Optimizer,
+    choose_optimizer,
+    compute_bounds,
+)
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils._enum import OptimizersLabels
@@ -41,7 +47,7 @@ def build_linear_problem(
         (set(cComponentEndogenous) & set(objFG.debugOrder)) | {objFG.intervention}
     )
 
-    probs, decisionMatrix = generate_constraints(
+    probs, decision_matrix = generate_constraints(
         data=df,
         dag=objFG.graph,
         unob=interventionLatentParent,
@@ -49,22 +55,22 @@ def build_linear_problem(
         mechanisms=mechanisms,
     )
 
-    objFunctionCoefficients: list[float] = objFG.build_objective_function(mechanisms)
+    obj_function_coefficients: list[float] = objFG.build_objective_function(mechanisms)
     logger.debug("-- DEBUG OBJ FUNCTION --")
-    for i, coeff in enumerate(objFunctionCoefficients):
+    for i, coeff in enumerate(obj_function_coefficients):
         logger.debug(f"c_{i} = {coeff}")
 
     logger.debug("-- DECISION MATRIX --")
-    for i in range(len(decisionMatrix)):
-        for j in range(len(decisionMatrix[i])):
-            logger.debug(f"{decisionMatrix[i][j]} ")
+    for i in range(len(decision_matrix)):
+        for j in range(len(decision_matrix[i])):
+            logger.debug(f"{decision_matrix[i][j]} ")
         logger.debug(f" = {probs[i]}")
 
     optimizer: Optimizer = choose_optimizer(
         optimizer_label,
         probs=probs,
-        decisionMatrix=decisionMatrix,
-        objFunctionCoefficients=objFunctionCoefficients,
+        decision_matrix=decision_matrix,
+        obj_function_coefficients=obj_function_coefficients,
     )
 
     lowerBound, upperBound = compute_bounds(optimizer)
@@ -120,7 +126,7 @@ def build_bi_linear_problem(
         mechanisms=mechanisms_2,
     )
 
-    objFunctionCoefficients: list[list[float]] = multiObjFG.build_objective_function(
+    obj_function_coefficients: list[list[float]] = multiObjFG.build_objective_function(
         mechanisms_1, mechanisms_2
     )
 
@@ -156,7 +162,7 @@ def build_bi_linear_problem(
 
     model.setObjective(
         gp.quicksum(
-            objFunctionCoefficients[i][j] * vars[i] * vars[j]
+            obj_function_coefficients[i][j] * vars[i] * vars[j]
             for i in range(number_of_vars_1)
             for j in range(number_of_vars_2)
         ),

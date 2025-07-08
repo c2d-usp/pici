@@ -9,7 +9,9 @@ import pandas as pd
 
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability2, find_probability2)
+    find_conditional_probability2,
+    find_probability2,
+)
 
 
 def genGraph(N, M):

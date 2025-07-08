@@ -6,12 +6,15 @@ logger = logging.getLogger(__name__)
 import networkx as nx
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import \
-    MechanismGenerator
+from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import (
+    MechanismGenerator,
+)
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability, find_probability)
+    find_conditional_probability,
+    find_probability,
+)
 from causal_reasoning.utils.types import MechanismType
 
 
@@ -121,11 +124,11 @@ class DoubleInterventionObjFunctionGenerator:
         """
 
         # Pensar se é melhor uni ou bi dimensional
-        objFunctionCoefficients: list[list[float]] = []
+        obj_function_coefficients: list[list[float]] = []
         for i in range(len(mechanisms_1)):
-            objFunctionCoefficients.append([])
+            obj_function_coefficients.append([])
             for j in range(len(mechanisms_2)):
-                objFunctionCoefficients[i].append(0)
+                obj_function_coefficients[i].append(0)
 
         # INICIALIZAR com len(u) e len(w)
         # [
@@ -233,8 +236,8 @@ class DoubleInterventionObjFunctionGenerator:
 
                     mechanismCoefficient += partialCoefficient
                     logger.debug(f"current coef = {mechanismCoefficient}")
-                objFunctionCoefficients[i][j] = mechanismCoefficient
-        return objFunctionCoefficients
+                obj_function_coefficients[i][j] = mechanismCoefficient
+        return obj_function_coefficients
 
     def find_linear_good_set(self):
         """

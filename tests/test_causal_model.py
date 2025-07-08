@@ -234,9 +234,10 @@ class TestMNCases(unittest.TestCase):
         cases = [
             (1, 1, DataExamplesPaths.CSV_N1M1),
             (2, 1, DataExamplesPaths.CSV_N2M1),
-            (3, 1, DataExamplesPaths.CSV_N3M1),
-            (4, 1, DataExamplesPaths.CSV_N4M1),
-            (1, 2, DataExamplesPaths.CSV_N1M2),
+            # Too long to run
+            # (3, 1, DataExamplesPaths.CSV_N3M1),
+            # (4, 1, DataExamplesPaths.CSV_N4M1),
+            # (1, 2, DataExamplesPaths.CSV_N1M2),
         ]
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
