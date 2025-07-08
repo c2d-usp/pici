@@ -147,11 +147,6 @@ class CausalModel:
             target=self.target,
             optimizer_label=OptimizersLabels.GUROBI.value
         )
-        # if l is None:
-        #     l = "None"
-        # if u is None:
-        #     u = "None"
-        # return l, u
 
     def double_intervention_query(self):
         return build_bi_linear_problem(
