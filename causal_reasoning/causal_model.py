@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.do_calculus_algorithm.linear_programming.gurobi_use import (
-    gurobi_build_linear_problem,
-)
+from causal_reasoning.utils._enum import OptimizersLabels
+
 from causal_reasoning.do_calculus_algorithm.linear_programming.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
@@ -141,13 +140,18 @@ class CausalModel:
         raise Exception("None interventions found")
 
     def single_intervention_query(self) -> tuple[str, str]:
-        # return build_linear_problem(
-        return gurobi_build_linear_problem(
-            self.graph,
-            self.data,
-            self.interventions[0],
-            self.target,
+        return build_linear_problem(
+            graph=self.graph,
+            df=self.data,
+            intervention=self.interventions[0],
+            target=self.target,
+            optimizer_label=OptimizersLabels.GUROBI.value
         )
+        # if l is None:
+        #     l = "None"
+        # if u is None:
+        #     u = "None"
+        # return l, u
 
     def double_intervention_query(self):
         return build_bi_linear_problem(

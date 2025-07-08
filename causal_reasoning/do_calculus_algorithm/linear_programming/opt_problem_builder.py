@@ -1,5 +1,4 @@
 import pandas as pd
-from scipy.optimize import linprog
 import logging
 import gurobipy as gp
 
@@ -9,6 +8,7 @@ from causal_reasoning.do_calculus_algorithm.linear_programming.double_interventi
 
 logger = logging.getLogger(__name__)
 
+from causal_reasoning.do_calculus_algorithm.linear_programming.optimizers import Optimizer, choose_optimizer, compute_bounds
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.do_calculus_algorithm.linear_programming.linear_constraints import (
@@ -17,13 +17,14 @@ from causal_reasoning.do_calculus_algorithm.linear_programming.linear_constraint
 from causal_reasoning.do_calculus_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )
-
+from causal_reasoning.utils._enum import OptimizersLabels
 
 def build_linear_problem(
     graph: Graph,
     df: pd.DataFrame,
     intervention: Node,
     target: Node,
+    optimizer_label: str = OptimizersLabels.GUROBI.value,
 ) -> tuple[str, str]:
     objFG = ObjFunctionGenerator(
         graph=graph,
@@ -58,55 +59,16 @@ def build_linear_problem(
         for j in range(len(decisionMatrix[i])):
             logger.debug(f"{decisionMatrix[i][j]} ")
         logger.debug(f" = {probs[i]}")
-    intervals = [(0, 1) for _ in range(len(decisionMatrix[0]))]
+    
+    optimizer: Optimizer = choose_optimizer(optimizer_label, probs=probs, decisionMatrix=decisionMatrix, objFunctionCoefficients=objFunctionCoefficients)
 
-    lowerBoundSol = linprog(
-        c=objFunctionCoefficients,
-        A_ub=None,
-        b_ub=None,
-        A_eq=decisionMatrix,
-        b_eq=probs,
-        method="highs",
-        bounds=intervals,
-    )
-    print("Success:", lowerBoundSol.success)
-    print("Status:", lowerBoundSol.status)
-    print("Message:", lowerBoundSol.message)
-    if lowerBoundSol is None:
-        print(f"lowerBoundSol is None")
-        lowerBound = None
-    elif lowerBoundSol.fun is None:
-        print(f"lowerBoundSol.fun is None")
-        lowerBound = None
-    else:
-        lowerBound = lowerBoundSol.fun
-
-    upperBoundSol = linprog(
-        c=[-x for x in objFunctionCoefficients],
-        A_ub=None,
-        b_ub=None,
-        A_eq=decisionMatrix,
-        b_eq=probs,
-        method="highs",
-        bounds=intervals,
-    )
-    print("Success:", upperBoundSol.success)
-    print("Status:", upperBoundSol.status)
-    print("Message:", upperBoundSol.message)
-    if upperBoundSol is None:
-        upperBound = None
-        print(f"upperBoundSol is None")
-    elif upperBoundSol.fun is None:
-        upperBound = None
-        print(f"upperBoundSol.fun is None")
-    else:
-        upperBound = -upperBoundSol.fun
+    lowerBound, upperBound = compute_bounds(optimizer)
 
     logger.info(
         f"Causal query: P({target.label}={target.value}|do({intervention.label}={intervention.value}))"
-    )
+        )
     logger.info(f"Bounds: {lowerBound} <= P <= {upperBound}")
-    return str(lowerBound), str(upperBound)
+    return lowerBound, upperBound
 
 
 def build_bi_linear_problem(

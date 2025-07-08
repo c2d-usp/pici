@@ -29,7 +29,7 @@ def generate_constraints(
     unob: Node,
     consideredCcomp: list[Node],
     mechanisms: MechanismType,
-) -> tuple[float, list[list[int]]]:
+) -> tuple[list[float], list[list[int]]]:
     topoOrder: list[Node] = dag.topologicalOrder
     cCompOrder: list[Node] = []
     probs: list[float] = [1.0]
