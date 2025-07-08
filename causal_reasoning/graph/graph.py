@@ -70,7 +70,7 @@ class Graph:
                 return self.topologicalOrder[j]
 
         # TODO: BETTER ERROR HANDLING
-        raise Exception(f"Node not found")
+        raise Exception("Node not found")
 
     # Not Used
     def find_cComponents(self):

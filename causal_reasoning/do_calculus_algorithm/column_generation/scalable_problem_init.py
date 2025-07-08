@@ -102,7 +102,7 @@ class InitScalable:
             objCoeff *= find_conditional_probability2(
                 dataFrame=df,
                 targetRealization=targetRealization,
-                conditionRealization={f"X": XValue},
+                conditionRealization={"X": XValue},
             )
 
             betaVarsBits[betaVarIndex] = (bitPlus.copy(), bitMinus.copy())

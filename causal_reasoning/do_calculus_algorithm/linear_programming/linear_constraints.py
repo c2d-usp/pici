@@ -46,7 +46,7 @@ def generate_constraints(
     Wc: list[Node] = cCompOrder.copy()
     for cCompNode in cCompOrder:
         for par in cCompNode.parents:
-            if not (par in Wc) and (par != unob):
+            if par not in Wc and (par != unob):
                 Wc.append(par)
 
     # TODO: ENQUANTO NÃO ESTIVER VAZIA
@@ -54,9 +54,9 @@ def generate_constraints(
         node = cCompOrder.pop(0)
         for cond in Wc:
             if topoOrder.index(cond) < topoOrder.index(node):
-                if not (cond in condVars):
+                if cond not in condVars:
                     condVars.append(cond)
-                if not (cond in usedVars):
+                if cond not in usedVars:
                     usedVars.append(cond)
         productTerms.append({node: condVars.copy()})
         condVars.clear()

@@ -3,20 +3,13 @@ import time as tm
 
 logger = logging.getLogger(__name__)
 
-from itertools import product
 
 import pandas as pd
 
-from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
-from causal_reasoning.utils.data_gen import generate_data_for_scale_case
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
-from causal_reasoning.utils.probabilities_helper import (
-    find_conditional_probability2,
-    find_probability2,
-)
 
 EXPERIMENT_PATH = "./outputs/second_concurrent_experiment_results.csv"
 ERROR_PATH = "./outputs/second_concurrent_error_log.txt"
@@ -103,7 +96,7 @@ def run_test(N, M, method, presolve=-1, numeric_focus=-1, fea_tol=-1, opt_tol=-1
             )
     experiments_df = pd.concat([experiments_df, new_row_df], ignore_index=True)
     experiments_df.to_csv(EXPERIMENT_PATH, index=False)
-    logger.info(f"CSV updated")
+    logger.info("CSV updated")
 
 
 def main():

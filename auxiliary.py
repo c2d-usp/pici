@@ -1,11 +1,9 @@
 import logging
-import time as tm
 
 logger = logging.getLogger(__name__)
 
 from itertools import product
 
-import pandas as pd
 
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 from causal_reasoning.utils.probabilities_helper import (

@@ -1,6 +1,5 @@
 import os
 import sys
-import unittest
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
@@ -112,14 +111,14 @@ def main():
 
     b = [3, 2, 5, 1]
     x, A, b = PhaseI().phase_one_gurobi(A, b)
-    print(f"Variables coefficients:")
+    print("Variables coefficients:")
     print(x)
 
     A = np.array([[1, 1], [2, 2]], dtype=float)
 
     b = np.array([4, 8], dtype=float)
     x, A, b = PhaseI().phase_one_gurobi(A, b)
-    print(f"Variables coefficients:")
+    print("Variables coefficients:")
     print(x)
 
     A = np.array([[1, 1], [1, 1]], dtype=float)
@@ -127,7 +126,7 @@ def main():
     b = np.array([1, 3], dtype=float)
 
     x, A, b = PhaseI().phase_one_gurobi(A, b)
-    print(f"Variables coefficients:")
+    print("Variables coefficients:")
     print(x)
 
 
