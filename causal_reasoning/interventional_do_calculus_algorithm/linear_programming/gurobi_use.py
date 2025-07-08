@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.linear_constraints import (
+from causal_reasoning.interventional_do_calculus_algorithm.linear_programming.linear_constraints import (
     generate_constraints,
 )
-from causal_reasoning.interventional_do_calculus_algorithm.obj_function_generator import (
+from causal_reasoning.interventional_do_calculus_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )
 

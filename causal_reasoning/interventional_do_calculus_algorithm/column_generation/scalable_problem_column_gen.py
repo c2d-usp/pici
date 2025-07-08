@@ -12,7 +12,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_init import \
+from causal_reasoning.interventional_do_calculus_algorithm.column_generation.scalable_problem_init import \
     InitScalable
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 

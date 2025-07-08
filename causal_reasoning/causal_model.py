@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import (
+from causal_reasoning.interventional_do_calculus_algorithm.linear_programming.gurobi_use import (
     gurobi_build_linear_problem,
 )
-from causal_reasoning.interventional_do_calculus_algorithm.opt_problem_builder import (
+from causal_reasoning.interventional_do_calculus_algorithm.linear_programming.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
 )

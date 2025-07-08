@@ -8,7 +8,7 @@ import networkx as nx
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.mechanisms_generator import (
+from causal_reasoning.interventional_do_calculus_algorithm.linear_programming.mechanisms_generator import (
     MechanismGenerator,
 )
 from causal_reasoning.utils.probabilities_helper import (
