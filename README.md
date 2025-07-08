@@ -10,7 +10,6 @@ Causal Reasoning (WIP)
    - [Running Examples](#running-examples)
    - [Linters](#linters)
      - [Black](#black)
-     - [Isort](#isort)
    - [Unittest](#unittest)
 5. [Acknowledgements](#acknowledgements)
 
@@ -118,27 +117,20 @@ This project uses some linters to follow a code standardization that improves co
 This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.
 Black is an code formatter that ensures consistency by enforcing a uniform style.
 
-Usage Example:
+Usage example for a file:
 
 ```bash
 black your_script.py
 ```
 
-Running this command will change automatically.
-
-
-#### Isort
-
-**isort** focuses specifically on the organization of import statements.
-It automatically sorts imports alphabetically and separates them into sections (standard library, third-party, and local imports).
-
-Usage Example:
+For all files in the current directory and sub-directories:
 
 ```bash
-isort your_script.py
+black .
 ```
 
-After running the command, save the file to apply the sorted imports.
+Running this command will change automatically.
+
 
 
 ### Unittest
