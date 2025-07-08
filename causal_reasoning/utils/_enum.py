@@ -43,3 +43,7 @@ class PlotGraphColors(Enum):
     TARGETS = "orange"
     UNOBSERVABLES = "lightgray"
     OBSERVABLES = "lightblue"
+
+class OptimizersLabels(Enum):
+    GUROBI = "gurobi"
+    SCIPY = "scipy"
