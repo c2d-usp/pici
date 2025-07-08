@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 import pandas as pd
 from itertools import product
 from causal_reasoning.utils.probabilities_helper import find_conditional_probability2, find_probability2
-from causal_reasoning.interventional_do_calculus_algorithm.column_generation.scalable_problem_column_gen import ScalarProblem
+from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import ScalarProblem
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils.data_gen import generate_data_for_scale_case

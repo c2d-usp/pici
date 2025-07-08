@@ -9,7 +9,7 @@ from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )
-from causal_reasoning.interventional_do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
+from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
 from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
