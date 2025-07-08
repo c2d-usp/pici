@@ -1,8 +1,8 @@
+import logging
 from abc import ABC, abstractmethod
+
 import gurobipy as gp
 from scipy.optimize import linprog
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,8 @@ from causal_reasoning.utils._enum import OptimizersLabels
 
 
 class Optimizer(ABC):
-    def __init__(self,
+    def __init__(
+        self,
         probs: list[float],
         decisionMatrix: list[list[int]],
         objFunctionCoefficients: list[float],
@@ -18,11 +19,11 @@ class Optimizer(ABC):
         self.probs = probs
         self.decisionMatrix = decisionMatrix
         self.objFunctionCoefficients = objFunctionCoefficients
-    
+
     def template_method(self) -> tuple[str, str]:
         self.setup()
         return self.compute_bounds()
-    
+
     @abstractmethod
     def setup(self) -> None:
         pass
@@ -37,7 +38,12 @@ class Optimizer(ABC):
 
 
 class GurobiOptimizer(Optimizer):
-    def __init__(self, probs: list[float], decisionMatrix: list[list[int]], objFunctionCoefficients: list[float]) -> None:
+    def __init__(
+        self,
+        probs: list[float],
+        decisionMatrix: list[list[int]],
+        objFunctionCoefficients: list[float],
+    ) -> None:
         super().__init__(probs, decisionMatrix, objFunctionCoefficients)
 
         self.model = gp.Model("linear")
@@ -92,7 +98,7 @@ class GurobiOptimizer(Optimizer):
             bound = self.model.objVal
             logger.info(f"{msg} solution found!\nMIN Query: {bound}")
             return str(bound)
-    
+
         logger.info(
             f"{msg} solution not found. Gurobi status code: {self.model.Status}"
         )
@@ -100,9 +106,14 @@ class GurobiOptimizer(Optimizer):
 
 
 class ScipyOptimizer(Optimizer):
-    def __init__(self, probs: list[float], decisionMatrix: list[list[int]], objFunctionCoefficients: list[float]) -> None:
+    def __init__(
+        self,
+        probs: list[float],
+        decisionMatrix: list[list[int]],
+        objFunctionCoefficients: list[float],
+    ) -> None:
         super().__init__(probs, decisionMatrix, objFunctionCoefficients)
-    
+
     def setup(self):
         self.intervals = [(0, 1) for _ in range(len(self.decisionMatrix[0]))]
 
@@ -144,7 +155,7 @@ def choose_optimizer(
     optimizer_label: str,
     probs: list[float],
     decisionMatrix: list[list[int]],
-    objFunctionCoefficients: list[float]
+    objFunctionCoefficients: list[float],
 ) -> tuple[str, str]:
 
     if optimizer_label == OptimizersLabels.GUROBI.value:
@@ -154,8 +165,7 @@ def choose_optimizer(
         return ScipyOptimizer(probs, decisionMatrix, objFunctionCoefficients)
 
     raise Exception(f"Optimizer {optimizer_label} not found.")
-    
+
 
 def compute_bounds(optimizer: Optimizer) -> tuple[str, str]:
     return optimizer.template_method()
-

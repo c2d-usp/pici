@@ -20,6 +20,7 @@ BIG_M = 1e4
 DBG = False
 MAX_ITERACTIONS_ALLOWED = 2000
 
+
 class MasterProblem:
     def __init__(self):
         self.model = gp.Model("master")
@@ -535,7 +536,9 @@ class ScalarProblem:
             self.columns_base.append(newColumn)
             counter += 1
             if counter >= MAX_ITERACTIONS_ALLOWED:
-                raise TimeoutError(f"Too many iterations (MAX:{MAX_ITERACTIONS_ALLOWED})")
+                raise TimeoutError(
+                    f"Too many iterations (MAX:{MAX_ITERACTIONS_ALLOWED})"
+                )
             logger.info(f"Iteration Number = {counter}")
 
         return counter
@@ -581,7 +584,7 @@ class ScalarProblem:
             minimum=minimum,
         )
 
-    def solve(self, method = -1, presolve = -1, numeric_focus = -1, opt_tol = -1, fea_tol = -1):
+    def solve(self, method=-1, presolve=-1, numeric_focus=-1, opt_tol=-1, fea_tol=-1):
         """
         Gurobi does not support branch-and-price, as this requires to add columns
         at local nodes of the search tree. A heuristic is used instead, where the
@@ -607,7 +610,7 @@ class ScalarProblem:
         if fea_tol != -1:
             self.master.model.Params.FeasibilityTol = fea_tol
             self.subproblem.model.Params.FeasibilityTol = fea_tol
-    
+
         numberIterations = self._generate_patterns()
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()

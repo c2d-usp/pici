@@ -1,18 +1,18 @@
-import unittest
-import sys
 import os
-import pandas as pd
+import sys
+import unittest
+
 import networkx as nx
+import pandas as pd
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from auxiliary import genGraph, true_value
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import DataExamplesPaths
-
-from auxiliary import true_value, genGraph
 
 
 class TestInferenceAlgorithm(unittest.TestCase):

@@ -1,6 +1,7 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 import networkx as nx
 
 THIS_DIR = os.path.dirname(__file__)
@@ -11,18 +12,14 @@ if PROJECT_ROOT not in sys.path:
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.utils.parser import (
-    parse_input_graph,
-    _parse_default_graph,
-    parse_edges,
-    _edge_string_to_edge_tuples,
-    list_tuples_into_list_nodes,
-    tuple_into_node,
-    parse_tuples_str_int_list,
-    parse_tuple_str_int,
-    parse_edges,
-    parse_to_string_list,
-)
+from causal_reasoning.utils.parser import (_edge_string_to_edge_tuples,
+                                           _parse_default_graph,
+                                           list_tuples_into_list_nodes,
+                                           parse_edges, parse_input_graph,
+                                           parse_to_string_list,
+                                           parse_tuple_str_int,
+                                           parse_tuples_str_int_list,
+                                           tuple_into_node)
 
 
 class TestParseDefaultGraph(unittest.TestCase):

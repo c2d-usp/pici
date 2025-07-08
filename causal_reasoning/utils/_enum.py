@@ -44,6 +44,7 @@ class PlotGraphColors(Enum):
     UNOBSERVABLES = "lightgray"
     OBSERVABLES = "lightblue"
 
+
 class OptimizersLabels(Enum):
     GUROBI = "gurobi"
     SCIPY = "scipy"

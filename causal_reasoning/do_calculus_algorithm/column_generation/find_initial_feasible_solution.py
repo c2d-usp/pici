@@ -1,16 +1,18 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-import gurobipy as gp
-from gurobipy import GRB
-import numpy as np
 import array
+
+import gurobipy as gp
+import numpy as np
+from gurobipy import GRB
+
 
 class PhaseI:
     def __init__(self):
@@ -25,7 +27,7 @@ class PhaseI:
 
         A = _parse_matrix_to_np_ndarray(A)
         b = _parse_matrix_to_np_ndarray(b)
-            
+
         m, n = A.shape
 
         # Step: 1 Ensure b >= 0 by flipping rows if needed
@@ -48,7 +50,9 @@ class PhaseI:
 
         # Constraints: A_mod @ x + artificial = b_mod
         for i in range(m):
-            constr_expr = gp.quicksum(A_mod[i, j] * x[j] for j in range(n)) + artificial[i]
+            constr_expr = (
+                gp.quicksum(A_mod[i, j] * x[j] for j in range(n)) + artificial[i]
+            )
             model.addConstr(constr_expr == b_mod[i], name=f"c_{i}")
 
         # Objective: minimize sum of artificial variables
@@ -73,9 +77,10 @@ class PhaseI:
         redundant_rows = []
         for i in range(m):
             if artificial[i].VBasis == 0:
-                print(f"Artificial var artificial[{i}] is in basis with value 0 — constraint {i} is redundant.")
+                print(
+                    f"Artificial var artificial[{i}] is in basis with value 0 — constraint {i} is redundant."
+                )
                 redundant_rows.append(i)
-
 
         # Remove redundant constraints from A and b
         A_clean = np.delete(A_mod, redundant_rows, axis=0)
@@ -86,6 +91,7 @@ class PhaseI:
 
         return x_vals, A_clean, b_clean
 
+
 def _parse_matrix_to_np_ndarray(M):
     if isinstance(M, np.ndarray):
         return M
@@ -95,38 +101,28 @@ def _parse_matrix_to_np_ndarray(M):
         return np.array(M)
     raise Exception("Unknown type.")
 
+
 def main():
 
     # Se tiver variável artificial com coef zero na base, é simplesmente tirar? Parece que sim.
     # ---> Quando pode ter uma artficial com coef zero na base?
     # ----------> Se tem restrições LD, então haverá artificial com zero coef
     # ----------> Se tem var artificial com coef zero, então tem restrições LD?? (NÃO SEI)
-    A = [
-        [1, 2, 3, 0],
-        [-1, 2, 6, 0],
-        [0, 4, 9, 0],
-        [0, 0, 3, 1]
-    ]
+    A = [[1, 2, 3, 0], [-1, 2, 6, 0], [0, 4, 9, 0], [0, 0, 3, 1]]
 
-    b = [3,2,5,1]
+    b = [3, 2, 5, 1]
     x, A, b = PhaseI().phase_one_gurobi(A, b)
     print(f"Variables coefficients:")
     print(x)
-    
-    A = np.array([
-        [1, 1],
-        [2, 2]
-    ], dtype=float)
+
+    A = np.array([[1, 1], [2, 2]], dtype=float)
 
     b = np.array([4, 8], dtype=float)
     x, A, b = PhaseI().phase_one_gurobi(A, b)
     print(f"Variables coefficients:")
     print(x)
 
-    A = np.array([
-        [1, 1],
-        [1, 1]
-    ], dtype=float)
+    A = np.array([[1, 1], [1, 1]], dtype=float)
 
     b = np.array([1, 3], dtype=float)
 
@@ -175,7 +171,6 @@ if __name__ == "__main__":
 #         x, A, b = PhaseI().phase_one_gurobi(A, b)
 #         expected = None
 #         self.assertEqual(x, expected)
-
 
 
 # if __name__ == '__main__':
