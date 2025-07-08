@@ -3,8 +3,12 @@ from typing import TypeVar
 import networkx as nx
 from pandas import DataFrame
 import logging
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.inference.CausalInference import CausalInference
+from pgmpy.estimators import MaximumLikelihoodEstimator
 
 logger = logging.getLogger(__name__)
+logging.getLogger("pgmpy").setLevel(logging.WARNING)
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
@@ -101,6 +105,43 @@ class CausalModel:
             interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
         return nx.is_d_separator(G=operated_digraph, x=set(set_nodes_X), y=set(set_nodes_Y), z=set(set_nodes_Z))
+     
+    
+    def identifiable_intervention_query(
+        self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
+    ) -> float:
+        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
+        if interventions_nodes is None and self.interventions is None:
+            raise Exception("Expect intervention to be not None")
+
+        if interventions_nodes is not None:
+            self.interventions = interventions_nodes
+
+        target_node = tuple_into_node(target, self.graph)
+        if target_node is None and self.target is None:
+            raise Exception("Expect target to be not None")
+        if target_node is not None:
+            self.target = target_node
+
+        G = DiscreteBayesianNetwork()
+        G.add_edges_from(self.graph.DAG.edges())
+        G.fit(self.data, estimator=MaximumLikelihoodEstimator)
+        model = CausalInference(G)
+        min_adjustment_set = model.get_minimal_adjustment_set(
+            X=interventions_nodes[0].label,
+            Y=target_node.label
+        )
+
+        distribution = model.query(
+            variables=[target_node.label],
+            do={interventions_nodes[i].label: interventions_nodes[i].value for i in range(len(interventions_nodes))},
+            adjustment_set=min_adjustment_set
+        )
+
+        kwargs = {}
+        kwargs[target_node.label] = target_node.value
+
+        return distribution.get_value(**kwargs)
 
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
