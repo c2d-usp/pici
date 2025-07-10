@@ -140,6 +140,8 @@ class CausalModel:
         G.add_edges_from(self.graph.DAG.edges())
         G.fit(self.data, estimator=MaximumLikelihoodEstimator)
         model = CausalInference(G)
+        if not self.interventions or len(self.interventions) == 0:
+            raise Exception("Expect interventions to contain at least one element")
         min_adjustment_set = model.get_minimal_adjustment_set(
             X=self.interventions[0].label,
             Y=self.target.label
