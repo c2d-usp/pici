@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class DirectoriesPath(Enum):
@@ -43,3 +43,19 @@ class PlotGraphColors(Enum):
     TARGETS = "orange"
     UNOBSERVABLES = "lightgray"
     OBSERVABLES = "lightblue"
+
+
+class OptimizersLabels(Enum):
+    GUROBI = "gurobi"
+    SCIPY = "scipy"
+
+
+class OptimizationDirection(Enum):
+    MINIMIZE = auto()
+    MAXIMIZE = auto()
+
+
+class GurobiParameters(Enum):
+    OUTPUT_SUPRESSED = 0
+    OUTPUT_VERBOSE = 1
+    DefaultObjectiveCoefficients = 1

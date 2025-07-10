@@ -1,5 +1,4 @@
 # Remove files that have no extension
-*
 !/**/
 !*.*
 __pycache__/

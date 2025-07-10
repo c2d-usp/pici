@@ -1,6 +1,6 @@
-import networkx as nx
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import networkx as nx
 
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils._enum import PlotGraphColors

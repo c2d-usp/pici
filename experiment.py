@@ -1,20 +1,21 @@
-import time as tm
 import logging
+import time as tm
 
 logger = logging.getLogger(__name__)
 
-import pandas as pd
 from itertools import product
+
+import pandas as pd
+
+from causal_reasoning.causal_model import CausalModel
+from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
+    ScalarProblem,
+)
+from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )
-from causal_reasoning.interventional_do_calculus_algorithm.scalable_problem_column_gen import (
-    ScalarProblem,
-)
-from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
-from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.utils.data_gen import generate_data_for_scale_case
 
 
 def genGraph(N, M):
@@ -206,7 +207,7 @@ def main():
 
             experiments_df = pd.concat([experiments_df, new_row_df], ignore_index=True)
             experiments_df.to_csv("./outputs/experiment_results.csv", index=False)
-            logger.info(f"CSV updated")
+            logger.info("CSV updated")
     logger.info("Done")
 
 

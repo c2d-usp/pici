@@ -1,5 +1,7 @@
 import copy
+import logging
 from typing import TypeVar
+
 import networkx as nx
 from pandas import DataFrame
 import logging
@@ -12,23 +14,21 @@ from causal_reasoning.utils.graph_plotter import plot_graph_image
 logger = logging.getLogger(__name__)
 logging.getLogger("pgmpy").setLevel(logging.WARNING)
 
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
-from causal_reasoning.interventional_do_calculus_algorithm.gurobi_use import (
-    gurobi_build_linear_problem,
-)
-from causal_reasoning.interventional_do_calculus_algorithm.opt_problem_builder import (
+from causal_reasoning.do_calculus_algorithm.linear_programming.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
 )
+from causal_reasoning.graph.graph import Graph
+from causal_reasoning.graph.node import Node
+from causal_reasoning.utils._enum import OptimizersLabels
 from causal_reasoning.utils.parser import (
-    list_tuples_into_list_nodes,
+    convert_tuples_list_into_nodes_list,
     parse_edges,
     parse_input_graph,
     parse_to_string_list,
-    parse_tuples_str_int_list,
     parse_tuple_str_int,
-    tuple_into_node,
+    parse_tuples_str_int_list,
+    convert_tuple_into_node,
 )
 
 T = TypeVar("str")
@@ -64,13 +64,13 @@ class CausalModel:
         ]
         # TODO:
         if interventions:
-            interventions = list_tuples_into_list_nodes(
+            interventions = convert_tuples_list_into_nodes_list(
                 parse_tuples_str_int_list(interventions), self.graph
             )
         self.interventions = interventions
 
         if target:
-            target = tuple_into_node(parse_tuple_str_int(target), self.graph)
+            target = convert_tuple_into_node(parse_tuple_str_int(target), self.graph)
         self.target = target
 
     def are_d_separated_in_complete_graph(
@@ -112,25 +112,25 @@ class CausalModel:
         for intervention in self.interventions:
             interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
-        
+
         return nx.is_d_separator(
             G=operated_digraph,
             x=set(set_nodes_X),
             y=set(set_nodes_Y),
             z=set(set_nodes_Z),
         )
-    
+
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> str:
-        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
         if interventions_nodes is not None:
             self.interventions = interventions_nodes
 
-        target_node = tuple_into_node(target, self.graph)
+        target_node = convert_tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
         if target_node is not None:
@@ -143,14 +143,16 @@ class CausalModel:
         if not self.interventions or len(self.interventions) == 0:
             raise Exception("Expect interventions to contain at least one element")
         min_adjustment_set = model.get_minimal_adjustment_set(
-            X=self.interventions[0].label,
-            Y=self.target.label
+            X=self.interventions[0].label, Y=self.target.label
         )
 
         distribution = model.query(
             variables=[self.target.label],
-            do={self.interventions[i].label: self.interventions[i].value for i in range(len(self.interventions))},
-            adjustment_set=min_adjustment_set
+            do={
+                self.interventions[i].label: self.interventions[i].value
+                for i in range(len(self.interventions))
+            },
+            adjustment_set=min_adjustment_set,
         )
 
         kwargs = {}
@@ -161,14 +163,14 @@ class CausalModel:
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> tuple[str, str]:
-        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
         if interventions_nodes is not None:
             self.interventions = interventions_nodes
 
-        target_node = tuple_into_node(target, self.graph)
+        target_node = convert_tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
         if target_node is not None:
@@ -184,12 +186,12 @@ class CausalModel:
         raise Exception("None interventions found")
 
     def single_intervention_query(self) -> tuple[str, str]:
-        # return build_linear_problem(
-        return gurobi_build_linear_problem(
-            self.graph,
-            self.data,
-            self.interventions[0],
-            self.target,
+        return build_linear_problem(
+            graph=self.graph,
+            df=self.data,
+            intervention=self.interventions[0],
+            target=self.target,
+            optimizer_label=OptimizersLabels.GUROBI.value,
         )
 
     def double_intervention_query(self):
@@ -209,10 +211,10 @@ class CausalModel:
         pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
+        self.interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
 
     def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        more_interventions = list_tuples_into_list_nodes(interventions, self.graph)
+        more_interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if more_interventions is None:
             return
         for intervention in more_interventions:
@@ -220,7 +222,7 @@ class CausalModel:
                 self.interventions.append(intervention)
 
     def set_target(self, target: tuple[str, int]) -> None:
-        self.target = tuple_into_node(target, self.graph)
+        self.target = convert_tuple_into_node(target, self.graph)
 
     def set_unobservables(self, unobservables):
         # This implies the whole graph re-creation

@@ -64,7 +64,7 @@ def _parse_default_graph(
 
 def parse_edges(state):
     if isinstance(state, str):
-        return _edge_string_to_edge_tuples(state)
+        return _convert_edge_string_to_edge_tuples(state)
     elif isinstance(state, nx.DiGraph):
         output = []
         for left, right in state.edges():
@@ -99,7 +99,7 @@ def pair_to_valid_tuple(left, right):
     return (left, right)
 
 
-def _edge_string_to_edge_tuples(edges: str) -> list[tuple]:
+def _convert_edge_string_to_edge_tuples(edges: str) -> list[tuple]:
     edge_tuples = []
     edges_part = edges.split(",")
 
@@ -112,7 +112,7 @@ def _edge_string_to_edge_tuples(edges: str) -> list[tuple]:
     return edge_tuples
 
 
-def list_tuples_into_list_nodes(
+def convert_tuples_list_into_nodes_list(
     list_tuples_label_value: list[tuple[str, int]], graph: Graph
 ) -> list[Node] | None:
     if not list_tuples_label_value:
@@ -122,11 +122,11 @@ def list_tuples_into_list_nodes(
     for item in list_tuples_label_value:
         if not isinstance(item, tuple) or len(item) != 2:
             raise TypeError(f"Expected list of 2‐tuples, got {item!r}")
-        output.append(tuple_into_node(item, graph))
+        output.append(convert_tuple_into_node(item, graph))
     return output
 
 
-def tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | None:
+def convert_tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | None:
     if tuple_label_value is None:
         return None
     label, value = tuple_label_value

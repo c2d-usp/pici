@@ -1,6 +1,7 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 import networkx as nx
 
 THIS_DIR = os.path.dirname(__file__)
@@ -12,16 +13,15 @@ if PROJECT_ROOT not in sys.path:
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils.parser import (
-    parse_input_graph,
+    _convert_edge_string_to_edge_tuples,
     _parse_default_graph,
+    convert_tuples_list_into_nodes_list,
     parse_edges,
-    _edge_string_to_edge_tuples,
-    list_tuples_into_list_nodes,
-    tuple_into_node,
-    parse_tuples_str_int_list,
-    parse_tuple_str_int,
-    parse_edges,
+    parse_input_graph,
     parse_to_string_list,
+    parse_tuple_str_int,
+    parse_tuples_str_int_list,
+    convert_tuple_into_node,
 )
 
 
@@ -127,7 +127,7 @@ class TestEdgeStringToTuples(unittest.TestCase):
         """
         s = "A->B"
         expected = [("A", "B")]
-        self.assertEqual(_edge_string_to_edge_tuples(s), expected)
+        self.assertEqual(_convert_edge_string_to_edge_tuples(s), expected)
 
     def test_single_edge_with_spaces(self):
         """
@@ -135,7 +135,7 @@ class TestEdgeStringToTuples(unittest.TestCase):
         """
         s = "   A   ->   B   "
         expected = [("A", "B")]
-        self.assertEqual(_edge_string_to_edge_tuples(s), expected)
+        self.assertEqual(_convert_edge_string_to_edge_tuples(s), expected)
 
     def test_two_edges_comma_separated(self):
         """
@@ -145,8 +145,8 @@ class TestEdgeStringToTuples(unittest.TestCase):
         s1 = "X->Y, Z->W"
         s2 = "X->Y,Z->W"
         expected = [("X", "Y"), ("Z", "W")]
-        self.assertEqual(_edge_string_to_edge_tuples(s1), expected)
-        self.assertEqual(_edge_string_to_edge_tuples(s2), expected)
+        self.assertEqual(_convert_edge_string_to_edge_tuples(s1), expected)
+        self.assertEqual(_convert_edge_string_to_edge_tuples(s2), expected)
 
     def test_multiple_edges_mixed_spacing(self):
         """
@@ -154,7 +154,7 @@ class TestEdgeStringToTuples(unittest.TestCase):
         """
         s = "A->B ,C -> D,   E->F   "
         expected = [("A", "B"), ("C", "D"), ("E", "F")]
-        self.assertEqual(_edge_string_to_edge_tuples(s), expected)
+        self.assertEqual(_convert_edge_string_to_edge_tuples(s), expected)
 
     def test_invalid_format_raises_value_error(self):
         """
@@ -162,17 +162,17 @@ class TestEdgeStringToTuples(unittest.TestCase):
         For example 'A-B' or 'A->B, C-D' should raise a ValueError for the invalid fragment.
         """
         with self.assertRaises(ValueError):
-            _edge_string_to_edge_tuples("A-B")
+            _convert_edge_string_to_edge_tuples("A-B")
         # Even if the first edge is valid, the second is invalid:
         with self.assertRaises(ValueError):
-            _edge_string_to_edge_tuples("A->B, C-D")
+            _convert_edge_string_to_edge_tuples("A->B, C-D")
 
     def test_empty_string_behaviour(self):
         """
         If an empty string is passed, it splits into [''], and split('->') will raise.
         """
         with self.assertRaises(ValueError):
-            _edge_string_to_edge_tuples("")
+            _convert_edge_string_to_edge_tuples("")
 
 
 class TestParseEdges(unittest.TestCase):
@@ -355,32 +355,32 @@ class TestTupleIntoNode(unittest.TestCase):
 
     def test_tuple_none_returns_none(self):
         # If tuple_label_value is None, should return None
-        self.assertIsNone(tuple_into_node(None, self.graph))
+        self.assertIsNone(convert_tuple_into_node(None, self.graph))
 
     def test_tuple_valid_label_sets_value_and_returns_node(self):
         # Before: node "A" exists with value None
         self.assertIsNone(self.graph.graphNodes["A"].value)
 
-        node = tuple_into_node(("A", 42), self.graph)
+        node = convert_tuple_into_node(("A", 42), self.graph)
         # It should return the same DummyNode instance
         self.assertIs(node, self.graph.graphNodes["A"])
         # And the node’s value should now be updated
         self.assertEqual(node.value, 42)
 
         # Also test a second label
-        node_b = tuple_into_node(("B", -7), self.graph)
+        node_b = convert_tuple_into_node(("B", -7), self.graph)
         self.assertIs(node_b, self.graph.graphNodes["B"])
         self.assertEqual(node_b.value, -7)
 
     def test_tuple_invalid_label_raises_exception(self):
         # If label not in graph, should raise an Exception
         with self.assertRaises(Exception) as cm:
-            tuple_into_node(("X", 100), self.graph)
+            convert_tuple_into_node(("X", 100), self.graph)
         self.assertIn("Node 'X' not present", str(cm.exception))
 
         # Even if graph has some nodes, "Z" is not defined
         with self.assertRaises(Exception):
-            tuple_into_node(("Z", 0), self.graph)
+            convert_tuple_into_node(("Z", 0), self.graph)
 
 
 class TestListTuplesIntoListNodes(unittest.TestCase):
@@ -467,13 +467,13 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         )
 
     def test_list_none_returns_none(self):
-        self.assertIsNone(list_tuples_into_list_nodes(None, self.graph))
+        self.assertIsNone(convert_tuples_list_into_nodes_list(None, self.graph))
 
     def test_list_empty_returns_none(self):
-        self.assertIsNone(list_tuples_into_list_nodes([], self.graph))
+        self.assertIsNone(convert_tuples_list_into_nodes_list([], self.graph))
 
     def test_list_single_valid_tuple(self):
-        result = list_tuples_into_list_nodes([("A", 10)], self.graph)
+        result = convert_tuples_list_into_nodes_list([("A", 10)], self.graph)
         self.assertEqual(len(result), 1)
         node = result[0]
         self.assertIs(node, self.graph.graphNodes["A"])
@@ -481,7 +481,7 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
 
     def test_list_multiple_valid_tuples(self):
         input_list = [("A", 1), ("C", 3)]
-        result = list_tuples_into_list_nodes(input_list, self.graph)
+        result = convert_tuples_list_into_nodes_list(input_list, self.graph)
 
         self.assertEqual(len(result), 2)
         node_a, node_c = result
@@ -495,21 +495,21 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
     def test_list_contains_invalid_label_raises(self):
         bad_list = [("A", 5), ("X", 7)]
         with self.assertRaises(Exception) as cm:
-            list_tuples_into_list_nodes(bad_list, self.graph)
+            convert_tuples_list_into_nodes_list(bad_list, self.graph)
         self.assertIn("Node 'X' not present", str(cm.exception))
 
     def test_list_contains_none_tuple_raises(self):
         with self.assertRaises(TypeError):
-            list_tuples_into_list_nodes([None], self.graph)
+            convert_tuples_list_into_nodes_list([None], self.graph)
 
     def test_list_contains_invalid_type_raises(self):
         # If the list contains something that’s not a 2-tuple, unpacking also fails.
         with self.assertRaises(TypeError):
-            list_tuples_into_list_nodes([("A", 1), "not a tuple"], self.graph)
+            convert_tuples_list_into_nodes_list([("A", 1), "not a tuple"], self.graph)
 
         # If it’s a 2-tuple of wrong types, but label not in graph, it raises from tuple_into_node
         with self.assertRaises(Exception):
-            list_tuples_into_list_nodes([("X", 1)], self.graph)
+            convert_tuples_list_into_nodes_list([("X", 1)], self.graph)
 
 
 class TestParseTuplesStrIntList(unittest.TestCase):

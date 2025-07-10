@@ -1,15 +1,15 @@
-import time as tm
 import logging
 
 logger = logging.getLogger(__name__)
 
-import pandas as pd
 from itertools import product
+
+
+from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )
-from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
 
 
 def genGraph(N, M):
