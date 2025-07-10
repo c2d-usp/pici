@@ -109,7 +109,7 @@ class CausalModel:
     
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
-    ) -> float:
+    ) -> str:
         interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
@@ -128,18 +128,18 @@ class CausalModel:
         G.fit(self.data, estimator=MaximumLikelihoodEstimator)
         model = CausalInference(G)
         min_adjustment_set = model.get_minimal_adjustment_set(
-            X=interventions_nodes[0].label,
-            Y=target_node.label
+            X=self.interventions[0].label,
+            Y=self.target.label
         )
 
         distribution = model.query(
-            variables=[target_node.label],
-            do={interventions_nodes[i].label: interventions_nodes[i].value for i in range(len(interventions_nodes))},
+            variables=[self.target.label],
+            do={self.interventions[i].label: self.interventions[i].value for i in range(len(self.interventions))},
             adjustment_set=min_adjustment_set
         )
 
         kwargs = {}
-        kwargs[target_node.label] = target_node.value
+        kwargs[self.target.label] = self.target.value
 
         return distribution.get_value(**kwargs)
 
