@@ -160,7 +160,7 @@ class ScipyOptimizer(Optimizer):
 
         if direction:
             return str(result.fun)
-        
+
         return str(-result.fun)
 
 

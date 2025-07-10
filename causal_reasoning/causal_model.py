@@ -112,14 +112,14 @@ class CausalModel:
         for intervention in self.interventions:
             interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
         operated_digraph.remove_edges_from(interventions_outgoing_edges)
-        
+
         return nx.is_d_separator(
             G=operated_digraph,
             x=set(set_nodes_X),
             y=set(set_nodes_Y),
             z=set(set_nodes_Z),
         )
-    
+
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> str:
@@ -143,14 +143,16 @@ class CausalModel:
         if not self.interventions or len(self.interventions) == 0:
             raise Exception("Expect interventions to contain at least one element")
         min_adjustment_set = model.get_minimal_adjustment_set(
-            X=self.interventions[0].label,
-            Y=self.target.label
+            X=self.interventions[0].label, Y=self.target.label
         )
 
         distribution = model.query(
             variables=[self.target.label],
-            do={self.interventions[i].label: self.interventions[i].value for i in range(len(self.interventions))},
-            adjustment_set=min_adjustment_set
+            do={
+                self.interventions[i].label: self.interventions[i].value
+                for i in range(len(self.interventions))
+            },
+            adjustment_set=min_adjustment_set,
         )
 
         kwargs = {}
