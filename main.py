@@ -1,10 +1,11 @@
 import pandas as pd
 import networkx as nx
+
 # from pgmpy.models import BayesianNetwork
 import logging
 
 from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.utils._enum import Examples
+from causal_reasoning.utils._enum import DataExamplesPaths
 
 
 def incident_model():
@@ -42,7 +43,7 @@ def incident_model():
     ]
     edges_2 = nx.DiGraph(edges_list_2)
     df_medium_scale_incident = pd.read_csv(
-        Examples.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
+        DataExamplesPaths.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value, index_col=0
     )
     model_2 = CausalModel(
         data=df_medium_scale_incident,
@@ -78,7 +79,7 @@ def binary_balke_pearl_example():
     balke_target_value = 1
     balke_intervention = "X"
     balke_intervention_value = 1
-    balke_csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+    balke_csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
     balke_df = pd.read_csv(balke_csv_path)
 
     balke_model = CausalModel(
@@ -92,10 +93,12 @@ def binary_balke_pearl_example():
 
     # balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
     # balke_model.set_target((balke_target, balke_target_value))
-    print(balke_model.are_d_separated_in_intervened_graph(['Z'], ['Y'], ['X']))
+    print(balke_model.are_d_separated_in_intervened_graph(["Z"], ["Y"], ["X"]))
 
-    # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'], balke_model.graph.DAG)}")
-    balke_model.inference_intervention_query()
+    balke_model.generate_graph_image("balke.png")
+
+    # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(['Z'], ['Y'], ['X'], balke_model.graph.DAG)}")
+    # balke_model.inference_intervention_query()
 
 
 def discrete_iv_random():
@@ -106,7 +109,7 @@ def discrete_iv_random():
     iv_target_value = 1
     iv_intervention = "X"
     iv_intervention_value = 1
-    iv_csv_path = Examples.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
+    iv_csv_path = DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
     iv_df = pd.read_csv(iv_csv_path)
 
     iv_model = CausalModel(
@@ -121,14 +124,15 @@ def discrete_iv_random():
     # print(
     #     f">> Is Z d-separated from Y giving X? {iv_model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'])}"
     # )
-    iv_model.inference_intervention_query()
+    # iv_model.inference_intervention_query()
+    iv_model.generate_graph_image("discrete_iv.png")
 
 
-def binary_itau_example():
-    itau_input = (
+def binary_copilot_example():
+    copilot_input = (
         "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X, U2 -> D, U3 -> E, U1 -> F"
     )
-    itau_cardinalities = {
+    copilot_cardinalities = {
         "X": 2,
         "Y": 2,
         "D": 2,
@@ -138,21 +142,22 @@ def binary_itau_example():
         "U2": 0,
         "U3": 0,
     }
-    itau_unobs = ["U1", "U2", "U3"]
-    itau_target = "Y"
-    itau_intervention = "X"
-    itau_csv_path = Examples.CSV_ITAU_EXAMPLE.value
-    itau_df = pd.read_csv(itau_csv_path)
+    copilot_unobs = ["U1", "U2", "U3"]
+    copilot_target = "Y"
+    copilot_intervention = "X"
+    copilot_csv_path = DataExamplesPaths.CSV_COPILOT_EXAMPLE.value
+    copilot_df = pd.read_csv(copilot_csv_path)
 
-    itau_model = CausalModel(
-        data=itau_df,
-        edges=itau_input,
-        custom_cardinalities=itau_cardinalities,
-        unobservables_labels=itau_unobs,
-        interventions=(itau_intervention, 1),
-        target=(itau_target, 1),
+    copilot_model = CausalModel(
+        data=copilot_df,
+        edges=copilot_input,
+        custom_cardinalities=copilot_cardinalities,
+        unobservables_labels=copilot_unobs,
+        interventions=(copilot_intervention, 1),
+        target=(copilot_target, 1),
     )
-    itau_model.inference_intervention_query()
+    # copilot_model.inference_intervention_query()
+    copilot_model.generate_graph_image("copilot.png")
 
 
 def double_intervention():
@@ -161,7 +166,7 @@ def double_intervention():
     unobs = ["U1", "U2"]
     target = "Y"
     target_value = 1
-    csv_path = Examples.CSV_BALKE_PEARL_EXAMPLE.value
+    csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
     df = pd.read_csv(csv_path)
 
     model = CausalModel(
@@ -176,10 +181,11 @@ def double_intervention():
     print(
         f">> Is Z d-separated from Y giving X? {model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'])}"
     )
-    model.inference_intervention_query()
+    model.generate_graph_image("two_interventions.png")
+    # model.inference_intervention_query()
 
 
-def discrete_itau_example():
+def discrete_copilot_example():
     raise NotImplementedError
 
 
@@ -189,7 +195,7 @@ def main():
 
     binary_balke_pearl_example()
     # discrete_iv_random()
-    # binary_itau_example()
+    # binary_copilot_example()
     # double_intervention()
     # incident_model()
 

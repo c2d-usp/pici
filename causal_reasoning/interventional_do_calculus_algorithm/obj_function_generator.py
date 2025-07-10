@@ -229,10 +229,9 @@ class ObjFunctionGenerator:
                     current_target, current_targets, interventionLatent, intervention
                 )
 
-                # TODO: Não usa mais o intervention?
                 current_targets = list(
                     (set(current_targets) | set(valid_d_separator_set))
-                    - {intervention, current_target}
+                    - {current_target}
                 )
 
                 conditionalProbabilities[current_target] = valid_d_separator_set
@@ -296,9 +295,16 @@ class ObjFunctionGenerator:
             current_conditioned_nodes = (
                 conditioned_nodes + current_conditionable_ancestors
             )
-            
-            current_conditioned_nodes_labels = [node.label for node in current_conditioned_nodes]
-            condition1 = nx.is_d_separator(G=self.graph.DAG, x= { current_target.label }, y = { intervention_latent.label }, z = set(current_conditioned_nodes_labels))
+
+            current_conditioned_nodes_labels = [
+                node.label for node in current_conditioned_nodes
+            ]
+            condition1 = nx.is_d_separator(
+                G=self.graph.DAG,
+                x={current_target.label},
+                y={intervention_latent.label},
+                z=set(current_conditioned_nodes_labels),
+            )
 
             if intervention in current_conditioned_nodes:
                 condition2 = True
@@ -306,7 +312,12 @@ class ObjFunctionGenerator:
                 operatedDigraph = copy.deepcopy(self.graph.DAG)
                 outgoing_edgesX = list(self.graph.DAG.out_edges(intervention.label))
                 operatedDigraph.remove_edges_from(outgoing_edgesX)
-                condition2 = nx.is_d_separator(G=operatedDigraph, x = {current_target.label}, y = {intervention.label}, z = set(current_conditioned_nodes_labels))
+                condition2 = nx.is_d_separator(
+                    G=operatedDigraph,
+                    x={current_target.label},
+                    y={intervention.label},
+                    z=set(current_conditioned_nodes_labels),
+                )
 
             if condition1 and condition2:
                 valid_d_separator_set: list[Node] = []

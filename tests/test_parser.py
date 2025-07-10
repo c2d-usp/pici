@@ -11,42 +11,39 @@ if PROJECT_ROOT not in sys.path:
 
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
-from causal_reasoning.utils.parser import parse_input_graph, _parse_default_graph, parse_edges, _edge_string_to_edge_tuples, list_tuples_into_list_nodes, tuple_into_node, parse_tuples_str_int_list, parse_tuple_str_int, parse_edges, parse_to_string_list
+from causal_reasoning.utils.parser import (
+    parse_input_graph,
+    _parse_default_graph,
+    parse_edges,
+    _edge_string_to_edge_tuples,
+    list_tuples_into_list_nodes,
+    tuple_into_node,
+    parse_tuples_str_int_list,
+    parse_tuple_str_int,
+    parse_edges,
+    parse_to_string_list,
+)
+
 
 class TestParseDefaultGraph(unittest.TestCase):
     def test_simple_graph(self):
         edges = [("A", "B"), ("B", "C")]
         latents = []
         custom_card = {}
-        (n_nodes,
-         children,
-         node_cardinalities,
-         parents,
-         node_labels,
-         dag) = _parse_default_graph(edges, latents, custom_card)
+        (n_nodes, children, node_cardinalities, parents, node_labels, dag) = (
+            _parse_default_graph(edges, latents, custom_card)
+        )
 
         # number of nodes
         self.assertEqual(n_nodes, 3)
         # node labels set
         self.assertEqual(node_labels, {"A", "B", "C"})
         # children
-        self.assertEqual(children, {
-            "A": ["B"],
-            "B": ["C"],
-            "C": []
-        })
+        self.assertEqual(children, {"A": ["B"], "B": ["C"], "C": []})
         # parents
-        self.assertEqual(parents, {
-            "A": [],
-            "B": ["A"],
-            "C": ["B"]
-        })
+        self.assertEqual(parents, {"A": [], "B": ["A"], "C": ["B"]})
         # default cardinalities = 2 for all
-        self.assertEqual(node_cardinalities, {
-            "A": 2,
-            "B": 2,
-            "C": 2
-        })
+        self.assertEqual(node_cardinalities, {"A": 2, "B": 2, "C": 2})
         # DAG edges
         self.assertEqual(set(dag.nodes()), {"A", "B", "C"})
         self.assertEqual(set(dag.edges()), {("A", "B"), ("B", "C")})
@@ -67,7 +64,9 @@ class TestParseDefaultGraph(unittest.TestCase):
         custom_card = {}
         with self.assertRaises(Exception) as cm:
             _parse_default_graph(edges, latents, custom_card)
-        self.assertIn("Invalid latent node: L1. Latent has income arrows.", str(cm.exception))
+        self.assertIn(
+            "Invalid latent node: L1. Latent has income arrows.", str(cm.exception)
+        )
 
     def test_latent_not_present_raises(self):
         edges = [("A", "B")]
@@ -75,7 +74,9 @@ class TestParseDefaultGraph(unittest.TestCase):
         custom_card = {}
         with self.assertRaises(Exception) as cm:
             _parse_default_graph(edges, latents, custom_card)
-        self.assertIn("Invalid latent node: L2. Not present in the graph.", str(cm.exception))
+        self.assertIn(
+            "Invalid latent node: L2. Not present in the graph.", str(cm.exception)
+        )
 
     def test_latent_cardinality_default(self):
         # latents appear only on left side
@@ -92,8 +93,8 @@ class TestParseDefaultGraph(unittest.TestCase):
         edges = []
         latents = []
         custom_card = {}
-        (n_nodes, children, node_cardinalities, parents, node_labels, dag) = _parse_default_graph(
-            edges, latents, custom_card
+        (n_nodes, children, node_cardinalities, parents, node_labels, dag) = (
+            _parse_default_graph(edges, latents, custom_card)
         )
         self.assertEqual(n_nodes, 0)
         self.assertEqual(children, {})
@@ -116,6 +117,7 @@ class TestParseDefaultGraph(unittest.TestCase):
         dag_direct, dag_wrapper = direct[5], wrapper[5]
         self.assertEqual(set(dag_direct.nodes()), set(dag_wrapper.nodes()))
         self.assertEqual(set(dag_direct.edges()), set(dag_wrapper.edges()))
+
 
 class TestEdgeStringToTuples(unittest.TestCase):
 
@@ -172,6 +174,7 @@ class TestEdgeStringToTuples(unittest.TestCase):
         with self.assertRaises(ValueError):
             _edge_string_to_edge_tuples("")
 
+
 class TestParseEdges(unittest.TestCase):
 
     def test_list_of_tuples_valid(self):
@@ -200,7 +203,9 @@ class TestParseEdges(unittest.TestCase):
         If the inner 2‐tuple has an element that is neither str nor int, parse_edges should raise.
         E.g. a float or None.
         """
-        bad_list = [(1, 2.5)]  # 2.5 is a float; no conversion path to str in code, so it should raise.
+        bad_list = [
+            (1, 2.5)
+        ]  # 2.5 is a float; no conversion path to str in code, so it should raise.
         with self.assertRaises(Exception) as cm:
             parse_edges(bad_list)
         self.assertIn("not recognized", str(cm.exception))
@@ -218,7 +223,7 @@ class TestParseEdges(unittest.TestCase):
 
         # Mixed int and str
         self.assertEqual(parse_edges((3, "C")), [("3", "C")])
-    
+
     def test_tuple_with_invalid_inner_type_raises(self):
         """
         If tuple elements aren’t str or int, parse_edges should raise.
@@ -235,8 +240,8 @@ class TestParseEdges(unittest.TestCase):
         """
         G = nx.DiGraph()
         G.add_edge("A", "B")  # both strings
-        G.add_edge(1, 2)      # ints
-        G.add_edge("X", 3)    # mixed
+        G.add_edge(1, 2)  # ints
+        G.add_edge("X", 3)  # mixed
 
         result = parse_edges(G)
         # We expect edges converted to strings:
@@ -249,7 +254,9 @@ class TestParseEdges(unittest.TestCase):
         parse_edges should raise an Exception.
         """
         G1 = nx.DiGraph()
-        class Foo: pass
+
+        class Foo:
+            pass
 
         # Edge with a node of type Foo:
         G1.add_edge(Foo(), "B")
@@ -270,15 +277,16 @@ class TestParseEdges(unittest.TestCase):
             with self.assertRaises(Exception):
                 parse_edges(bad)
 
+
 class TestTupleIntoNode(unittest.TestCase):
     def setUp(self):
         self.nodeA = Node(
-            children=[],       # no children yet
-            parents=[],        # no parents yet
-            latentParent=None, # no latent parent
-            isLatent=False,    # not a latent node
-            label="A",         # string label "A"
-            cardinality=2      # arbitrary cardinality
+            children=[],  # no children yet
+            parents=[],  # no parents yet
+            latentParent=None,  # no latent parent
+            isLatent=False,  # not a latent node
+            label="A",  # string label "A"
+            cardinality=2,  # arbitrary cardinality
         )
         self.nodeB = Node(
             children=[],
@@ -286,7 +294,7 @@ class TestTupleIntoNode(unittest.TestCase):
             latentParent=None,
             isLatent=False,
             label="B",
-            cardinality=2
+            cardinality=2,
         )
 
         # 2) Build the directed graph structure (networkx.DiGraph).
@@ -322,19 +330,13 @@ class TestTupleIntoNode(unittest.TestCase):
         cComponentToUnob = {}
 
         # graphNodes: a dictionary mapping each node’s string label → the Node instance
-        graphNodes = {
-            "A": self.nodeA,
-            "B": self.nodeB
-        }
+        graphNodes = {"A": self.nodeA, "B": self.nodeB}
 
         # node_set: a Python set containing all Node objects
         node_set = {self.nodeA, self.nodeB}
 
         # topologicalOrderIndexes: map each Node → its index in the above topologicalOrder list
-        topologicalOrderIndexes = {
-            self.nodeA: 0,
-            self.nodeB: 1
-        }
+        topologicalOrderIndexes = {self.nodeA: 0, self.nodeB: 1}
 
         # Finally, construct the Graph object itself:
         self.graph = Graph(
@@ -385,16 +387,28 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
     def setUp(self):
         # 1) Create three Node objects: A, B, and C
         self.nodeA = Node(
-            children=[], parents=[], latentParent=None,
-            isLatent=False, label="A", cardinality=2
+            children=[],
+            parents=[],
+            latentParent=None,
+            isLatent=False,
+            label="A",
+            cardinality=2,
         )
         self.nodeB = Node(
-            children=[], parents=[], latentParent=None,
-            isLatent=False, label="B", cardinality=2
+            children=[],
+            parents=[],
+            latentParent=None,
+            isLatent=False,
+            label="B",
+            cardinality=2,
         )
         self.nodeC = Node(
-            children=[], parents=[], latentParent=None,
-            isLatent=False, label="C", cardinality=2
+            children=[],
+            parents=[],
+            latentParent=None,
+            isLatent=False,
+            label="C",
+            cardinality=2,
         )
 
         # 2) Build the directed graph structure with edges A→B and B→C
@@ -402,12 +416,12 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         for lbl in ("A", "B", "C"):
             self.DAG.add_node(lbl)
         self.DAG.add_edge("A", "B")
-        self.DAG.add_edge("B", "C")   # new edge
+        self.DAG.add_edge("B", "C")  # new edge
 
         # 3) Fill in Graph constructor arguments
 
         numberOfNodes = 3
-        currNodes      = [self.nodeA, self.nodeB, self.nodeC]
+        currNodes = [self.nodeA, self.nodeB, self.nodeC]
 
         # Now all three form a single chain component A→B→C
         dagComponents = [[self.nodeA, self.nodeB, self.nodeC]]
@@ -451,7 +465,6 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
             node_set=node_set,
             topologicalOrderIndexes=topologicalOrderIndexes,
         )
-
 
     def test_list_none_returns_none(self):
         self.assertIsNone(list_tuples_into_list_nodes(None, self.graph))
@@ -497,6 +510,8 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         # If it’s a 2-tuple of wrong types, but label not in graph, it raises from tuple_into_node
         with self.assertRaises(Exception):
             list_tuples_into_list_nodes([("X", 1)], self.graph)
+
+
 class TestParseTuplesStrIntList(unittest.TestCase):
     def test_list_of_valid_tuples(self):
         """
@@ -545,10 +560,12 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         """
         Non-list, non-tuple inputs should raise the generic “not recognized” Exception.
         """
-        for bad in [123, 3.14, "string", None, {"A":1}]:
+        for bad in [123, 3.14, "string", None, {"A": 1}]:
             with self.assertRaises(Exception) as cm:
                 parse_tuples_str_int_list(bad)
             self.assertIn("Input format for", str(cm.exception))
+
+
 class TestParseTupleStrInt(unittest.TestCase):
     def test_str_str_numeric(self):
         """('A','123') → ('A', 123)"""
@@ -590,6 +607,7 @@ class TestParseTupleStrInt(unittest.TestCase):
             with self.assertRaises(Exception) as cm:
                 parse_tuple_str_int(bad)
             self.assertIn("Input format for", str(cm.exception))
+
 
 class TestParseToStringList(unittest.TestCase):
     def test_string_input(self):
@@ -653,5 +671,6 @@ class TestParseToStringList(unittest.TestCase):
                 parse_to_string_list(bad)
             self.assertIn("not recognized", str(cm.exception))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

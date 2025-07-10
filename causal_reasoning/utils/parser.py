@@ -3,6 +3,7 @@ import networkx as nx
 from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 
+
 def parse_input_graph(
     edges: list[tuple[str, str]],
     latents_label: list[str],
@@ -71,17 +72,22 @@ def parse_edges(state):
         return output
     elif isinstance(state, tuple):
         if len(state) != 2:
-            raise ValueError(f"Input format for {state} not recognized (tuple must be length 2).")
+            raise ValueError(
+                f"Input format for {state} not recognized (tuple must be length 2)."
+            )
         return [pair_to_valid_tuple(state[0], state[1])]
     elif isinstance(state, list):
         if not all(isinstance(item, tuple) and len(item) == 2 for item in state):
-            raise ValueError(f"Input format for {state} not recognized (list must contain 2‐tuples).")
+            raise ValueError(
+                f"Input format for {state} not recognized (list must contain 2‐tuples)."
+            )
         output = []
         for item_1, item_2 in state:
             output.append(pair_to_valid_tuple(item_1, item_2))
         return output
     else:
         raise ValueError(f"Input format for {state} not recognized: {type(state)}")
+
 
 def pair_to_valid_tuple(left, right):
     if isinstance(left, (str, int)):
@@ -91,6 +97,7 @@ def pair_to_valid_tuple(left, right):
     if not isinstance(left, str) or not isinstance(right, str):
         raise ValueError(f"Input format for ({left}, {right}) not recognized.")
     return (left, right)
+
 
 def _edge_string_to_edge_tuples(edges: str) -> list[tuple]:
     edge_tuples = []
@@ -109,7 +116,7 @@ def list_tuples_into_list_nodes(
     list_tuples_label_value: list[tuple[str, int]], graph: Graph
 ) -> list[Node] | None:
     if not list_tuples_label_value:
-        return None  
+        return None
 
     output = []
     for item in list_tuples_label_value:
@@ -117,7 +124,6 @@ def list_tuples_into_list_nodes(
             raise TypeError(f"Expected list of 2‐tuples, got {item!r}")
         output.append(tuple_into_node(item, graph))
     return output
-
 
 
 def tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | None:
