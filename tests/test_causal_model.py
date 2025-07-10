@@ -234,8 +234,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
 class TestIdentifiableInterventionQueries(unittest.TestCase):
     def test_identifiable_queries_via_subtests(self):
         cases = [
-            (1, 1, Examples.CSV_N1M1),
-            (2, 1, Examples.CSV_N2M1)
+            (1, 1, DataExamplesPaths.CSV_N1M1),
+            (2, 1, DataExamplesPaths.CSV_N2M1)
         ]
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
@@ -272,8 +272,8 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
 class TestMNCases(unittest.TestCase):
     def test_intervention_queries_via_subtests(self):
         cases = [
-            (1, 1, Examples.CSV_N1M1),
-            (2, 1, Examples.CSV_N2M1)
+            (1, 1, DataExamplesPaths.CSV_N1M1),
+            (2, 1, DataExamplesPaths.CSV_N2M1)
             # (3, 1, Examples.CSV_N3M1),
             # (4, 1, Examples.CSV_N4M1),
             # (1, 2, Examples.CSV_N1M2),
