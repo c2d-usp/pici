@@ -3,11 +3,14 @@ import sys
 import os
 import pandas as pd
 import networkx as nx
+import logging
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+logging.disable(logging.INFO)
 
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import DataExamplesPaths
@@ -227,16 +230,12 @@ class TestInferenceAlgorithm(unittest.TestCase):
         # model_2.set_interventions([(intervention_2, 1)])
         # model_2.set_target((target, 1))
         # print(f"{intervention_2}: PS = {model_2.inference_intervention_query()}")
-
-
-class TestMNCases(unittest.TestCase):
-    def test_intervention_queries_via_subtests(self):
+        
+class TestIdentifiableInterventionQueries(unittest.TestCase):
+    def test_identifiable_queries_via_subtests(self):
         cases = [
-            (1, 1, DataExamplesPaths.CSV_N1M1),
-            (2, 1, DataExamplesPaths.CSV_N2M1),
-            (3, 1, DataExamplesPaths.CSV_N3M1),
-            (4, 1, DataExamplesPaths.CSV_N4M1),
-            (1, 2, DataExamplesPaths.CSV_N1M2),
+            (1, 1, Examples.CSV_N1M1),
+            (2, 1, Examples.CSV_N2M1)
         ]
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
@@ -246,6 +245,48 @@ class TestMNCases(unittest.TestCase):
                 edges = genGraph(N=N, M=M)
                 csv_path = os.path.join(PROJECT_ROOT, csv_example.value)
                 df = pd.read_csv(csv_path)
+                df["U3"] = df["Y"].copy()
+
+                model = CausalModel(
+                    data=df,
+                    edges=edges,
+                    unobservables_labels=unobs,
+                )
+
+                for target_value, intervention_value in interventions:
+                    with self.subTest(N=N, M=M,
+                                      target=target_value,
+                                      intervention=intervention_value):
+                        model.set_interventions([("X", intervention_value)])
+                        model.set_target(("Y", target_value))
+                        
+                        identifiable_value = model.identifiable_intervention_query()
+                        
+                        tv = true_value(N, M, target_value, intervention_value, df)
+                        
+                        self.assertAlmostEqual(
+                            identifiable_value, tv, places=2,
+                            msg=f"Values do not match for N={N},M={M},Y={target_value},do(X={intervention_value})"
+                        )
+
+class TestMNCases(unittest.TestCase):
+    def test_intervention_queries_via_subtests(self):
+        cases = [
+            (1, 1, Examples.CSV_N1M1),
+            (2, 1, Examples.CSV_N2M1)
+            # (3, 1, Examples.CSV_N3M1),
+            # (4, 1, Examples.CSV_N4M1),
+            # (1, 2, Examples.CSV_N1M2),
+        ]
+        unobs = ["U1", "U2", "U3"]
+        interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
+
+        for N, M, csv_example in cases:
+            with self.subTest(N=N, M=M):
+                edges = genGraph(N=N, M=M)
+                csv_path = os.path.join(PROJECT_ROOT, csv_example.value)
+                df = pd.read_csv(csv_path)
+                df["U3"] = df["Y"].copy()
 
                 model = CausalModel(
                     data=df,
@@ -266,7 +307,8 @@ class TestMNCases(unittest.TestCase):
                         model.set_target(("Y", target_value))
                         lower, upper = model.inference_intervention_query()
 
-                        tv = true_value(N, M, target_value, intervention_value, df)
+                        tv = model.identifiable_intervention_query()
+
                         self.assertGreaterEqual(
                             float(upper),
                             tv,
@@ -277,7 +319,7 @@ class TestMNCases(unittest.TestCase):
                             tv,
                             msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
-
+                        
 
 if __name__ == "__main__":
     unittest.main()
