@@ -22,13 +22,13 @@ from causal_reasoning.graph.graph import Graph
 from causal_reasoning.graph.node import Node
 from causal_reasoning.utils._enum import OptimizersLabels
 from causal_reasoning.utils.parser import (
-    list_tuples_into_list_nodes,
+    convert_tuples_list_into_nodes_list,
     parse_edges,
     parse_input_graph,
     parse_to_string_list,
     parse_tuple_str_int,
     parse_tuples_str_int_list,
-    tuple_into_node,
+    convert_tuple_into_node,
 )
 
 T = TypeVar("str")
@@ -64,13 +64,13 @@ class CausalModel:
         ]
         # TODO:
         if interventions:
-            interventions = list_tuples_into_list_nodes(
+            interventions = convert_tuples_list_into_nodes_list(
                 parse_tuples_str_int_list(interventions), self.graph
             )
         self.interventions = interventions
 
         if target:
-            target = tuple_into_node(parse_tuple_str_int(target), self.graph)
+            target = convert_tuple_into_node(parse_tuple_str_int(target), self.graph)
         self.target = target
 
     def are_d_separated_in_complete_graph(
@@ -123,14 +123,14 @@ class CausalModel:
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> str:
-        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
         if interventions_nodes is not None:
             self.interventions = interventions_nodes
 
-        target_node = tuple_into_node(target, self.graph)
+        target_node = convert_tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
         if target_node is not None:
@@ -163,14 +163,14 @@ class CausalModel:
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> tuple[str, str]:
-        interventions_nodes = list_tuples_into_list_nodes(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
         if interventions_nodes is not None:
             self.interventions = interventions_nodes
 
-        target_node = tuple_into_node(target, self.graph)
+        target_node = convert_tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
         if target_node is not None:
@@ -211,10 +211,10 @@ class CausalModel:
         pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        self.interventions = list_tuples_into_list_nodes(interventions, self.graph)
+        self.interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
 
     def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        more_interventions = list_tuples_into_list_nodes(interventions, self.graph)
+        more_interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
         if more_interventions is None:
             return
         for intervention in more_interventions:
@@ -222,7 +222,7 @@ class CausalModel:
                 self.interventions.append(intervention)
 
     def set_target(self, target: tuple[str, int]) -> None:
-        self.target = tuple_into_node(target, self.graph)
+        self.target = convert_tuple_into_node(target, self.graph)
 
     def set_unobservables(self, unobservables):
         # This implies the whole graph re-creation
