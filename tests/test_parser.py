@@ -16,11 +16,11 @@ from causal_reasoning.utils.parser import (
     _convert_edge_string_to_edge_tuples,
     _parse_default_graph,
     convert_tuples_list_into_nodes_list,
-    parse_edges,
-    parse_input_graph,
-    parse_to_string_list,
-    parse_tuple_str_int,
-    parse_tuples_str_int_list,
+    _parse_edges,
+    _parse_input_graph,
+    _parse_to_string_list,
+    _parse_tuple_str_int,
+    _parse_tuples_str_int_list,
     convert_tuple_into_node,
 )
 
@@ -110,7 +110,7 @@ class TestParseDefaultGraph(unittest.TestCase):
         custom_card = {"A": 3}
 
         direct = _parse_default_graph(edges, latents, custom_card)
-        wrapper = parse_input_graph(edges, latents, custom_card)
+        wrapper = _parse_input_graph(edges, latents, custom_card)
 
         self.assertEqual(wrapper[:5], direct[:5])
 
@@ -185,7 +185,7 @@ class TestParseEdges(unittest.TestCase):
 
         input_list = [(1, 2), ("A", 3), (4, "B")]
         expected = [("1", "2"), ("A", "3"), ("4", "B")]
-        output = parse_edges(input_list)
+        output = _parse_edges(input_list)
         self.assertEqual(output, expected)
 
     def test_list_with_non_tuple_element_raises(self):
@@ -195,7 +195,7 @@ class TestParseEdges(unittest.TestCase):
         """
         bad_list = [(1, 2), ["not", "a", "tuple"], ("A", "B")]
         with self.assertRaises(Exception) as cm:
-            parse_edges(bad_list)
+            _parse_edges(bad_list)
         self.assertIn("not recognized", str(cm.exception))
 
     def test_list_with_invalid_inner_type_raises(self):
@@ -207,7 +207,7 @@ class TestParseEdges(unittest.TestCase):
             (1, 2.5)
         ]  # 2.5 is a float; no conversion path to str in code, so it should raise.
         with self.assertRaises(Exception) as cm:
-            parse_edges(bad_list)
+            _parse_edges(bad_list)
         self.assertIn("not recognized", str(cm.exception))
 
     def test_tuple_input_valid(self):
@@ -216,22 +216,22 @@ class TestParseEdges(unittest.TestCase):
         with u, v coerced to strings if they are ints.
         """
         # Pure strings
-        self.assertEqual(parse_edges(("A", "B")), [("A", "B")])
+        self.assertEqual(_parse_edges(("A", "B")), [("A", "B")])
 
         # Pure ints → strings
-        self.assertEqual(parse_edges((1, 2)), [("1", "2")])
+        self.assertEqual(_parse_edges((1, 2)), [("1", "2")])
 
         # Mixed int and str
-        self.assertEqual(parse_edges((3, "C")), [("3", "C")])
+        self.assertEqual(_parse_edges((3, "C")), [("3", "C")])
 
     def test_tuple_with_invalid_inner_type_raises(self):
         """
         If tuple elements aren’t str or int, parse_edges should raise.
         """
         with self.assertRaises(Exception):
-            parse_edges((None, "A"))
+            _parse_edges((None, "A"))
         with self.assertRaises(Exception):
-            parse_edges(("A", object()))
+            _parse_edges(("A", object()))
 
     def test_graph_input_all_str_or_int_nodes(self):
         """
@@ -243,7 +243,7 @@ class TestParseEdges(unittest.TestCase):
         G.add_edge(1, 2)  # ints
         G.add_edge("X", 3)  # mixed
 
-        result = parse_edges(G)
+        result = _parse_edges(G)
         # We expect edges converted to strings:
         #   [("A", "B"), ("1", "2"), ("X", "3")]  in any order
         self.assertEqual(set(result), {("A", "B"), ("1", "2"), ("X", "3")})
@@ -261,12 +261,12 @@ class TestParseEdges(unittest.TestCase):
         # Edge with a node of type Foo:
         G1.add_edge(Foo(), "B")
         with self.assertRaises(Exception):
-            parse_edges(G1)
+            _parse_edges(G1)
 
         G2 = nx.DiGraph()
         G2.add_edge("A", Foo())
         with self.assertRaises(Exception):
-            parse_edges(G2)
+            _parse_edges(G2)
 
     def test_invalid_type_raises(self):
         """
@@ -275,7 +275,7 @@ class TestParseEdges(unittest.TestCase):
         """
         for bad in [123, 3.14, {"A", "B"}, {"A": "B"}, None]:
             with self.assertRaises(Exception):
-                parse_edges(bad)
+                _parse_edges(bad)
 
 
 class TestTupleIntoNode(unittest.TestCase):
@@ -520,7 +520,7 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         """
         input_list = [("X", "10"), (20, "30"), ("Z", 40)]
         expected = [("X", 10), ("20", 30), ("Z", 40)]
-        result = parse_tuples_str_int_list(input_list)
+        result = _parse_tuples_str_int_list(input_list)
         self.assertEqual(result, expected)
 
     def test_list_with_non_tuple_element_raises(self):
@@ -530,7 +530,7 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         """
         bad_list = [("A", "1"), ["B", "2"], ("C", "3")]
         with self.assertRaises(Exception) as cm:
-            parse_tuples_str_int_list(bad_list)
+            _parse_tuples_str_int_list(bad_list)
         self.assertIn("Input format for", str(cm.exception))
 
     def test_single_tuple(self):
@@ -538,8 +538,8 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         A single 2-tuple should be wrapped in a list and parsed.
         E.g. ("A","5") → [("A",5)] or (6, "7") → [("6",7)].
         """
-        self.assertEqual(parse_tuples_str_int_list(("A", "5")), [("A", 5)])
-        self.assertEqual(parse_tuples_str_int_list((6, "7")), [("6", 7)])
+        self.assertEqual(_parse_tuples_str_int_list(("A", "5")), [("A", 5)])
+        self.assertEqual(_parse_tuples_str_int_list((6, "7")), [("6", 7)])
 
     def test_tuple_with_non_numeric_string_raises_value_error(self):
         """
@@ -547,14 +547,14 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         That propagates out of parse_tuples_str_int_list.
         """
         with self.assertRaises(ValueError):
-            parse_tuples_str_int_list(("A", "not-a-number"))
+            _parse_tuples_str_int_list(("A", "not-a-number"))
 
     def test_tuple_with_wrong_length_raises_value_error(self):
         """
         If the tuple is not length 2, unpacking in parse_tuple_str_int triggers ValueError.
         """
         with self.assertRaises(ValueError):
-            parse_tuples_str_int_list(("A", "1", "extra"))
+            _parse_tuples_str_int_list(("A", "1", "extra"))
 
     def test_invalid_type_raises(self):
         """
@@ -562,75 +562,75 @@ class TestParseTuplesStrIntList(unittest.TestCase):
         """
         for bad in [123, 3.14, "string", None, {"A": 1}]:
             with self.assertRaises(Exception) as cm:
-                parse_tuples_str_int_list(bad)
+                _parse_tuples_str_int_list(bad)
             self.assertIn("Input format for", str(cm.exception))
 
 
 class TestParseTupleStrInt(unittest.TestCase):
     def test_str_str_numeric(self):
         """('A','123') → ('A', 123)"""
-        self.assertEqual(parse_tuple_str_int(("A", "123")), ("A", 123))
+        self.assertEqual(_parse_tuple_str_int(("A", "123")), ("A", 123))
 
     def test_int_int(self):
         """(5, 6) → ('5', 6)"""
-        self.assertEqual(parse_tuple_str_int((5, 6)), ("5", 6))
+        self.assertEqual(_parse_tuple_str_int((5, 6)), ("5", 6))
 
     def test_int_str(self):
         """(7, '8') → ('7', 8)"""
-        self.assertEqual(parse_tuple_str_int((7, "8")), ("7", 8))
+        self.assertEqual(_parse_tuple_str_int((7, "8")), ("7", 8))
 
     def test_invalid_first_element_type(self):
         """First element not str/int (e.g. None) → custom Exception"""
         with self.assertRaises(Exception) as cm:
-            parse_tuple_str_int((None, 1))
+            _parse_tuple_str_int((None, 1))
         self.assertIn("Tuple input format for", str(cm.exception))
 
     def test_invalid_second_element_type(self):
         """Second element neither str nor int (e.g. float) → custom Exception"""
         with self.assertRaises(Exception) as cm:
-            parse_tuple_str_int(("A", 2.5))
+            _parse_tuple_str_int(("A", 2.5))
         self.assertIn("Tuple input format for", str(cm.exception))
 
     def test_non_numeric_string_second_raises_value_error(self):
         """Second element is non‐numeric string → int(...) raises ValueError"""
         with self.assertRaises(ValueError):
-            parse_tuple_str_int(("A", "hello"))
+            _parse_tuple_str_int(("A", "hello"))
 
     def test_wrong_length_tuple_raises_value_error(self):
         """Tuple of length ≠ 2 → unpacking into two variables raises ValueError"""
         with self.assertRaises(ValueError):
-            parse_tuple_str_int(("A", 1, "extra"))
+            _parse_tuple_str_int(("A", 1, "extra"))
 
     def test_non_tuple_input_raises_exception(self):
         """Any non‐tuple input → custom Exception with type in message"""
         for bad in ["A", 123, None, ["A", 1]]:
             with self.assertRaises(Exception) as cm:
-                parse_tuple_str_int(bad)
+                _parse_tuple_str_int(bad)
             self.assertIn("Input format for", str(cm.exception))
 
 
 class TestParseToStringList(unittest.TestCase):
     def test_string_input(self):
         """A pure string should be wrapped in a single-element list."""
-        self.assertEqual(parse_to_string_list("hello"), ["hello"])
-        self.assertEqual(parse_to_string_list(""), [""])
+        self.assertEqual(_parse_to_string_list("hello"), ["hello"])
+        self.assertEqual(_parse_to_string_list(""), [""])
 
     def test_int_input(self):
         """An integer should be converted to string and wrapped in a list."""
-        self.assertEqual(parse_to_string_list(123), ["123"])
-        self.assertEqual(parse_to_string_list(0), ["0"])
+        self.assertEqual(_parse_to_string_list(123), ["123"])
+        self.assertEqual(_parse_to_string_list(0), ["0"])
 
     def test_list_of_str(self):
         """A list of strings should be returned unchanged."""
         data = ["a", "b", "c"]
-        result = parse_to_string_list(data)
+        result = _parse_to_string_list(data)
         self.assertIs(result, data)  # same list object
         self.assertEqual(result, ["a", "b", "c"])
 
     def test_empty_list(self):
         """An empty list yields itself (an empty list)."""
         data = []
-        result = parse_to_string_list(data)
+        result = _parse_to_string_list(data)
         self.assertIs(result, data)
         self.assertEqual(result, [])
 
@@ -640,7 +640,7 @@ class TestParseToStringList(unittest.TestCase):
         (the code attempts conversion but does not rebuild the list).
         """
         data = [1, 2, 3]
-        result = parse_to_string_list(data)
+        result = _parse_to_string_list(data)
         self.assertIs(result, data)
         # Currently ints remain ints under existing implementation
         self.assertEqual(result, [1, 2, 3])
@@ -650,25 +650,25 @@ class TestParseToStringList(unittest.TestCase):
         A mixed list of int and str passes and is returned unchanged.
         """
         data = [10, "20", 30]
-        result = parse_to_string_list(data)
+        result = _parse_to_string_list(data)
         self.assertIs(result, data)
         self.assertEqual(result, [10, "20", 30])
 
     def test_list_with_invalid_type_raises(self):
         """Any list containing a non-str, non-int element should raise."""
         with self.assertRaises(Exception) as cm:
-            parse_to_string_list([1, None, "x"])
+            _parse_to_string_list([1, None, "x"])
         self.assertIn("not recognized", str(cm.exception))
 
         with self.assertRaises(Exception) as cm:
-            parse_to_string_list([[], "a"])
+            _parse_to_string_list([[], "a"])
         self.assertIn("not recognized", str(cm.exception))
 
     def test_other_types_raise(self):
         """Inputs that are not str, int, or list should raise."""
         for bad in [3.14, {"a": 1}, {"a", "b"}, None]:
             with self.assertRaises(Exception) as cm:
-                parse_to_string_list(bad)
+                _parse_to_string_list(bad)
             self.assertIn("not recognized", str(cm.exception))
 
 

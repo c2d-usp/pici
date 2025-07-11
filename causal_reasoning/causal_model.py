@@ -4,7 +4,6 @@ from typing import TypeVar
 
 import networkx as nx
 from pandas import DataFrame
-import logging
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.estimators import MaximumLikelihoodEstimator
@@ -23,12 +22,8 @@ from causal_reasoning.graph.node import Node
 from causal_reasoning.utils._enum import OptimizersLabels
 from causal_reasoning.utils.parser import (
     convert_tuples_list_into_nodes_list,
-    parse_edges,
-    parse_input_graph,
-    parse_to_string_list,
-    parse_tuple_str_int,
-    parse_tuples_str_int_list,
     convert_tuple_into_node,
+    Parser
 )
 
 T = TypeVar("str")
@@ -46,32 +41,15 @@ class CausalModel:
     ) -> None:
         self.data = data
 
-        # TODO: If it is a nx
-        # Or str
-        # or list of tuples
-        # or one tuple
-        edges = parse_edges(edges)
+        parser = Parser(edges, custom_cardinalities, unobservables_labels, interventions, target)
+        
+        self.graph: Graph = parser.get_graph()
+        self.unobservables: list[Node] = parser.get_unobservables()
+        self.interventions: list[Node] = parser.get_interventions()
+        self.target: Node = parser.get_target()
 
-        unobservables_labels = parse_to_string_list(unobservables_labels)
-        self.graph: Graph = get_graph(
-            edges=edges,
-            unobservables=unobservables_labels,
-            custom_cardinalities=custom_cardinalities,
-        )
-        self.unobservables = [
-            self.graph.graphNodes[unobservable_label]
-            for unobservable_label in unobservables_labels
-        ]
-        # TODO:
-        if interventions:
-            interventions = convert_tuples_list_into_nodes_list(
-                parse_tuples_str_int_list(interventions), self.graph
-            )
-        self.interventions = interventions
+        del parser
 
-        if target:
-            target = convert_tuple_into_node(parse_tuple_str_int(target), self.graph)
-        self.target = target
 
     def are_d_separated_in_complete_graph(
         self,
@@ -173,6 +151,7 @@ class CausalModel:
         target_node = convert_tuple_into_node(target, self.graph)
         if target_node is None and self.target is None:
             raise Exception("Expect target to be not None")
+
         if target_node is not None:
             self.target = target_node
 
@@ -183,7 +162,7 @@ class CausalModel:
         elif len(self.interventions) > 2:
             self.multi_intervention_query()
             return ("None", "None")
-        raise Exception("None interventions found")
+        raise Exception("None interventions found. Expect at least one intervention.")
 
     def single_intervention_query(self) -> tuple[str, str]:
         return build_linear_problem(
@@ -238,8 +217,6 @@ class CausalModel:
         """
         Draw the graph using networkx.
         """
-        # TODO: Change 'target' to 'targets'.
-        # plot_graph_image handles already with targets
         plot_graph_image(
             graph=self.graph.DAG,
             unobservables=self.unobservables,
@@ -247,110 +224,3 @@ class CausalModel:
             targets=[self.target],
             output_path=output_path,
         )
-
-
-def get_node(graphNodes: dict[str, Node], node_label: str):
-    return graphNodes[node_label]
-
-
-def get_node_list(graphNodes: dict[str, Node], node_labels: list[str]) -> list[Node]:
-    return [get_node(graphNodes, node_label) for node_label in node_labels]
-
-
-def get_parent_latent(parents_label: list[str], node_cardinalities: list[str]) -> str:
-    for node_parent in parents_label:
-        if node_cardinalities[node_parent] == 0:
-            return node_parent
-    return None
-
-
-def get_graph(
-    edges: tuple[str, str] = None,
-    unobservables: list[str] = None,
-    custom_cardinalities: dict[str, int] = {},
-):
-    (
-        number_of_nodes,
-        children_labels,
-        node_cardinalities,
-        parents_labels,
-        node_labels_set,
-        dag,
-    ) = parse_input_graph(
-        edges, latents_label=unobservables, custom_cardinalities=custom_cardinalities
-    )
-    order = list(nx.topological_sort(dag))
-
-    parent_latent_labels: dict[str, str] = {}
-    graphNodes: dict[str, Node] = {}
-    node_set: set[Node] = set()
-
-    parent_latent_label: str = None
-    for node_label in node_labels_set:
-        if node_cardinalities[node_label] == 0:
-            parent_latent_label = None
-            new_node = Node(
-                children=[],
-                parents=[],
-                latentParent=None,
-                isLatent=True,
-                label=node_label,
-                cardinality=node_cardinalities[node_label],
-            )
-        else:
-            parent_latent_label = get_parent_latent(
-                parents_labels[node_label], node_cardinalities
-            )
-
-            if parent_latent_label is None:
-                # TODO: ADD WARNING MESSAGE
-                logger.error(
-                    f"PARSE ERROR: ALL OBSERVABLE VARIABLES SHOULD HAVE A LATENT PARENT, BUT {node_label} DOES NOT."
-                )
-
-            new_node = Node(
-                children=[],
-                parents=[],
-                latentParent=None,
-                isLatent=False,
-                label=node_label,
-                cardinality=node_cardinalities[node_label],
-            )
-
-        graphNodes[node_label] = new_node
-        parent_latent_labels[new_node.label] = parent_latent_label
-        node_set.add(new_node)
-
-    endogenous: list[Node] = []
-    exogenous: list[Node] = []
-    topologicalOrderIndexes = {}
-
-    for i, node_label in enumerate(node_labels_set):
-        node = graphNodes[node_label]
-        if node.isLatent:
-            exogenous.append(node)
-            node.children = get_node_list(graphNodes, children_labels[node.label])
-        else:
-            node.latentParent = graphNodes[parent_latent_labels[node_label]]
-            endogenous.append(node)
-            node.children = get_node_list(graphNodes, children_labels[node.label])
-            node.parents = get_node_list(graphNodes, parents_labels[node.label])
-        topologicalOrderIndexes[node] = i
-
-    topological_order_nodes: list[Node] = []
-    for node_label in order:
-        topological_order_nodes.append(graphNodes[node_label])
-
-    return Graph(
-        numberOfNodes=number_of_nodes,
-        exogenous=exogenous,  # list[Node]
-        endogenous=endogenous,  # list[Node]
-        topologicalOrder=topological_order_nodes,  # list[Node]
-        DAG=dag,  # nx.DiGraph
-        graphNodes=graphNodes,  # dict[str, Node]
-        node_set=node_set,  # set(Node)
-        topologicalOrderIndexes=topologicalOrderIndexes,  # dict[Node, int]
-        currNodes=[],
-        dagComponents=[],  # list[list[Node]]
-        cComponentToUnob={},  # dict[int, Node]
-    )
