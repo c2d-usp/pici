@@ -23,7 +23,7 @@ from causal_reasoning.utils._enum import OptimizersLabels
 from causal_reasoning.utils.parser import (
     convert_tuples_list_into_nodes_list,
     convert_tuple_into_node,
-    Parser
+    Parser,
 )
 
 T = TypeVar("str")
@@ -41,15 +41,16 @@ class CausalModel:
     ) -> None:
         self.data = data
 
-        parser = Parser(edges, custom_cardinalities, unobservables_labels, interventions, target)
-        
+        parser = Parser(
+            edges, custom_cardinalities, unobservables_labels, interventions, target
+        )
+
         self.graph: Graph = parser.get_graph()
         self.unobservables: list[Node] = parser.get_unobservables()
         self.interventions: list[Node] = parser.get_interventions()
         self.target: Node = parser.get_target()
 
         del parser
-
 
     def are_d_separated_in_complete_graph(
         self,
@@ -101,7 +102,9 @@ class CausalModel:
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> str:
-        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(
+            interventions, self.graph
+        )
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
@@ -141,7 +144,9 @@ class CausalModel:
     def inference_intervention_query(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
     ) -> tuple[str, str]:
-        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
+        interventions_nodes = convert_tuples_list_into_nodes_list(
+            interventions, self.graph
+        )
         if interventions_nodes is None and self.interventions is None:
             raise Exception("Expect intervention to be not None")
 
@@ -190,10 +195,14 @@ class CausalModel:
         pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        self.interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
+        self.interventions = convert_tuples_list_into_nodes_list(
+            interventions, self.graph
+        )
 
     def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
-        more_interventions = convert_tuples_list_into_nodes_list(interventions, self.graph)
+        more_interventions = convert_tuples_list_into_nodes_list(
+            interventions, self.graph
+        )
         if more_interventions is None:
             return
         for intervention in more_interventions:

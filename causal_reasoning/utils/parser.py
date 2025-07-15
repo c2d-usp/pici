@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("str")
 
+
 class Parser:
     def __init__(
         self,
@@ -22,13 +23,13 @@ class Parser:
         edges = _parse_edges(edges)
 
         unobservables_labels = _parse_to_string_list(unobservables_labels)
-        
+
         self.graph: Graph = _define_graph(
             edges=edges,
             unobservables=unobservables_labels,
             custom_cardinalities=custom_cardinalities,
         )
-        
+
         self.unobservables = [
             self.graph.graphNodes[unobservable_label]
             for unobservable_label in unobservables_labels
@@ -43,7 +44,7 @@ class Parser:
         if target:
             target = convert_tuple_into_node(_parse_tuple_str_int(target), self.graph)
         self.target = target
-    
+
     def get_graph(self) -> Graph:
         return self.graph
 
@@ -121,7 +122,9 @@ def convert_tuples_list_into_nodes_list(
     return output
 
 
-def convert_tuple_into_node(tuple_label_value: tuple[str, int], graph: Graph) -> Node | None:
+def convert_tuple_into_node(
+    tuple_label_value: tuple[str, int], graph: Graph
+) -> Node | None:
     if tuple_label_value is None:
         return None
     label, value = tuple_label_value
@@ -318,6 +321,7 @@ def _parse_default_graph(
             node_cardinalities[node_label] = 0 if node_label in latents_label else 2
     return number_of_nodes, children, node_cardinalities, parents, node_labels_set, dag
 
+
 def _get_parent_latent(parents_label: list[str], node_cardinalities: list[str]) -> str:
     for node_parent in parents_label:
         if node_cardinalities[node_parent] == 0:
@@ -328,6 +332,6 @@ def _get_parent_latent(parents_label: list[str], node_cardinalities: list[str]) 
 def _get_node_list(graphNodes: dict[str, Node], node_labels: list[str]) -> list[Node]:
     return [_get_node(graphNodes, node_label) for node_label in node_labels]
 
+
 def _get_node(graphNodes: dict[str, Node], node_label: str):
     return graphNodes[node_label]
-
