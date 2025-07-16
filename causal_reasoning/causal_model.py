@@ -121,6 +121,8 @@ class CausalModel:
         if target_node is not None:
             self.target = target_node
 
+        if not self.interventions:
+            raise Exception("Expect interventions to be a non-empty list")
         X = self.interventions[0].label
         Y = self.target.label
         latent_labels = {u.label for u in (self.unobservables or [])}
