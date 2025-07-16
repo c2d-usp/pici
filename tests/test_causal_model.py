@@ -326,6 +326,99 @@ class TestMNCases(unittest.TestCase):
                             msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
 
+class TestIsIdentifiableIntervention(unittest.TestCase):
+    def setUp(self):
+        self.df_xy = pd.DataFrame({
+            'X': [0, 1] * 10,
+            'Y': [1, 0] * 10
+        })
+        self.df_xwy = pd.DataFrame({
+            'X': [0, 1] * 10,
+            'W': [0, 1] * 10,
+            'Y': [1, 0] * 10
+        })
+        self.df_xzy = pd.DataFrame({
+            'X': [0, 1] * 10,
+            'Z': [0, 1] * 10,
+            'Y': [1, 0] * 10
+        })
+
+    def test_backdoor_non_identifiable(self):
+        # Pure confounder U -> X, U -> Y
+        graph = "U -> X, U -> Y, X -> Y"
+        model = CausalModel(
+            data=self.df_xy,
+            edges=graph,
+            unobservables_labels=['U']
+        )
+        identifiable, method, detail = model.is_identifiable_intervention(
+            interventions=[('X', 0)],
+            target=('Y', 1)
+        )
+        self.assertFalse(identifiable)
+        self.assertIsNone(method)
+        self.assertIsNone(detail)
+
+    def test_frontdoor_identifiable(self):
+        # Front-door: U1 -> X,Y; X -> W -> Y; U2 -> W (harmless latent on W)
+        graph = "U1 -> X, U1 -> Y, X -> W, W -> Y, U2 -> W"
+        model = CausalModel(
+            data=self.df_xwy,
+            edges=graph,
+            unobservables_labels=['U1', 'U2']
+        )
+        identifiable, method, detail = model.is_identifiable_intervention(
+            interventions=[('X', 0)],
+            target=('Y', 1)
+        )
+        self.assertTrue(identifiable)
+        self.assertEqual(method, "frontdoor")
+        # The minimal observed front-door set should be {'W'}
+        self.assertEqual(detail, frozenset({'W'}))
+
+    def test_iv_identifiable(self):
+        # IV: U1 -> X,Y; U2 -> Z; Z -> X -> Y
+        graph = "U1 -> X, U1 -> Y, U2 -> Z, Z -> X, X -> Y"
+        model = CausalModel(
+            data=self.df_xzy,
+            edges=graph,
+            unobservables_labels=['U1', 'U2']
+        )
+        identifiable, method, detail = model.is_identifiable_intervention(
+            interventions=[('X', 0)],
+            target=('Y', 1)
+        )
+        self.assertTrue(identifiable)
+        self.assertEqual(method, "iv")
+        # The identified instrument should be 'Z'
+        self.assertEqual(detail, 'Z')
+
+    def test_missing_intervention_raises(self):
+        graph = "U -> X, U -> Y, X -> Y"
+        model = CausalModel(
+            data=self.df_xy,
+            edges=graph,
+            unobservables_labels=['U']
+        )
+        with self.assertRaises(Exception):
+            model.is_identifiable_intervention(
+                interventions=[],
+                target=('Y', 1)
+            )
+
+    def test_missing_target_raises(self):
+        graph = "U -> X, U -> Y, X -> Y"
+        model = CausalModel(
+            data=self.df_xy,
+            edges=graph,
+            unobservables_labels=['U']
+        )
+        with self.assertRaises(Exception):
+            model.is_identifiable_intervention(
+                interventions=[('X', 0)],
+                target=None
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
