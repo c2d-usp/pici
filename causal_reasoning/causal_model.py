@@ -104,7 +104,7 @@ class CausalModel:
     
     def is_identifiable_intervention(
         self, interventions: list[tuple[str, int]] = [], target: tuple[str, int] = None
-    ) -> bool:
+    ) -> tuple[bool, str | None, Any | None]:
         """
         Check if the intervention is identifiable.
         """
