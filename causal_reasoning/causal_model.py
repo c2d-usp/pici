@@ -155,7 +155,8 @@ class CausalModel:
             bds_zy = infer.get_all_backdoor_adjustment_sets(X=z, Y=Y)
             if any(not Bd.isdisjoint(latent_labels) for Bd in bds_zy):
                 continue
-            if all(X in path[1:-1] for path in all_directed_paths(G, z, Y)):
+            paths = list(all_directed_paths(G, z, Y))
+            if paths and all(X in path[1:-1] for path in paths):
                 return True, "iv", z
 
         data_obs = self.data.drop(
