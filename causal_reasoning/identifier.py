@@ -16,7 +16,7 @@ class Identifier:
         dbn.add_edges_from(self.G.edges())
         self.infer = CausalInference(dbn)
         self.data_obs = causal_model.data.drop(
-            columns=[u.label for u in self.latent_labels if u in causal_model.data.columns]
+            columns=[u for u in self.latent_labels if u in causal_model.data.columns]
         )
 
     @staticmethod
