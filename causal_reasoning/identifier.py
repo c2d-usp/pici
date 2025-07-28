@@ -66,7 +66,7 @@ class Identifier:
         sets: Iterable[FrozenSet[str]]
     ) -> List[FrozenSet[str]]:
         """
-        Returns only those adjustment‐sets Z that do not contain any latent variable.
+        Returns only those adjustment-sets Z that do not contain any latent variable.
         """
         return [Z for Z in sets if Z.isdisjoint(self.latent_labels)]
 
