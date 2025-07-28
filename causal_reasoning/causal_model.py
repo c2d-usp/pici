@@ -11,6 +11,7 @@ from pgmpy.estimators import MaximumLikelihoodEstimator
 from dowhy import CausalModel as DowhyCausalModel
 
 from causal_reasoning.utils.graph_plotter import plot_graph_image
+from .identifier import Identifier
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pgmpy").setLevel(logging.WARNING)
@@ -154,88 +155,30 @@ class CausalModel:
         """
         Check if the intervention is identifiable.
         """
-        interventions_nodes = convert_tuples_list_into_nodes_list(interventions, self.graph)
-        if interventions_nodes is None and self.interventions is None:
-            raise Exception("Expect intervention to be not None")
 
-        if interventions_nodes is not None:
-            self.interventions = interventions_nodes
+        if not self.interventions_validator(interventions):
+            raise ValueError("Invalid interventions")
+        if not self.target_validator(target):
+            raise ValueError("Invalid target")
 
-        target_node = convert_tuple_into_node(target, self.graph)
-        if target_node is None and self.target is None:
-            raise Exception("Expect target to be not None")
-        if target_node is not None:
-            self.target = target_node
-
-        if not self.interventions:
-            raise Exception("Expect interventions to be a non-empty list")
-        X = self.interventions[0].label
-        Y = self.target.label
-        latent_labels = {u.label for u in (self.unobservables or [])}
-
-        dbn = DiscreteBayesianNetwork()
-        dbn.add_edges_from(self.graph.DAG.edges())
-
-        infer = CausalInference(dbn)
-
-        backdoors = infer.get_all_backdoor_adjustment_sets(X=X, Y=Y)
-        obs_bds = [Z for Z in backdoors if Z.isdisjoint(latent_labels)]
-        if obs_bds:
-            Z = min(obs_bds, key=len)
-            return True, "backdoor", Z
-        
-        frontdoors = infer.get_all_frontdoor_adjustment_sets(X=X, Y=Y)
-        obs_fds = [Z for Z in frontdoors if Z.isdisjoint(latent_labels)]
-        if obs_fds:
-            W = min(obs_fds, key=len)
-            return True, "frontdoor", W
-
-        def all_directed_paths(G, src, dst):
-            for path in nx.all_simple_paths(G, src, dst):
-                if all(G.has_edge(u, v) for u, v in zip(path, path[1:])):
-                    yield path
-
-        G = self.graph.DAG
-        observed = set(G.nodes()) - latent_labels
-        for z in observed - {X, Y}:
-            if not G.has_edge(z, X):
-                continue
-            bds_zy = infer.get_all_backdoor_adjustment_sets(X=z, Y=Y)
-            if any(not Bd.isdisjoint(latent_labels) for Bd in bds_zy):
-                continue
-            paths = list(all_directed_paths(G, z, Y))
-            if paths and all(X in path[1:-1] for path in paths):
-                return True, "iv", z
-
-        data_obs = self.data.drop(
-            columns=[u for u in latent_labels if u in self.data.columns]
+        identifier = Identifier(
+            causal_model=self
         )
 
-        for U in (self.unobservables or []):
-            if nx.has_path(G, U.label, X) and nx.has_path(G, U.label, Y):
-                return False, None, None
-            
-        G_do = G.copy()
-        G_do.remove_edges_from(list(G_do.in_edges(X)))
-        if nx.is_d_separator(G_do, {X}, {Y}, set()):
+        for method in ["backdoor", "frontdoor", "instrumental_variable"]:
+            finder = getattr(identifier, f"find_{method}")
+            result = finder()
+            if result:
+                return True, method, result
+
+        if identifier.check_unobservable_confounding():
+            return False, "unobservable_confounding", None
+        
+        if identifier.graphical_identification():
             return True, "graphical", None
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            dowhy_model = DowhyCausalModel(
-                data=data_obs,
-                graph=self.graph.DAG,
-                treatment=X,
-                outcome=Y
-            )
-            try:
-                estimand = dowhy_model.identify_effect(
-                    method_name="id-algorithm",
-                    proceed_when_unidentifiable=False
-                )
-                return True, "id-algorithm", estimand
-            except Exception:
-                return False, None, None
+        estimand = identifier.id_algorithm_identification()
+        return (True, "id_algorithm", estimand) if estimand else (False, None, None)
 
     def identifiable_intervention_query(
         self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
