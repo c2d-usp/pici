@@ -75,7 +75,7 @@ class Identifier:
         sets: Iterable[FrozenSet[str]]
     ) -> bool:
         """
-        Returns True iff every adjustment‐set in sets is disjoint from the latents.
+        Returns True iff every adjustment-set in sets is disjoint from the latents.
         """
         return all(Z.isdisjoint(self.latent_labels) for Z in sets)
 
