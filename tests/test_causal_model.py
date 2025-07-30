@@ -356,7 +356,7 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
             target=('Y', 1)
         )
         self.assertFalse(identifiable)
-        self.assertIsNone(method)
+        self.assertEqual(method, "unobservable_confounding")
         self.assertIsNone(detail)
 
     def test_frontdoor_identifiable(self):
@@ -389,7 +389,7 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
             target=('Y', 1)
         )
         self.assertTrue(identifiable)
-        self.assertEqual(method, "iv")
+        self.assertEqual(method, "instrumental_variable")
         # The identified instrument should be 'Z'
         self.assertEqual(detail, 'Z')
 
