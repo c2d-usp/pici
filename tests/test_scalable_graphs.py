@@ -3,6 +3,7 @@ import sys
 import unittest
 
 import pandas as pd
+import numpy as np
 import logging
 
 THIS_DIR = os.path.dirname(__file__)
@@ -36,7 +37,7 @@ class TestMNCases(unittest.TestCase):
                 edges = genGraph(N=N, M=M)
                 csv_path = os.path.join(PROJECT_ROOT, csv_example.value)
                 df = pd.read_csv(csv_path)
-                df["U3"] = df["Y"].copy()
+                df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 
                 model = CausalModel(
                     data=df,
