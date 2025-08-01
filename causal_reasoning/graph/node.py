@@ -19,5 +19,4 @@ class Node:
         self.cardinality: int = cardinality
         self.visited: bool = False
         self.value: int = None
-        self.target_value: int = None
-        self.intervention_value: int = None
+        self.intervened_value: int = None

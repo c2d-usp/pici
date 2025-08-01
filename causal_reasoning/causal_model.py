@@ -200,14 +200,14 @@ class CausalModel:
         distribution = model.query(
             variables=[self.target.label],
             do={
-                self.interventions[i].label: self.interventions[i].intervention_value
+                self.interventions[i].label: self.interventions[i].intervened_value
                 for i in range(len(self.interventions))
             },
             adjustment_set=min_adjustment_set,
         )
 
         kwargs = {}
-        kwargs[self.target.label] = self.target.target_value
+        kwargs[self.target.label] = self.target.intervened_value
 
         return distribution.get_value(**kwargs)
 

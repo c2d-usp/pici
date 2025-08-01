@@ -54,11 +54,11 @@ class Graph:
             raise Exception(f"Node label '{node_label}' is not of type {str}.")
         return node_label in self.graphNodes
 
-    def set_node_value(self, node_label: str, node_value: int) -> Node:
+    def set_node_intervened_value(self, node_label: str, node_value: int) -> Node:
         if not isinstance(node_value, int):
             raise Exception(f"Node value '{node_value}' is not of type int.")
         # TODO: Validate if value fits in node cardinality
-        self.graphNodes[node_label].value = node_value
+        self.graphNodes[node_label].intervened_value = node_value
         return self.graphNodes[node_label]
 
     def get_closest_node_from_leaf_in_the_topological_order(

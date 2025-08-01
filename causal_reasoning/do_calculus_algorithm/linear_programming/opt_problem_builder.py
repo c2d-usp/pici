@@ -76,7 +76,7 @@ def build_linear_problem(
     lowerBound, upperBound = compute_bounds(optimizer)
 
     logger.info(
-        f"Causal query: P({target.label}={target.target_value}|do({intervention.label}={intervention.intervention_value}))"
+        f"Causal query: P({target.label}={target.intervened_value}|do({intervention.label}={intervention.intervened_value}))"
     )
     logger.info(f"Bounds: {lowerBound} <= P <= {upperBound}")
     return lowerBound, upperBound

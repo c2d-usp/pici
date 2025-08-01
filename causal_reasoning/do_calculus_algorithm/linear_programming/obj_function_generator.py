@@ -93,7 +93,7 @@ class ObjFunctionGenerator:
             nodes=summandNodes
         )
         summandNodes.append(self.target)
-        spaces.append([self.target.target_value])
+        spaces.append([self.target.intervened_value])
         inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
             listSpaces=spaces
         )
