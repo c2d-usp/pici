@@ -200,14 +200,14 @@ class CausalModel:
         distribution = model.query(
             variables=[self.target.label],
             do={
-                self.interventions[i].label: self.interventions[i].value
+                self.interventions[i].label: self.interventions[i].intervention_value
                 for i in range(len(self.interventions))
             },
             adjustment_set=min_adjustment_set,
         )
 
         kwargs = {}
-        kwargs[self.target.label] = self.target.value
+        kwargs[self.target.label] = self.target.target_value
 
         return distribution.get_value(**kwargs)
 
@@ -248,11 +248,6 @@ class CausalModel:
 
     def multi_intervention_query(self):
         raise NotImplementedError
-
-    def is_identifiable(self):
-        # backdoor
-        # frontdoor
-        pass
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
         self.interventions = convert_tuples_list_into_nodes_list(
