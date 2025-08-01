@@ -359,18 +359,18 @@ class TestTupleIntoNode(unittest.TestCase):
 
     def test_tuple_valid_label_sets_value_and_returns_node(self):
         # Before: node "A" exists with value None
-        self.assertIsNone(self.graph.graphNodes["A"].value)
+        self.assertIsNone(self.graph.graphNodes["A"].intervened_value)
 
         node = convert_tuple_into_node(("A", 42), self.graph)
         # It should return the same DummyNode instance
         self.assertIs(node, self.graph.graphNodes["A"])
         # And the node’s value should now be updated
-        self.assertEqual(node.value, 42)
+        self.assertEqual(node.intervened_value, 42)
 
         # Also test a second label
         node_b = convert_tuple_into_node(("B", -7), self.graph)
         self.assertIs(node_b, self.graph.graphNodes["B"])
-        self.assertEqual(node_b.value, -7)
+        self.assertEqual(node_b.intervened_value, -7)
 
     def test_tuple_invalid_label_raises_exception(self):
         # If label not in graph, should raise an Exception
@@ -477,7 +477,7 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         self.assertEqual(len(result), 1)
         node = result[0]
         self.assertIs(node, self.graph.graphNodes["A"])
-        self.assertEqual(node.value, 10)
+        self.assertEqual(node.intervened_value, 10)
 
     def test_list_multiple_valid_tuples(self):
         input_list = [("A", 1), ("C", 3)]
@@ -486,11 +486,11 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         self.assertEqual(len(result), 2)
         node_a, node_c = result
         self.assertIs(node_a, self.graph.graphNodes["A"])
-        self.assertEqual(node_a.value, 1)
+        self.assertEqual(node_a.intervened_value, 1)
         self.assertIs(node_c, self.graph.graphNodes["C"])
-        self.assertEqual(node_c.value, 3)
+        self.assertEqual(node_c.intervened_value, 3)
 
-        self.assertIsNone(self.graph.graphNodes["B"].value)
+        self.assertIsNone(self.graph.graphNodes["B"].intervened_value)
 
     def test_list_contains_invalid_label_raises(self):
         bad_list = [("A", 5), ("X", 7)]
