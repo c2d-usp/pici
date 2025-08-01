@@ -130,7 +130,7 @@ def convert_tuple_into_node(
     label, value = tuple_label_value
     if not graph.is_node_in_graph(label):
         raise Exception(f"Node '{label}' not present in the defined graph.")
-    graph.set_node_value(label, value)
+    graph.set_node_intervened_value(label, value)
     return graph.graphNodes[label]
 
 
