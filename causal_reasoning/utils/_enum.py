@@ -12,6 +12,8 @@ class DataExamplesPaths(Enum):
     CSV_DISCRETE_IV_RANDOM_EXAMPLE = (
         "causal_reasoning/data/csv/random_probabilities.csv"
     )
+    CSV_BCAUSE_EXAMPLE_1 = "causal_reasoning/data/csv/bcause_example_1.csv"
+    CSV_BCAUSE_EXAMPLE_2 = "causal_reasoning/data/csv/bcause_example_2.csv"
     CSV_N1M1 = "causal_reasoning/data/csv/n1_m1_scaling_case.csv"
     CSV_N2M1 = "causal_reasoning/data/csv/n2_m1_scaling_case.csv"
     CSV_N3M1 = "causal_reasoning/data/csv/n3_m1_scaling_case.csv"
