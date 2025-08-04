@@ -56,15 +56,25 @@ class CausalModel:
         del parser
 
     def intervention_query(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+        self,
+        interventions: list[tuple[str, int]] = None,
+        target: tuple[str, int] = None,
     ) -> str:
-        is_identifiable, _, _ = self.is_identifiable_intervention(interventions=interventions, target=target)
+        is_identifiable, _, _ = self.is_identifiable_intervention(
+            interventions=interventions, target=target
+        )
         if is_identifiable:
-            return self.identifiable_intervention_query(interventions=interventions, target=target)
-        return self.partially_identifiable_intervention_query(interventions=interventions, target=target)
+            return self.identifiable_intervention_query(
+                interventions=interventions, target=target
+            )
+        return self.partially_identifiable_intervention_query(
+            interventions=interventions, target=target
+        )
 
     def is_identifiable_intervention(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+        self,
+        interventions: list[tuple[str, int]] = None,
+        target: tuple[str, int] = None,
     ) -> tuple[bool, str | None, Any | None]:
         """
         Check if the intervention is identifiable.
@@ -75,9 +85,7 @@ class CausalModel:
         if not self.target_validator(target):
             raise ValueError("Invalid target")
 
-        identifier = Identifier(
-            causal_model=self
-        )
+        identifier = Identifier(causal_model=self)
 
         for method in ["backdoor", "frontdoor", "instrumental_variable"]:
             finder = getattr(identifier, f"find_{method}")
@@ -87,7 +95,7 @@ class CausalModel:
 
         if identifier.check_unobservable_confounding():
             return False, "unobservable_confounding", None
-        
+
         if identifier.graphical_identification():
             return True, "graphical", None
 
@@ -95,7 +103,9 @@ class CausalModel:
         return (True, "id_algorithm", estimand) if estimand else (False, None, None)
 
     def identifiable_intervention_query(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+        self,
+        interventions: list[tuple[str, int]] = None,
+        target: tuple[str, int] = None,
     ) -> str:
         if not self.interventions_validator(interventions):
             raise ValueError("Invalid interventions")
@@ -125,9 +135,11 @@ class CausalModel:
         return distribution.get_value(**kwargs)
 
     def partially_identifiable_intervention_query(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+        self,
+        interventions: list[tuple[str, int]] = None,
+        target: tuple[str, int] = None,
     ) -> tuple[str, str]:
-        
+
         if not self.interventions_validator(interventions):
             raise ValueError("Invalid interventions")
         if not self.target_validator(target):
@@ -162,7 +174,9 @@ class CausalModel:
     def multi_intervention_query(self):
         raise NotImplementedError
 
-    def interventions_validator(self, interventions: list[tuple[str, int]] = None) -> bool:
+    def interventions_validator(
+        self, interventions: list[tuple[str, int]] = None
+    ) -> bool:
         """
         Validate that interventions is a non-empty list of (label, value) tuples
         and that each label is actually in the graph.
@@ -186,7 +200,7 @@ class CausalModel:
 
         self.interventions = nodes
         return True
-    
+
     def target_validator(self, target: tuple[str, int] = None) -> bool:
         """
         Validate that target is a (label, value) tuple whose label is
@@ -207,6 +221,26 @@ class CausalModel:
 
         self.target = node
         return True
+
+    def weak_pn_inference(self, intervention_label: str, target_label: str):
+        '''
+        PN = P(Y_{X=0} = 0 | X = 1, Y = 1)
+        WEAK_PN = P(Y_{X=0} = 0)
+        '''
+        return self.partially_identifiable_intervention_query(interventions=[(intervention_label, 0)], target=(target_label, 0))
+
+    def weak_ps_inference(self, intervention_label: str, target_label: str):
+        '''
+        PS = P(Y_{X=1} = 1 | X = 0, Y = 0)
+        WEAK_PS = P(Y_{X=1} = 1)
+        '''
+        return self.partially_identifiable_intervention_query(interventions=[(intervention_label, 1)], target=(target_label, 1))
+
+    def weak_pns_inference(self, intervention_label: str, target_label: str):
+        '''
+        PNS = P(X_{X=1} = 1, Y_{X=0} = 0)
+        '''
+        raise NotImplementedError
 
     def are_d_separated_in_intervened_graph(
         self,
