@@ -8,7 +8,6 @@ from pandas import DataFrame
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.estimators import MaximumLikelihoodEstimator
-from dowhy import CausalModel as DowhyCausalModel
 
 from causal_reasoning.utils.graph_plotter import plot_graph_image
 from .identifier import Identifier
@@ -56,52 +55,112 @@ class CausalModel:
 
         del parser
 
-    def are_d_separated_in_complete_graph(
-        self,
-        set_nodes_X: list[str],
-        set_nodes_Y: list[str],
-        set_nodes_Z: list[str],
-        G: nx.DiGraph = None,
-    ) -> bool:
-        """
-        Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+    def intervention_query(
+        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+    ) -> str:
+        is_identifiable, _, _ = self.is_identifiable_intervention(interventions=interventions, target=target)
+        if is_identifiable:
+            return self.identifiable_intervention_query(interventions=interventions, target=target)
+        return self.partially_identifiable_intervention_query(interventions=interventions, target=target)
 
-        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
-        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
+    def is_identifiable_intervention(
+        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+    ) -> tuple[bool, str | None, Any | None]:
         """
-        if G is None:
-            G = self.graph.DAG
-        return nx.is_d_separator(
-            G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z)
+        Check if the intervention is identifiable.
+        """
+
+        if not self.interventions_validator(interventions):
+            raise ValueError("Invalid interventions")
+        if not self.target_validator(target):
+            raise ValueError("Invalid target")
+
+        identifier = Identifier(
+            causal_model=self
         )
 
-    def are_d_separated_in_intervened_graph(
-        self,
-        set_nodes_X: list[str],
-        set_nodes_Y: list[str],
-        set_nodes_Z: list[str],
-        G: nx.DiGraph = None,
-    ) -> bool:
-        if G is None:
-            G = self.graph.DAG
+        for method in ["backdoor", "frontdoor", "instrumental_variable"]:
+            finder = getattr(identifier, f"find_{method}")
+            result = finder()
+            if result:
+                return True, method, result
 
-        if len(self.interventions) <= 0:
-            return self.are_d_separated_in_complete_graph(
-                set_nodes_X, set_nodes_Y, set_nodes_Z, G
-            )
+        if identifier.check_unobservable_confounding():
+            return False, "unobservable_confounding", None
+        
+        if identifier.graphical_identification():
+            return True, "graphical", None
 
-        operated_digraph = copy.deepcopy(G)
-        interventions_outgoing_edges = []
-        for intervention in self.interventions:
-            interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
-        operated_digraph.remove_edges_from(interventions_outgoing_edges)
+        estimand = identifier.id_algorithm_identification()
+        return (True, "id_algorithm", estimand) if estimand else (False, None, None)
 
-        return nx.is_d_separator(
-            G=operated_digraph,
-            x=set(set_nodes_X),
-            y=set(set_nodes_Y),
-            z=set(set_nodes_Z),
+    def identifiable_intervention_query(
+        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+    ) -> str:
+        if not self.interventions_validator(interventions):
+            raise ValueError("Invalid interventions")
+        if not self.target_validator(target):
+            raise ValueError("Invalid target")
+
+        G = DiscreteBayesianNetwork()
+        G.add_edges_from(self.graph.DAG.edges())
+        G.fit(self.data, estimator=MaximumLikelihoodEstimator)
+        model = CausalInference(G)
+        min_adjustment_set = model.get_minimal_adjustment_set(
+            X=self.interventions[0].label, Y=self.target.label
         )
+
+        distribution = model.query(
+            variables=[self.target.label],
+            do={
+                self.interventions[i].label: self.interventions[i].intervened_value
+                for i in range(len(self.interventions))
+            },
+            adjustment_set=min_adjustment_set,
+        )
+
+        kwargs = {}
+        kwargs[self.target.label] = self.target.intervened_value
+
+        return distribution.get_value(**kwargs)
+
+    def partially_identifiable_intervention_query(
+        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
+    ) -> tuple[str, str]:
+        
+        if not self.interventions_validator(interventions):
+            raise ValueError("Invalid interventions")
+        if not self.target_validator(target):
+            raise ValueError("Invalid target")
+
+        if len(self.interventions) == 1:
+            return self.single_intervention_query()
+        elif len(self.interventions) == 2:
+            return self.double_intervention_query()
+        elif len(self.interventions) > 2:
+            self.multi_intervention_query()
+            return ("None", "None")
+        raise Exception("None interventions found. Expect at least one intervention.")
+
+    def single_intervention_query(self) -> tuple[str, str]:
+        return build_linear_problem(
+            graph=self.graph,
+            df=self.data,
+            intervention=self.interventions[0],
+            target=self.target,
+            optimizer_label=OptimizersLabels.GUROBI.value,
+        )
+
+    def double_intervention_query(self):
+        return build_bi_linear_problem(
+            self.graph,
+            self.data,
+            self.interventions,
+            self.target,
+        )
+
+    def multi_intervention_query(self):
+        raise NotImplementedError
 
     def interventions_validator(self, interventions: list[tuple[str, int]] = None) -> bool:
         """
@@ -149,105 +208,52 @@ class CausalModel:
         self.target = node
         return True
 
-    def is_identifiable_intervention(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
-    ) -> tuple[bool, str | None, Any | None]:
+    def are_d_separated_in_intervened_graph(
+        self,
+        set_nodes_X: list[str],
+        set_nodes_Y: list[str],
+        set_nodes_Z: list[str],
+        G: nx.DiGraph = None,
+    ) -> bool:
+        if G is None:
+            G = self.graph.DAG
+
+        if len(self.interventions) <= 0:
+            return self.are_d_separated_in_complete_graph(
+                set_nodes_X, set_nodes_Y, set_nodes_Z, G
+            )
+
+        operated_digraph = copy.deepcopy(G)
+        interventions_outgoing_edges = []
+        for intervention in self.interventions:
+            interventions_outgoing_edges.extend(list(G.in_edges(intervention.label)))
+        operated_digraph.remove_edges_from(interventions_outgoing_edges)
+
+        return nx.is_d_separator(
+            G=operated_digraph,
+            x=set(set_nodes_X),
+            y=set(set_nodes_Y),
+            z=set(set_nodes_Z),
+        )
+
+    def are_d_separated_in_complete_graph(
+        self,
+        set_nodes_X: list[str],
+        set_nodes_Y: list[str],
+        set_nodes_Z: list[str],
+        G: nx.DiGraph = None,
+    ) -> bool:
         """
-        Check if the intervention is identifiable.
+        Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+
+        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
+        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
         """
-
-        if not self.interventions_validator(interventions):
-            raise ValueError("Invalid interventions")
-        if not self.target_validator(target):
-            raise ValueError("Invalid target")
-
-        identifier = Identifier(
-            causal_model=self
+        if G is None:
+            G = self.graph.DAG
+        return nx.is_d_separator(
+            G, set(set_nodes_X), set(set_nodes_Y), set(set_nodes_Z)
         )
-
-        for method in ["backdoor", "frontdoor", "instrumental_variable"]:
-            finder = getattr(identifier, f"find_{method}")
-            result = finder()
-            if result:
-                return True, method, result
-
-        if identifier.check_unobservable_confounding():
-            return False, "unobservable_confounding", None
-        
-        if identifier.graphical_identification():
-            return True, "graphical", None
-
-        estimand = identifier.id_algorithm_identification()
-        return (True, "id_algorithm", estimand) if estimand else (False, None, None)
-
-    def identifiable_intervention_query(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
-    ) -> str:
-        
-        if not self.interventions_validator(interventions):
-            raise ValueError("Invalid interventions")
-        if not self.target_validator(target):
-            raise ValueError("Invalid target")
-
-        G = DiscreteBayesianNetwork()
-        G.add_edges_from(self.graph.DAG.edges())
-        G.fit(self.data, estimator=MaximumLikelihoodEstimator)
-        model = CausalInference(G)
-        min_adjustment_set = model.get_minimal_adjustment_set(
-            X=self.interventions[0].label, Y=self.target.label
-        )
-
-        distribution = model.query(
-            variables=[self.target.label],
-            do={
-                self.interventions[i].label: self.interventions[i].intervened_value
-                for i in range(len(self.interventions))
-            },
-            adjustment_set=min_adjustment_set,
-        )
-
-        kwargs = {}
-        kwargs[self.target.label] = self.target.intervened_value
-
-        return distribution.get_value(**kwargs)
-
-    def inference_intervention_query(
-        self, interventions: list[tuple[str, int]] = None, target: tuple[str, int] = None
-    ) -> tuple[str, str]:
-        
-        if not self.interventions_validator(interventions):
-            raise ValueError("Invalid interventions")
-        if not self.target_validator(target):
-            raise ValueError("Invalid target")
-
-        if len(self.interventions) == 1:
-            return self.single_intervention_query()
-        elif len(self.interventions) == 2:
-            return self.double_intervention_query()
-        elif len(self.interventions) > 2:
-            self.multi_intervention_query()
-            return ("None", "None")
-        raise Exception("None interventions found. Expect at least one intervention.")
-
-    def single_intervention_query(self) -> tuple[str, str]:
-        return build_linear_problem(
-            graph=self.graph,
-            df=self.data,
-            intervention=self.interventions[0],
-            target=self.target,
-            optimizer_label=OptimizersLabels.GUROBI.value,
-        )
-
-    def double_intervention_query(self):
-        return build_bi_linear_problem(
-            self.graph,
-            self.data,
-            self.interventions,
-            self.target,
-        )
-
-    def multi_intervention_query(self):
-        raise NotImplementedError
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
         self.interventions = convert_tuples_list_into_nodes_list(
@@ -266,16 +272,6 @@ class CausalModel:
 
     def set_target(self, target: tuple[str, int]) -> None:
         self.target = convert_tuple_into_node(target, self.graph)
-
-    def set_unobservables(self, unobservables):
-        # This implies the whole graph re-creation
-        # Changes the intervention and target also (?)
-        raise NotImplementedError
-
-    def add_unobservables(self, unobservables):
-        # This implies the whole graph re-creation
-        # Changes the intervention and target also (?)
-        raise NotImplementedError
 
     def generate_graph_image(self, output_path="graph.png"):
         """

@@ -56,19 +56,19 @@ def incident_model():
 
     model_2.set_interventions([(intervention_1, 0)])
     model_2.set_target((target, 0))
-    print(f"{intervention_1}: PN = {model_2.inference_intervention_query()}")
+    print(f"{intervention_1}: PN = {model_2.partially_identifiable_intervention_query()}")
 
     model_2.set_interventions([(intervention_1, 1)])
     model_2.set_target((target, 1))
-    print(f"{intervention_1}: PS = {model_2.inference_intervention_query()}")
+    print(f"{intervention_1}: PS = {model_2.partially_identifiable_intervention_query()}")
 
     model_2.set_interventions([(intervention_2, 0)])
     model_2.set_target((target, 0))
-    print(f"{intervention_2}: PN = {model_2.inference_intervention_query()}")
+    print(f"{intervention_2}: PN = {model_2.partially_identifiable_intervention_query()}")
 
     model_2.set_interventions([(intervention_2, 1)])
     model_2.set_target((target, 1))
-    print(f"{intervention_2}: PS = {model_2.inference_intervention_query()}")
+    print(f"{intervention_2}: PS = {model_2.partially_identifiable_intervention_query()}")
 
 
 def binary_balke_pearl_example():

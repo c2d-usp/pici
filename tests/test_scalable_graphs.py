@@ -56,7 +56,7 @@ class TestMNCases(unittest.TestCase):
                     ):
                         model.set_interventions([("X", intervention_value)])
                         model.set_target(("Y", target_value))
-                        lower, upper = model.inference_intervention_query()
+                        lower, upper = model.partially_identifiable_intervention_query()
 
                         tv = model.identifiable_intervention_query()
 

@@ -45,7 +45,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         expected_lower, expected_upper = (0.45000000000000007, 0.5199999999999999)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
-        lower, upper = model.inference_intervention_query()
+        lower, upper = model.partially_identifiable_intervention_query()
         lower = round(float(lower), 3)
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
@@ -77,7 +77,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         expected_lower, expected_upper = (0.17221135029354206, 0.8160779537149818)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
-        lower, upper = model.inference_intervention_query()
+        lower, upper = model.partially_identifiable_intervention_query()
         lower = round(float(lower), 3)
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
@@ -114,7 +114,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         expected_lower, expected_upper = (0.3570355041940286, 0.8560355041940286)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
-        lower, upper = model.inference_intervention_query()
+        lower, upper = model.partially_identifiable_intervention_query()
         lower = round(float(lower), 3)
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
@@ -147,7 +147,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         expected_lower, expected_upper = (0.07680001854838515, 0.09309998464330864)
         expected_lower = round(expected_lower, 3)
         expected_upper = round(expected_upper, 3)
-        lower, upper = model.inference_intervention_query()
+        lower, upper = model.partially_identifiable_intervention_query()
         lower = round(float(lower), 3)
         upper = round(float(upper), 3)
         self.assertEqual(lower, expected_lower)
@@ -235,7 +235,7 @@ class TestBenchmarkBcauseInference(unittest.TestCase):
                     unobservables_labels=unobs
                 )
 
-                lower, upper = model.inference_intervention_query(
+                lower, upper = model.partially_identifiable_intervention_query(
                     interventions=[("X", intervention_value)],
                     target=("Y", 1)
                 )
@@ -286,7 +286,7 @@ class TestBenchmarkBcauseInference(unittest.TestCase):
                     unobservables_labels=unobs
                 )
 
-                lower, upper = model_2.inference_intervention_query(
+                lower, upper = model_2.partially_identifiable_intervention_query(
                     interventions=[("X", intervention_value)],
                     target=("Y", 1)
                 )
