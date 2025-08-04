@@ -122,6 +122,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         model.set_interventions([("D", 1)])
         self.assertTrue(model.are_d_separated_in_intervened_graph(["E"], ["Y"], ["D"]))
 
+    # TODO: remove double intervention
     @unittest.skip("double intervention has a bug")
     def test_double_intervention_binary_balke_pearl(self):
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
