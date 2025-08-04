@@ -55,7 +55,9 @@ def build_linear_problem(
         mechanisms=mechanisms,
     )
 
+    intervention.value = intervention.intervened_value
     obj_function_coefficients: list[float] = objFG.build_objective_function(mechanisms)
+
     logger.debug("-- DEBUG OBJ FUNCTION --")
     for i, coeff in enumerate(obj_function_coefficients):
         logger.debug(f"c_{i} = {coeff}")
