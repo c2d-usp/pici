@@ -59,7 +59,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
         iv_target = "Y"
         iv_target_value = 1
         iv_intervention = "X"
-        iv_intervention_value = 1
+        iv_intervention_value = 2
         rel_path = DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
         iv_csv_path = os.path.join(PROJECT_ROOT, rel_path)
         iv_df = pd.read_csv(iv_csv_path)
@@ -215,8 +215,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
             )
         )
 
+class TestBenchmarkBcauseInference(unittest.TestCase):
     def test_bcause_1(self):
-
         edges = "X -> Y, U -> X, U -> Y"
         unobs = ["U"]
         rel_path = DataExamplesPaths.CSV_BCAUSE_EXAMPLE_1.value
