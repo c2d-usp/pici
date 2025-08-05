@@ -76,6 +76,7 @@ To get started, install Poetry by following the [official instructions](https://
 ### Install
 
 - Install dependencies
+Once you have installed poetry, you can install the required packages:
 ```bash
 poetry install
 ```
@@ -130,12 +131,6 @@ black .
 ```
 
 Running this command will change automatically.
-
-
-
-### Unittest
-
-TODO: EXPLAIN SOME UNITTESTS
 
 
 ## Acknowledgements
