@@ -24,19 +24,21 @@ class TestMNCases(unittest.TestCase):
         cases = [
             (1, 1, DataExamplesPaths.CSV_N1M1),
             (2, 1, DataExamplesPaths.CSV_N2M1),
-            # Too long to run
-            # (3, 1, DataExamplesPaths.CSV_N3M1),
-            # (4, 1, DataExamplesPaths.CSV_N4M1),
-            # (1, 2, DataExamplesPaths.CSV_N1M2),
+            (3, 1, DataExamplesPaths.CSV_N3M1),
+            (4, 1, DataExamplesPaths.CSV_N4M1),
+            (1, 2, DataExamplesPaths.CSV_N1M2),
         ]
+        # Skip cases that are too long to run
+        skip_cases = {(3, 1), (4, 1), (1, 2)}
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
         for N, M, csv_example in cases:
             with self.subTest(N=N, M=M):
+                if (N, M) in skip_cases:
+                    self.skipTest(f"Skipping N={N}, M={M} (too long to run)")
                 edges = genGraph(N=N, M=M)
-                csv_path = os.path.join(PROJECT_ROOT, csv_example.value)
-                df = pd.read_csv(csv_path)
+                df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 
                 model = CausalModel(
