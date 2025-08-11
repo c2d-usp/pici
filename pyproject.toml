@@ -1,7 +1,7 @@
 [project]
-name = "causal_reasoning"
+name = "pici"
 version = "0.0.1"
-description = "Package for causal inference under partially observability"
+description = "Package for Partially Identifiable Causal Inference"
 authors = [
     { name="Daniel Lawand", email="daniel.lawand@gmail.com" },
     ]
