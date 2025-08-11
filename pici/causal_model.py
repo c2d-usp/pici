@@ -37,8 +37,8 @@ class CausalModel:
         self,
         data: DataFrame,
         edges: T,
-        custom_cardinalities: dict[T, int],
         unobservables_labels: list[T] | T,
+        custom_cardinalities: dict[T, int] | None = {},
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
     ) -> None:
@@ -59,7 +59,7 @@ class CausalModel:
         self,
         interventions: list[tuple[str, int]] = None,
         target: tuple[str, int] = None,
-    ) -> str:
+    ) -> str | tuple[str, str]:
         is_identifiable, _, _ = self.is_identifiable_intervention(
             interventions=interventions, target=target
         )
