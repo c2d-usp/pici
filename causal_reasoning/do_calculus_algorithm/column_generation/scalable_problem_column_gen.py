@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
-from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
+from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
 
 BIG_M = 1e4
 DBG = False
@@ -625,7 +625,7 @@ class ScalarProblem:
 def single_exec():
     N = 1
     M = 2
-    scalable_df = getScalableDataFrame(M=M, N=N)
+    scalable_df = get_scalable_dataframe(M=M, N=N)
     interventionValue = 1
     targetValue = 1
 

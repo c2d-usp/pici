@@ -1,9 +1,14 @@
+from itertools import product
 import pandas as pd
 
 from causal_reasoning.utils._enum import DataExamplesPaths
+from causal_reasoning.utils.probabilities_helper import (
+    find_conditional_probability2,
+    find_probability2,
+)
 
 
-def getScalableDataFrame(M: int, N: int):
+def get_scalable_dataframe(M: int, N: int):
     if N == 1 and M == 1:
         scalable_csv_path = DataExamplesPaths.CSV_N1M1.value
     elif N == 2 and M == 1:
@@ -48,3 +53,41 @@ def getScalableDataFrame(M: int, N: int):
         scalable_csv_path = DataExamplesPaths.CSV_N1M6.value
 
     return pd.read_csv(scalable_csv_path)
+
+
+def generate_scalable_string_edges(N, M):
+    scalable_input: str = "U1 -> X, U3 -> Y, "
+    for i in range(1, N + 1):
+        scalable_input += f"U1 -> A{i}, "
+        if i == 1:
+            scalable_input += "X -> A1, "
+        else:
+            scalable_input += f"A{i-1} -> A{i}, "
+    scalable_input += f"A{N} -> Y, "
+
+    for i in range(1, M + 1):
+        scalable_input += f"U2 -> B{i}, "
+        scalable_input += f"X -> B{i}, "
+        for j in range(1, N + 1):
+            scalable_input += f"B{i} -> A{j}, "
+
+    return scalable_input[:-2]
+
+
+def find_true_value_in_scalable_graphs(N, M, y0, x0, df):
+    prob = 0
+    for rlt in list(product([0, 1], repeat=2)):
+        term = 1
+        term *= find_conditional_probability2(
+            dataFrame=df,
+            targetRealization={"Y": y0},
+            conditionRealization={f"A{N}": rlt[0]},
+        )
+        term *= find_conditional_probability2(
+            dataFrame=df,
+            targetRealization={f"A{N}": rlt[0]},
+            conditionRealization={"U1": rlt[1], "X": x0},
+        )
+        term *= find_probability2(dataFrame=df, realizationDict={"U1": rlt[1]})
+        prob += term
+    return prob

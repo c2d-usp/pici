@@ -15,8 +15,7 @@ logging.disable(logging.INFO)
 
 from causal_reasoning.causal_model import CausalModel
 from causal_reasoning.utils._enum import DataExamplesPaths
-
-from auxiliary import genGraph
+from causal_reasoning.utils.scalable_graphs_helper import generate_scalable_string_edges
 
 
 class TestMNCases(unittest.TestCase):
@@ -37,7 +36,7 @@ class TestMNCases(unittest.TestCase):
             with self.subTest(N=N, M=M):
                 if (N, M) in skip_cases:
                     self.skipTest(f"Skipping N={N}, M={M} (too long to run)")
-                edges = genGraph(N=N, M=M)
+                edges = generate_scalable_string_edges(N=N, M=M)
                 df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 
