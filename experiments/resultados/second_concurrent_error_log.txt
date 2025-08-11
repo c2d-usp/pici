@@ -1,1 +1,0 @@
-GC Error for 4th -- N:6,M:1_METHOD:3_PRESOLVE:-1_NUM_FOC:-1_FEASIBILITYTOL:-1_OPTIMALITYTOL:-1: Too many iterations. (Max 1700)
