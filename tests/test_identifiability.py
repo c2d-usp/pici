@@ -14,7 +14,7 @@ if PROJECT_ROOT not in sys.path:
 logging.disable(logging.INFO)
 
 from causal_reasoning.utils._enum import DataExamplesPaths
-from auxiliary import genGraph, true_value
+from causal_reasoning.utils.scalable_graphs_helper import generate_scalable_string_edges, find_true_value_in_scalable_graphs
 from causal_reasoning.causal_model import CausalModel
 
 
@@ -122,7 +122,7 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
 
         for N, M, csv_example in cases:
             with self.subTest(N=N, M=M):
-                edges = genGraph(N=N, M=M)
+                edges = generate_scalable_string_edges(N=N, M=M)
                 df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 
@@ -141,7 +141,7 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
 
                         identifiable_value = model.identifiable_intervention_query()
 
-                        tv = true_value(N, M, target_value, intervention_value, df)
+                        tv = find_true_value_in_scalable_graphs(N, M, target_value, intervention_value, df)
 
                         self.assertAlmostEqual(
                             identifiable_value,
