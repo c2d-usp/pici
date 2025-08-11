@@ -19,12 +19,6 @@ class Identifier:
             columns=[u for u in self.latent_labels if u in causal_model.data.columns]
         )
 
-    @staticmethod
-    def _all_directed_paths(G, src, dst):
-        for path in nx.all_simple_paths(G, src, dst):
-            if all(G.has_edge(u, v) for u, v in zip(path, path[1:])):
-                yield path
-
     def find_backdoor(self):
 
         backdoors = self.infer.get_all_backdoor_adjustment_sets(X=self.X, Y=self.Y)
@@ -60,24 +54,6 @@ class Identifier:
                 return z
         
         return None
-            
-    def _filter_observed_sets(
-        self,
-        sets: Iterable[FrozenSet[str]]
-    ) -> List[FrozenSet[str]]:
-        """
-        Returns only those adjustment-sets Z that do not contain any latent variable.
-        """
-        return [Z for Z in sets if Z.isdisjoint(self.latent_labels)]
-
-    def _all_sets_observed(
-        self,
-        sets: Iterable[FrozenSet[str]]
-    ) -> bool:
-        """
-        Returns True iff every adjustment-set in sets is disjoint from the latents.
-        """
-        return all(Z.isdisjoint(self.latent_labels) for Z in sets)
 
     def check_unobservable_confounding(self) -> bool:
 
@@ -95,7 +71,7 @@ class Identifier:
             return True
         
         return False
-    
+
     def id_algorithm_identification(self):
 
         with warnings.catch_warnings():
@@ -114,5 +90,29 @@ class Identifier:
                 return estimand
             except Exception:
                 return None
+
+    def _filter_observed_sets(
+        self,
+        sets: Iterable[FrozenSet[str]]
+    ) -> List[FrozenSet[str]]:
+        """
+        Returns only those adjustment-sets Z that do not contain any latent variable.
+        """
+        return [Z for Z in sets if Z.isdisjoint(self.latent_labels)]
+
+    @staticmethod
+    def _all_directed_paths(G, src, dst):
+        for path in nx.all_simple_paths(G, src, dst):
+            if all(G.has_edge(u, v) for u, v in zip(path, path[1:])):
+                yield path
+
+    def _all_sets_observed(
+        self,
+        sets: Iterable[FrozenSet[str]]
+    ) -> bool:
+        """
+        Returns True iff every adjustment-set in sets is disjoint from the latents.
+        """
+        return all(Z.isdisjoint(self.latent_labels) for Z in sets)
 
     
