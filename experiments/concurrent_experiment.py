@@ -9,7 +9,7 @@ import pandas as pd
 from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
-from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
+from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
 
 EXPERIMENT_PATH = "./outputs/second_concurrent_experiment_results.csv"
 ERROR_PATH = "./outputs/second_concurrent_error_log.txt"
@@ -38,7 +38,7 @@ def run_test(N, M, method, presolve=-1, numeric_focus=-1, fea_tol=-1, opt_tol=-1
     targetValue = 1
     scalable_df = None
     try:
-        scalable_df = getScalableDataFrame(M=M, N=N)
+        scalable_df = get_scalable_dataframe(M=M, N=N)
     except Exception as e:
         logger.error(
             f"SCALABLE DF Error_N:{N},M:{M}_METHOD:{method}_PRESOLVE:{presolve}_NUM_FOC:{numeric_focus}_FEASIBILITYTOL:{fea_tol}_OPTIMALITYTOL:{opt_tol}_: {e}"

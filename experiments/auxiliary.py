@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 from itertools import product
 
 
-from causal_reasoning.utils.get_scalable_df import getScalableDataFrame
+from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
 from causal_reasoning.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
@@ -78,7 +78,7 @@ def main():
     tuple_target_inter = [(0, 0), (0, 1), (1, 0), (1, 1)]
     for value in N_M:
         N, M = value
-        scalable_df = getScalableDataFrame(M=M, N=N)
+        scalable_df = get_scalable_dataframe(M=M, N=N)
         with open(FILE_PATH, "a") as file:
             file.write(f'n{N}_m{M}_scaling_case ==> Graph: ==> "{genGraph(N=N,M=M)}"\n')
         for target_value, intervention_value in tuple_target_inter:
