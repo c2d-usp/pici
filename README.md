@@ -69,7 +69,7 @@ lower_bound, upper_bound = model.intervention_query([('X', 1)], ('Y', 1))
 
 ## How it works
 
-TODO: ADD THE arXiv URL to the paper
+If you want to understand what is the theory of our approach, you can read the [paper](https://openreview.net/forum?id=aUPT1kEiwP).
 
 ## Developer tools
 
