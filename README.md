@@ -37,11 +37,8 @@ import pici
 ```python
 df = pd.read_csv(model_csv_path)
 edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-
-# The cardinalities should be discrete >= 2; 
-# the unobservables should not appear at the custom cardinalities.
-custom_cardinalities = {"Z": 5, "X": 2, "Y": 16}
 unobservable_variables = ["U1", "U2"]
+custom_cardinalities = {"Z": 5, "X": 2, "Y": 16, "U1": 0, "U2": 0}
 
 model = pici.causal_model.CausalModel(
   data=df,
