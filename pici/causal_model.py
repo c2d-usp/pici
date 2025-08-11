@@ -9,21 +9,21 @@ from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.estimators import MaximumLikelihoodEstimator
 
-from causal_reasoning.utils.graph_plotter import plot_graph_image
+from pici.utils.graph_plotter import plot_graph_image
 from .identifier import Identifier
 
 logger = logging.getLogger(__name__)
 logging.getLogger("pgmpy").setLevel(logging.WARNING)
 logging.getLogger("dowhy.causal_model").setLevel(logging.ERROR)
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.opt_problem_builder import (
+from pici.do_calculus_algorithm.linear_programming.opt_problem_builder import (
     build_bi_linear_problem,
     build_linear_problem,
 )
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
-from causal_reasoning.utils._enum import OptimizersLabels
-from causal_reasoning.utils.parser import (
+from pici.graph.graph import Graph
+from pici.graph.node import Node
+from pici.utils._enum import OptimizersLabels
+from pici.utils.parser import (
     convert_tuples_list_into_nodes_list,
     convert_tuple_into_node,
     Parser,
@@ -37,15 +37,15 @@ class CausalModel:
         self,
         data: DataFrame,
         edges: T,
-        custom_cardinalities: dict[T, int] | None = {},
-        unobservables_labels: list[T] | T | None = [],
+        custom_cardinalities: dict[T, int],
+        unobservables_labels: list[T] | T,
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
     ) -> None:
         self.data = data
 
         parser = Parser(
-            edges, custom_cardinalities, unobservables_labels, interventions, target
+            edges, unobservables_labels, custom_cardinalities, interventions, target
         )
 
         self.graph: Graph = parser.get_graph()

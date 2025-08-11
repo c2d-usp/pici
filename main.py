@@ -4,8 +4,8 @@ import logging
 import networkx as nx
 import pandas as pd
 
-from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.utils._enum import DataExamplesPaths
+from pici.causal_model import CausalModel
+from pici.utils._enum import DataExamplesPaths
 
 
 def incident_model():

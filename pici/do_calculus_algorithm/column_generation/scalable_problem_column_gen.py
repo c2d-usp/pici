@@ -12,10 +12,10 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_init import (
+from pici.do_calculus_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
-from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
+from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 
 BIG_M = 1e4
 DBG = False

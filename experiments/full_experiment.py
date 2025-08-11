@@ -6,10 +6,10 @@ logger = logging.getLogger(__name__)
 
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
+from pici.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
-from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
+from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 
 EXPERIMENT_PATH = "./outputs/second_full_flags_experiment_results.csv"
 ERROR_PATH = "./outputs/second_full_flags_error_log.txt"

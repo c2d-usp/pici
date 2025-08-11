@@ -13,9 +13,9 @@ if PROJECT_ROOT not in sys.path:
 
 logging.disable(logging.INFO)
 
-from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.utils._enum import DataExamplesPaths
-from causal_reasoning.utils.scalable_graphs_helper import generate_scalable_string_edges
+from pici.causal_model import CausalModel
+from pici.utils._enum import DataExamplesPaths
+from pici.utils.scalable_graphs_helper import generate_scalable_string_edges
 
 
 class TestMNCases(unittest.TestCase):

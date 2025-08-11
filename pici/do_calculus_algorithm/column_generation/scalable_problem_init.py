@@ -6,8 +6,8 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from causal_reasoning.utils._enum import DataExamplesPaths
-from causal_reasoning.utils.probabilities_helper import (
+from pici.utils._enum import DataExamplesPaths
+from pici.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )

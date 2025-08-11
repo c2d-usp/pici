@@ -7,11 +7,11 @@ from itertools import product
 
 import pandas as pd
 
-from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
+from pici.causal_model import CausalModel
+from pici.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
-from causal_reasoning.utils.probabilities_helper import (
+from pici.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )

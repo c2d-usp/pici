@@ -7,7 +7,7 @@ from scipy.optimize import linprog
 
 logger = logging.getLogger(__name__)
 
-from causal_reasoning.utils._enum import (
+from pici.utils._enum import (
     GurobiParameters,
     OptimizationDirection,
     OptimizersLabels,

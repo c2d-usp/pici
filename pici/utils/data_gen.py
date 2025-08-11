@@ -19,7 +19,7 @@ def fa(ai: int, b: list[int], u: int):
 
 
 def generate_data_for_scale_case(n: int, m: int, samples: int = 10000):
-    file_path = f"./causal_reasoning/data/csv/n{n}_m{m}_scaling_case.csv"
+    file_path = f"./pici/data/csv/n{n}_m{m}_scaling_case.csv"
     U1 = [random.choice([0, 1]) for _ in range(samples)]
     U2 = [random.choice([0, 1]) for _ in range(samples)]
     X = [fx(u) for u in U1]

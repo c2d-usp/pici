@@ -2,8 +2,8 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from causal_reasoning.graph.node import Node
-from causal_reasoning.utils._enum import PlotGraphColors
+from pici.graph.node import Node
+from pici.utils._enum import PlotGraphColors
 
 
 def plot_graph_image(

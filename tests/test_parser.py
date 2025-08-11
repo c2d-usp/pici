@@ -10,9 +10,9 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
-from causal_reasoning.utils.parser import (
+from pici.graph.graph import Graph
+from pici.graph.node import Node
+from pici.utils.parser import (
     _convert_edge_string_to_edge_tuples,
     _parse_default_graph,
     convert_tuples_list_into_nodes_list,

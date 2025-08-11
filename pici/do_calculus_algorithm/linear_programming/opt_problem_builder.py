@@ -3,26 +3,26 @@ import logging
 import gurobipy as gp
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.double_intervention_obj_func_gen import (
+from pici.do_calculus_algorithm.linear_programming.double_intervention_obj_func_gen import (
     DoubleInterventionObjFunctionGenerator,
 )
 
 logger = logging.getLogger(__name__)
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.linear_constraints import (
+from pici.do_calculus_algorithm.linear_programming.linear_constraints import (
     generate_constraints,
 )
-from causal_reasoning.do_calculus_algorithm.linear_programming.obj_function_generator import (
+from pici.do_calculus_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )
-from causal_reasoning.do_calculus_algorithm.linear_programming.optimizers import (
+from pici.do_calculus_algorithm.linear_programming.optimizers import (
     Optimizer,
     choose_optimizer,
     compute_bounds,
 )
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
-from causal_reasoning.utils._enum import OptimizersLabels
+from pici.graph.graph import Graph
+from pici.graph.node import Node
+from pici.utils._enum import OptimizersLabels
 
 
 def build_linear_problem(

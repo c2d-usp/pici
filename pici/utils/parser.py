@@ -3,8 +3,8 @@ from typing import TypeVar
 
 import networkx as nx
 
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
+from pici.graph.graph import Graph
+from pici.graph.node import Node
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +15,8 @@ class Parser:
     def __init__(
         self,
         edges: T,
-        custom_cardinalities: dict[T, int] | None = {},
-        unobservables_labels: list[T] | T | None = [],
+        unobservables_labels: list[T] | T,
+        custom_cardinalities: dict[T, int],
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
     ) -> None:

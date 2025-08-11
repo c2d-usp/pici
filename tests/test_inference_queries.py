@@ -14,8 +14,8 @@ if PROJECT_ROOT not in sys.path:
 
 logging.disable(logging.INFO)
 
-from causal_reasoning.causal_model import CausalModel
-from causal_reasoning.utils._enum import DataExamplesPaths
+from pici.causal_model import CausalModel
+from pici.utils._enum import DataExamplesPaths
 
 
 class TestInferenceAlgorithm(unittest.TestCase):

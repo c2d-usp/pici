@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import networkx as nx
 
-from causal_reasoning.graph.node import Node
+from pici.graph.node import Node
 
 
 class Graph:

@@ -5,7 +5,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-from causal_reasoning.graph.node import Node
+from pici.graph.node import Node
 
 
 def find_conditional_probability(

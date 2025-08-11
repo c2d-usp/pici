@@ -6,16 +6,16 @@ logger = logging.getLogger(__name__)
 import networkx as nx
 import pandas as pd
 
-from causal_reasoning.do_calculus_algorithm.linear_programming.mechanisms_generator import (
+from pici.do_calculus_algorithm.linear_programming.mechanisms_generator import (
     MechanismGenerator,
 )
-from causal_reasoning.graph.graph import Graph
-from causal_reasoning.graph.node import Node
-from causal_reasoning.utils.probabilities_helper import (
+from pici.graph.graph import Graph
+from pici.graph.node import Node
+from pici.utils.probabilities_helper import (
     find_conditional_probability,
     find_probability,
 )
-from causal_reasoning.utils.types import MechanismType
+from pici.utils.types import MechanismType
 
 
 class DoubleInterventionObjFunctionGenerator:

@@ -5,8 +5,8 @@ logger = logging.getLogger(__name__)
 from itertools import product
 
 
-from causal_reasoning.utils.scalable_graphs_helper import get_scalable_dataframe
-from causal_reasoning.utils.probabilities_helper import (
+from pici.utils.scalable_graphs_helper import get_scalable_dataframe
+from pici.utils.probabilities_helper import (
     find_conditional_probability2,
     find_probability2,
 )
