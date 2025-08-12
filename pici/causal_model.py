@@ -229,12 +229,6 @@ class CausalModel:
             interventions=[(intervention_label, 1)], target=(target_label, 1)
         )
 
-    def weak_pns_inference(self, intervention_label: str, target_label: str):
-        """
-        PNS = P(X_{X=1} = 1, Y_{X=0} = 0)
-        """
-        raise NotImplementedError
-
     def are_d_separated_in_intervened_graph(
         self,
         set_nodes_X: list[str],
