@@ -61,6 +61,7 @@ def true_value(N, M, y0, x0, df):
         prob += term
     return prob
 
+
 def column_gen_call(N_M, intervention_value=1, target_value=1):
     for values in N_M:
         N, M = values
@@ -137,6 +138,7 @@ def column_gen_call(N_M, intervention_value=1, target_value=1):
             logger.info("COLUMN GENERATION: CSV updated")
     logger.info("COLUMN GENERATION: Done")
 
+
 def lp_call(N_M, intervention_value=1, target_value=1):
     scalable_unobs = ["U1", "U2", "U3"]
     scalable_target = "Y"
@@ -183,9 +185,11 @@ def lp_call(N_M, intervention_value=1, target_value=1):
                     target=scalable_target,
                     target_value=target_value,
                 )
-                lower, upper = scalable_model.partially_identifiable_intervention_query()
+                lower, upper = (
+                    scalable_model.partially_identifiable_intervention_query()
+                )
                 end = tm.time()
-                total_time = end-start
+                total_time = end - start
                 new_row_df["LP_LOWER_BOUND"] = lower
                 new_row_df["LP_UPPER_BOUND"] = upper
                 new_row_df["LP_SECONDS_TAKEN"] = total_time
@@ -199,6 +203,7 @@ def lp_call(N_M, intervention_value=1, target_value=1):
             experiments_df.to_csv(LP_EXPERIMENT_PATH, index=False)
             logger.info("LP: CSV updated")
     logger.info("LP: Done")
+
 
 def true_value_call(N_M, intervention_value=1, target_value=1):
     for values in N_M:
@@ -243,6 +248,7 @@ def true_value_call(N_M, intervention_value=1, target_value=1):
         logger.info("TRUE VALUE: CSV updated")
     logger.info("TRUE VALUE: Done")
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
@@ -283,6 +289,7 @@ def main():
     true_value(N_M)
     column_gen_call(N_M)
     lp_call(N_M)
+
 
 if __name__ == "__main__":
     main()

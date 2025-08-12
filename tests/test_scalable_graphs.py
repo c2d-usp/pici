@@ -72,5 +72,6 @@ class TestMNCases(unittest.TestCase):
                             msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,7 @@ from typing import Iterable, Set, FrozenSet, List
 import warnings
 from dowhy import CausalModel as DowhyCausalModel
 
+
 class Identifier:
     def __init__(self, causal_model):
         self.causal_model = causal_model
@@ -28,9 +29,9 @@ class Identifier:
             return Z
 
         return None
-    
+
     def find_frontdoor(self):
-        
+
         frontdoors = self.infer.get_all_frontdoor_adjustment_sets(X=self.X, Y=self.Y)
         obs_fds = self._filter_observed_sets(frontdoors)
         if obs_fds:
@@ -38,7 +39,6 @@ class Identifier:
             return Z
 
         return None
-
 
     def find_instrumental_variable(self):
 
@@ -52,13 +52,15 @@ class Identifier:
             paths = list(self._all_directed_paths(self.G, z, self.Y))
             if paths and all(self.X in path[1:-1] for path in paths):
                 return z
-        
+
         return None
 
     def check_unobservable_confounding(self) -> bool:
 
-        for U in (self.causal_model.unobservables or []):
-            if nx.has_path(self.G, U.label, self.X) and nx.has_path(self.G, U.label, self.Y):
+        for U in self.causal_model.unobservables or []:
+            if nx.has_path(self.G, U.label, self.X) and nx.has_path(
+                self.G, U.label, self.Y
+            ):
                 return True
 
         return False
@@ -69,7 +71,7 @@ class Identifier:
         G_do.remove_edges_from(list(G_do.in_edges(self.X)))
         if nx.is_d_separator(G_do, {self.X}, {self.Y}, set()):
             return True
-        
+
         return False
 
     def id_algorithm_identification(self):
@@ -77,23 +79,18 @@ class Identifier:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             dowhy_model = DowhyCausalModel(
-                data=self.data_obs,
-                graph=self.G,
-                treatment=self.X,
-                outcome=self.Y
+                data=self.data_obs, graph=self.G, treatment=self.X, outcome=self.Y
             )
             try:
                 estimand = dowhy_model.identify_effect(
-                    method_name="id-algorithm",
-                    proceed_when_unidentifiable=False
+                    method_name="id-algorithm", proceed_when_unidentifiable=False
                 )
                 return estimand
             except Exception:
                 return None
 
     def _filter_observed_sets(
-        self,
-        sets: Iterable[FrozenSet[str]]
+        self, sets: Iterable[FrozenSet[str]]
     ) -> List[FrozenSet[str]]:
         """
         Returns only those adjustment-sets Z that do not contain any latent variable.
@@ -106,13 +103,8 @@ class Identifier:
             if all(G.has_edge(u, v) for u, v in zip(path, path[1:])):
                 yield path
 
-    def _all_sets_observed(
-        self,
-        sets: Iterable[FrozenSet[str]]
-    ) -> bool:
+    def _all_sets_observed(self, sets: Iterable[FrozenSet[str]]) -> bool:
         """
         Returns True iff every adjustment-set in sets is disjoint from the latents.
         """
         return all(Z.isdisjoint(self.latent_labels) for Z in sets)
-
-    

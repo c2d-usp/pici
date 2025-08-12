@@ -22,13 +22,12 @@ class TestInferenceAlgorithm(unittest.TestCase):
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
-        df = pd.read_csv(os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value))
+        df = pd.read_csv(
+            os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value)
+        )
 
         model = CausalModel(
-            data=df, 
-            edges=edges, 
-            custom_cardinalities=card, 
-            unobservables_labels=unobs
+            data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
         )
         model.set_interventions([("X", 1)])
         model.set_target(("Y", 1))
@@ -61,13 +60,14 @@ class TestInferenceAlgorithm(unittest.TestCase):
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 4, "X": 3, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
-        df = pd.read_csv(os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value))
+        df = pd.read_csv(
+            os.path.join(
+                PROJECT_ROOT, DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
+            )
+        )
 
         model = CausalModel(
-            data=df, 
-            edges=edges, 
-            custom_cardinalities=card, 
-            unobservables_labels=unobs
+            data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
         )
         model.set_interventions([("X", 2)])
         model.set_target(("Y", 1))
@@ -103,9 +103,13 @@ class TestInferenceAlgorithm(unittest.TestCase):
             "U3": 0,
         }
         unobs = ["U1", "U2", "U3"]
-        df = pd.read_csv(os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_COPILOT_EXAMPLE.value))
+        df = pd.read_csv(
+            os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_COPILOT_EXAMPLE.value)
+        )
 
-        model = CausalModel(data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs)
+        model = CausalModel(
+            data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
+        )
         model.set_interventions([("X", 1)])
         model.set_target(("Y", 1))
 
@@ -168,7 +172,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
     def test_simple_counfoundness(self):
         edges = "U1 -> X, U1 -> Y"
         unobs = ["U1"]
-        df = pd.read_csv(os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value))
+        df = pd.read_csv(
+            os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value)
+        )
 
         model = CausalModel(
             data=df,
@@ -202,18 +208,24 @@ class TestInferenceAlgorithm(unittest.TestCase):
             ("Unob_helper_6", "MS-A_Crash"),
             ("Unob_helper_7", "Outage"),
         ]
-        latent = [n for n in nx.topological_sort(nx.DiGraph(edges_list)) if n.startswith("Unob_") or n == "HeavyTraffic"]
+        latent = [
+            n
+            for n in nx.topological_sort(nx.DiGraph(edges_list))
+            if n.startswith("Unob_") or n == "HeavyTraffic"
+        ]
         df = pd.read_csv(
-            os.path.join(PROJECT_ROOT, DataExamplesPaths.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value),
+            os.path.join(
+                PROJECT_ROOT, DataExamplesPaths.NEW_MEDIUM_SCALE_OUTAGE_INCIDENT.value
+            ),
             index_col=0,
         )
         model = CausalModel(
-            data=df, 
-            edges=nx.DiGraph(edges_list), 
-            unobservables_labels=latent
+            data=df, edges=nx.DiGraph(edges_list), unobservables_labels=latent
         )
         self.assertTrue(
-            model.are_d_separated_in_complete_graph(["MS-A_Latency"], ["DB_Change"], ["DB_Latency"]),
+            model.are_d_separated_in_complete_graph(
+                ["MS-A_Latency"], ["DB_Change"], ["DB_Latency"]
+            ),
             msg="Incident scenario: MS-A_Latency and DB_Change should be d-separated given DB_Latency",
         )
 
