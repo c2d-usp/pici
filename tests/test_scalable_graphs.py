@@ -57,7 +57,7 @@ class TestMNCases(unittest.TestCase):
                     ):
                         model.set_interventions([("X", intervention_value)])
                         model.set_target(("Y", target_value))
-                        lower, upper = model.partially_identifiable_intervention_query()
+                        lower, upper = model.intervention_query()
 
                         tv = model.identifiable_intervention_query()
 
@@ -71,6 +71,7 @@ class TestMNCases(unittest.TestCase):
                             tv,
                             msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
+
 
 if __name__ == "__main__":
     unittest.main()

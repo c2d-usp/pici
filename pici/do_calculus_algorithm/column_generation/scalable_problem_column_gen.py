@@ -585,7 +585,7 @@ class ScalarProblem:
             minimum=minimum,
         )
 
-    def solve(self, method=-1, presolve=-1, numeric_focus=-1, opt_tol=-1, fea_tol=-1):
+    def solve(self, method=1, presolve=-1, numeric_focus=-1, opt_tol=-1, fea_tol=-1):
         """
         Gurobi does not support branch-and-price, as this requires to add columns
         at local nodes of the search tree. A heuristic is used instead, where the

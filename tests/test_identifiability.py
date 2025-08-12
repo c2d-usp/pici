@@ -14,38 +14,29 @@ if PROJECT_ROOT not in sys.path:
 logging.disable(logging.INFO)
 
 from pici.utils._enum import DataExamplesPaths
-from pici.utils.scalable_graphs_helper import generate_scalable_string_edges, find_true_value_in_scalable_graphs
+from pici.utils.scalable_graphs_helper import (
+    generate_scalable_string_edges,
+    find_true_value_in_scalable_graphs,
+)
 from pici.causal_model import CausalModel
 
 
 class TestIsIdentifiableIntervention(unittest.TestCase):
     def setUp(self):
-        self.df_xy = pd.DataFrame({
-            'X': [0, 1] * 10,
-            'Y': [1, 0] * 10
-        })
-        self.df_xwy = pd.DataFrame({
-            'X': [0, 1] * 10,
-            'W': [0, 1] * 10,
-            'Y': [1, 0] * 10
-        })
-        self.df_xzy = pd.DataFrame({
-            'X': [0, 1] * 10,
-            'Z': [0, 1] * 10,
-            'Y': [1, 0] * 10
-        })
+        self.df_xy = pd.DataFrame({"X": [0, 1] * 10, "Y": [1, 0] * 10})
+        self.df_xwy = pd.DataFrame(
+            {"X": [0, 1] * 10, "W": [0, 1] * 10, "Y": [1, 0] * 10}
+        )
+        self.df_xzy = pd.DataFrame(
+            {"X": [0, 1] * 10, "Z": [0, 1] * 10, "Y": [1, 0] * 10}
+        )
 
     def test_backdoor_non_identifiable(self):
         # Pure confounder U -> X, U -> Y
         graph = "U -> X, U -> Y, X -> Y"
-        model = CausalModel(
-            data=self.df_xy,
-            edges=graph,
-            unobservables_labels=['U']
-        )
+        model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         identifiable, method, detail = model.is_identifiable_intervention(
-            interventions=[('X', 0)],
-            target=('Y', 1)
+            interventions=[("X", 0)], target=("Y", 1)
         )
         self.assertFalse(identifiable)
         self.assertEqual(method, "unobservable_confounding")
@@ -55,61 +46,42 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
         # Front-door: U1 -> X,Y; X -> W -> Y; U2 -> W (harmless latent on W)
         graph = "U1 -> X, U1 -> Y, X -> W, W -> Y, U2 -> W"
         model = CausalModel(
-            data=self.df_xwy,
-            edges=graph,
-            unobservables_labels=['U1', 'U2']
+            data=self.df_xwy, edges=graph, unobservables_labels=["U1", "U2"]
         )
         identifiable, method, detail = model.is_identifiable_intervention(
-            interventions=[('X', 0)],
-            target=('Y', 1)
+            interventions=[("X", 0)], target=("Y", 1)
         )
         self.assertTrue(identifiable)
         self.assertEqual(method, "frontdoor")
         # The minimal observed front-door set should be {'W'}
-        self.assertEqual(detail, frozenset({'W'}))
+        self.assertEqual(detail, frozenset({"W"}))
 
     def test_iv_identifiable(self):
         # IV: U1 -> X,Y; U2 -> Z; Z -> X -> Y
         graph = "U1 -> X, U1 -> Y, U2 -> Z, Z -> X, X -> Y"
         model = CausalModel(
-            data=self.df_xzy,
-            edges=graph,
-            unobservables_labels=['U1', 'U2']
+            data=self.df_xzy, edges=graph, unobservables_labels=["U1", "U2"]
         )
         identifiable, method, detail = model.is_identifiable_intervention(
-            interventions=[('X', 0)],
-            target=('Y', 1)
+            interventions=[("X", 0)], target=("Y", 1)
         )
         self.assertTrue(identifiable)
         self.assertEqual(method, "instrumental_variable")
         # The identified instrument should be 'Z'
-        self.assertEqual(detail, 'Z')
+        self.assertEqual(detail, "Z")
 
     def test_missing_intervention_raises(self):
         graph = "U -> X, U -> Y, X -> Y"
-        model = CausalModel(
-            data=self.df_xy,
-            edges=graph,
-            unobservables_labels=['U']
-        )
+        model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         with self.assertRaises(Exception):
-            model.is_identifiable_intervention(
-                interventions=[],
-                target=('Y', 1)
-            )
+            model.is_identifiable_intervention(interventions=[], target=("Y", 1))
 
     def test_missing_target_raises(self):
         graph = "U -> X, U -> Y, X -> Y"
-        model = CausalModel(
-            data=self.df_xy,
-            edges=graph,
-            unobservables_labels=['U']
-        )
+        model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         with self.assertRaises(Exception):
-            model.is_identifiable_intervention(
-                interventions=[('X', 0)],
-                target=None
-            )
+            model.is_identifiable_intervention(interventions=[("X", 0)], target=None)
+
 
 class TestIdentifiableInterventionQueries(unittest.TestCase):
     def test_identifiable_queries_via_subtests(self):
@@ -141,7 +113,9 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
 
                         identifiable_value = model.identifiable_intervention_query()
 
-                        tv = find_true_value_in_scalable_graphs(N, M, target_value, intervention_value, df)
+                        tv = find_true_value_in_scalable_graphs(
+                            N, M, target_value, intervention_value, df
+                        )
 
                         self.assertAlmostEqual(
                             identifiable_value,
@@ -149,6 +123,7 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
                             places=2,
                             msg=f"Values do not match for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
+
 
 if __name__ == "__main__":
     unittest.main()

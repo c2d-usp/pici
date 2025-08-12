@@ -9,9 +9,7 @@ class DirectoriesPath(Enum):
 class DataExamplesPaths(Enum):
     CSV_COPILOT_EXAMPLE = "pici/data/csv/copilot.csv"
     CSV_BALKE_PEARL_EXAMPLE = "pici/data/csv/balke_pearl.csv"
-    CSV_DISCRETE_IV_RANDOM_EXAMPLE = (
-        "pici/data/csv/random_probabilities.csv"
-    )
+    CSV_DISCRETE_IV_RANDOM_EXAMPLE = "pici/data/csv/random_probabilities.csv"
     CSV_BCAUSE_EXAMPLE_1 = "pici/data/csv/bcause_example_1.csv"
     CSV_BCAUSE_EXAMPLE_2 = "pici/data/csv/bcause_example_2.csv"
     CSV_N1M1 = "pici/data/csv/n1_m1_scaling_case.csv"

@@ -59,7 +59,7 @@ class CausalModel:
         self,
         interventions: list[tuple[str, int]] = None,
         target: tuple[str, int] = None,
-    ) -> str:
+    ) -> str | tuple[str, str]:
         is_identifiable, _, _ = self.is_identifiable_intervention(
             interventions=interventions, target=target
         )
@@ -223,23 +223,27 @@ class CausalModel:
         return True
 
     def weak_pn_inference(self, intervention_label: str, target_label: str):
-        '''
+        """
         PN = P(Y_{X=0} = 0 | X = 1, Y = 1)
         WEAK_PN = P(Y_{X=0} = 0)
-        '''
-        return self.partially_identifiable_intervention_query(interventions=[(intervention_label, 0)], target=(target_label, 0))
+        """
+        return self.partially_identifiable_intervention_query(
+            interventions=[(intervention_label, 0)], target=(target_label, 0)
+        )
 
     def weak_ps_inference(self, intervention_label: str, target_label: str):
-        '''
+        """
         PS = P(Y_{X=1} = 1 | X = 0, Y = 0)
         WEAK_PS = P(Y_{X=1} = 1)
-        '''
-        return self.partially_identifiable_intervention_query(interventions=[(intervention_label, 1)], target=(target_label, 1))
+        """
+        return self.partially_identifiable_intervention_query(
+            interventions=[(intervention_label, 1)], target=(target_label, 1)
+        )
 
     def weak_pns_inference(self, intervention_label: str, target_label: str):
-        '''
+        """
         PNS = P(X_{X=1} = 1, Y_{X=0} = 0)
-        '''
+        """
         raise NotImplementedError
 
     def are_d_separated_in_intervened_graph(
