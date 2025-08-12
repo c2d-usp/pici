@@ -1,3 +1,8 @@
+'''
+    Benchmark with bcause (https://github.com/PGM-Lab/bcause).
+    The goal is to validate our approach compared to bcause.
+'''
+
 import os
 import sys
 import unittest
