@@ -115,29 +115,3 @@ class MechanismGenerator:
         --- There is an specific order for the parents: it is the same as in graph.graphNodes.
         """
         return allPossibleMechanisms, dictKeys, mechanismDicts
-
-    # Not used, but useful when there is more than one latent in the
-    # optimization system
-    def mechanism_list_generator(
-        listU: list[Node],
-        listSpaces: set[Node],
-    ):
-        mechanismDictsList: list[list[dictAndIndex]] = []
-        globalIndex: int = 0
-        for latentVariable in listU:
-            endogenousInS: list[Node] = list(set(latentVariable.children) & listSpaces)
-            _, _, mechanismDicts = MechanismGenerator.mechanisms_generator(
-                latentNode=latentVariable,
-                endogenousNodes=endogenousInS,
-            )
-
-            mechanismIndexDict: list[dictAndIndex] = []
-            initVal: int = globalIndex
-            for mechanismDict in mechanismDicts:
-                mechanismIndexDict.append(dictAndIndex(mechanismDict, globalIndex))
-                globalIndex += 1
-
-            latentVariable.cardinality = globalIndex - initVal
-            mechanismDictsList.append(mechanismIndexDict)
-
-        return mechanismDictsList

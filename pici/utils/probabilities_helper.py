@@ -50,7 +50,6 @@ def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
     return dataFrame[conditions].shape[0]
 
 
-# TODO: Counting wit node instead of dict
 def find_conditional_probability2(
     dataFrame: pd.DataFrame,
     targetRealization: dict[str, int],

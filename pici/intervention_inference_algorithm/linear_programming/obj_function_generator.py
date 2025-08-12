@@ -97,10 +97,7 @@ class ObjFunctionGenerator:
         inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
             listSpaces=spaces
         )
-        """
-        TODO: Check the order of "inputCases": it should be the same as the order of the spaces, which is the same as in debugOrder.
-        TODO: the case in which the summandNodes is empty (e.g Balke Pearl) has a very ugly fix
-        """
+
         obj_function_coefficients: list[float] = []
         logger.debug("Debug input cases:")
         logger.debug(f"Size of #inputs: {len(inputCases)}")
@@ -236,9 +233,6 @@ class ObjFunctionGenerator:
 
                 conditionalProbabilities[current_target] = valid_d_separator_set
 
-                # Question: is any already solved variable selected for the second time? Does the program need to address this issue
-                # by forcing the set to not contain any of such variables?
-
         self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
         self.mechanismVariables = mechanismVariables
         self.conditionalProbabilities = conditionalProbabilities
@@ -262,7 +256,6 @@ class ObjFunctionGenerator:
         ancestors: list[Node] = self.graph.find_ancestors(current_target)
         conditionable_ancestors: list[Node] = []
         for ancestor in ancestors:
-            # Question: does it need to not be the intervention?
             if (
                 ancestor.cardinality > 0
                 and ancestor.label != current_target.label
@@ -286,7 +279,6 @@ class ObjFunctionGenerator:
         current_target: Node,
         intervention: Node,
     ):
-        # testa todas as possibilidades de condicionar conjuntos de variáveis nesse vetor
         for no_of_possibilities in range(pow(2, len(conditionable_ancestors))):
             current_conditionable_ancestors = self._get_current_conditionable_ancestors(
                 conditionable_ancestors, no_of_possibilities
@@ -330,8 +322,6 @@ class ObjFunctionGenerator:
         if len(valid_d_separator_set) <= 0:
             logger.error("Failure: Could not find a separator set")
 
-        # Returns one of the valid subsets - Last instance of
-        # "valid_d_separator_set", for now.
         return valid_d_separator_set
 
     def _get_current_conditionable_ancestors(

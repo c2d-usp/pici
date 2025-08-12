@@ -251,16 +251,16 @@ def _define_graph(
 
     return Graph(
         numberOfNodes=number_of_nodes,
-        exogenous=exogenous,  # list[Node]
-        endogenous=endogenous,  # list[Node]
-        topologicalOrder=topological_order_nodes,  # list[Node]
-        DAG=dag,  # nx.DiGraph
-        graphNodes=graphNodes,  # dict[str, Node]
-        node_set=node_set,  # set(Node)
-        topologicalOrderIndexes=topologicalOrderIndexes,  # dict[Node, int]
+        exogenous=exogenous,
+        endogenous=endogenous,
+        topologicalOrder=topological_order_nodes,
+        DAG=dag,
+        graphNodes=graphNodes,
+        node_set=node_set,
+        topologicalOrderIndexes=topologicalOrderIndexes,
         currNodes=[],
-        dagComponents=[],  # list[list[Node]]
-        cComponentToUnob={},  # dict[int, Node]
+        dagComponents=[],
+        cComponentToUnob={},
     )
 
 

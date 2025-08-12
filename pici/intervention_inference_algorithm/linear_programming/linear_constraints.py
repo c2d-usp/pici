@@ -42,14 +42,12 @@ def generate_constraints(
             cCompOrder.append(node)
     cCompOrder.reverse()
     usedVars = cCompOrder.copy()
-    # TODO: O QUE QUE É WC? --> PAIS + TAIL
     Wc: list[Node] = cCompOrder.copy()
     for cCompNode in cCompOrder:
         for par in cCompNode.parents:
             if par not in Wc and (par != unob):
                 Wc.append(par)
 
-    # TODO: ENQUANTO NÃO ESTIVER VAZIA
     while bool(cCompOrder):
         node = cCompOrder.pop(0)
         for cond in Wc:
@@ -67,7 +65,6 @@ def generate_constraints(
 
     for rlt in cartesianProduct:
         prob = 1.0
-        # TODO: TRANSFORMAR EM FUNÇÃO ISSO AQUI:
         for term in productTerms:
             targetRealizationNodes: list[Node] = []
             conditionRealizationNodes: list[Node] = []
@@ -93,7 +90,6 @@ def generate_constraints(
                 if var in consideredCcomp:
                     endoParents: list[Node] = var.parents.copy()
                     endoParents.remove(unob)
-                    # TODO: key é algo do tipo 'A=1,B=3'
                     key = create_dict_index(
                         parents=endoParents, rlt=rlt, indexerList=usedVars
                     )

@@ -57,7 +57,6 @@ class Graph:
     def set_node_intervened_value(self, node_label: str, node_value: int) -> Node:
         if not isinstance(node_value, int):
             raise Exception(f"Node value '{node_value}' is not of type int.")
-        # TODO: Validate if value fits in node cardinality
         self.graphNodes[node_label].intervened_value = node_value
         return self.graphNodes[node_label]
 
@@ -68,18 +67,7 @@ class Graph:
         for j in range(n, -1, -1):
             if self.topologicalOrder[j] in nodes:
                 return self.topologicalOrder[j]
-
-        # TODO: BETTER ERROR HANDLING
         raise Exception("Node not found")
-
-    # Not Used
-    def find_cComponents(self):
-        for node in self.node_set:
-            if not node.visited and node.cardinality < 1:
-                self.currNodes.clear()
-                self._visit_nodes_in_same_cComponent(node)
-                self.dagComponents.append(self.currNodes[:])
-                self.cComponentToUnob[len(self.dagComponents) - 1] = node
 
     def _clear_visited(self):
         for node in self.node_set:
@@ -90,21 +78,6 @@ class Graph:
         for adj_node in node.children:
             if not adj_node.visited:
                 self._base_dfs(adj_node)
-
-    # Only used by 'find_cComponents'
-    def _visit_nodes_in_same_cComponent(self, node: Node):
-        node.visited = True
-        self.currNodes.append(node)
-        is_observable = node.cardinality > 1
-
-        if not is_observable:
-            for adj_node in node.children:
-                if not adj_node.visited:
-                    self._visit_nodes_in_same_cComponent(adj_node)
-        else:
-            for parent_node in node.parents:
-                if not parent_node.visited and parent_node.cardinality < 1:
-                    self._visit_nodes_in_same_cComponent(parent_node)
 
     def _dfs_ancestor(self, node: Node):
         node.visited = True
