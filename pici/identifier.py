@@ -40,18 +40,7 @@ class Identifier:
         return None
 
     def find_instrumental_variable(self):
-        observed = set(self.G.nodes()) - self.latent_labels
-        for z in observed - {self.X, self.Y}:
-            if not self.G.has_edge(z, self.X):
-                continue
-            bds_zy = self.infer.get_all_backdoor_adjustment_sets(X=z, Y=self.Y)
-            if not self._all_sets_observed(bds_zy):
-                continue
-            paths = list(self._all_directed_paths(self.G, z, self.Y))
-            if paths and all(self.X in path[1:-1] for path in paths):
-                return z
-
-        return None
+        raise NotImplementedError
 
     def check_unobservable_confounding(self) -> bool:
         for U in self.causal_model.unobservables or []:
@@ -91,15 +80,3 @@ class Identifier:
         Returns only those adjustment-sets Z that do not contain any latent variable.
         """
         return [Z for Z in sets if Z.isdisjoint(self.latent_labels)]
-
-    @staticmethod
-    def _all_directed_paths(G, src, dst):
-        for path in nx.all_simple_paths(G, src, dst):
-            if all(G.has_edge(u, v) for u, v in zip(path, path[1:])):
-                yield path
-
-    def _all_sets_observed(self, sets: Iterable[FrozenSet[str]]) -> bool:
-        """
-        Returns True iff every adjustment-set in sets is disjoint from the latents.
-        """
-        return all(Z.isdisjoint(self.latent_labels) for Z in sets)

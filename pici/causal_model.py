@@ -86,7 +86,7 @@ class CausalModel:
 
         identifier = Identifier(causal_model=self)
 
-        for method in ["backdoor", "frontdoor", "instrumental_variable"]:
+        for method in ["backdoor", "frontdoor"]:
             finder = getattr(identifier, f"find_{method}")
             result = finder()
             if result:
