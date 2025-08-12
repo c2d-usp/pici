@@ -147,9 +147,7 @@ class CausalModel:
 
         if len(self.interventions) == 1:
             return self.single_intervention_query()
-        elif len(self.interventions) == 2:
-            return self.double_intervention_query()
-        elif len(self.interventions) > 2:
+        elif len(self.interventions) >= 2:
             self.multi_intervention_query()
             return ("None", "None")
         raise Exception("None interventions found. Expect at least one intervention.")
@@ -161,14 +159,6 @@ class CausalModel:
             intervention=self.interventions[0],
             target=self.target,
             optimizer_label=OptimizersLabels.GUROBI.value,
-        )
-
-    def double_intervention_query(self):
-        return build_bi_linear_problem(
-            self.graph,
-            self.data,
-            self.interventions,
-            self.target,
         )
 
     def multi_intervention_query(self):

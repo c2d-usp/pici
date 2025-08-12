@@ -138,37 +138,6 @@ class TestInferenceAlgorithm(unittest.TestCase):
             msg="Copilot: intervened graph should d-separate E and Y given D",
         )
 
-    # TODO: remove double intervention
-    @unittest.skip("double intervention has a bug")
-    def test_double_intervention_binary_balke_pearl(self):
-        edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-        cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
-        unobs = ["U1", "U2"]
-        target = "Y"
-        target_value = 1
-        rel_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
-        csv_path = os.path.join(PROJECT_ROOT, rel_path)
-        df = pd.read_csv(csv_path)
-
-        model = CausalModel(
-            data=df,
-            edges=edges,
-            custom_cardinalities=cardinalities,
-            unobservables_labels=unobs,
-            interventions=[("X", 1), ("Z", 1)],
-            target=(target, target_value),
-        )
-
-        self.assertFalse(model.are_d_separated_in_complete_graph(["Z"], ["Y"], ["X"]))
-        expected_lower, expected_upper = (0.07680001854838515, 0.09309998464330864)
-        expected_lower = round(expected_lower, 3)
-        expected_upper = round(expected_upper, 3)
-        lower, upper = model.intervention_query()
-        lower = round(float(lower), 3)
-        upper = round(float(upper), 3)
-        self.assertEqual(lower, expected_lower)
-        self.assertEqual(upper, expected_upper)
-
     def test_simple_counfoundness(self):
         edges = "U1 -> X, U1 -> Y"
         unobs = ["U1"]
