@@ -12,7 +12,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from pici.do_calculus_algorithm.column_generation.scalable_problem_init import (
+from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
 from pici.utils.scalable_graphs_helper import get_scalable_dataframe

@@ -1,10 +1,10 @@
 import pandas as pd
 
-from pici.do_calculus_algorithm.linear_programming.mechanisms_generator import (
-    MechanismGenerator,
-)
 from pici.graph.graph import Graph
 from pici.graph.node import Node
+from pici.intervention_inference_algorithm.linear_programming.mechanisms_generator import (
+    MechanismGenerator,
+)
 from pici.utils.probabilities_helper import find_conditional_probability
 from pici.utils.types import MechanismType
 

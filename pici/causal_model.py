@@ -13,12 +13,11 @@ from pgmpy.estimators import MaximumLikelihoodEstimator
 from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.models import DiscreteBayesianNetwork
 
-from pici.do_calculus_algorithm.linear_programming.opt_problem_builder import (
-    build_bi_linear_problem,
-    build_linear_problem,
-)
 from pici.graph.graph import Graph
 from pici.graph.node import Node
+from pici.intervention_inference_algorithm.linear_programming.opt_problem_builder import (
+    build_linear_problem,
+)
 from pici.utils._enum import OptimizersLabels
 from pici.utils.graph_plotter import plot_graph_image
 from pici.utils.parser import (

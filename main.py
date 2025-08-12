@@ -1,4 +1,3 @@
-# from pgmpy.models import BayesianNetwork
 import logging
 
 import networkx as nx
@@ -168,31 +167,6 @@ def binary_copilot_example():
     copilot_model.generate_graph_image("copilot.png")
 
 
-def double_intervention():
-    edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-    cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
-    unobs = ["U1", "U2"]
-    target = "Y"
-    target_value = 1
-    csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
-    df = pd.read_csv(csv_path)
-
-    model = CausalModel(
-        data=df,
-        edges=edges,
-        custom_cardinalities=cardinalities,
-        unobservables_labels=unobs,
-        interventions=[("X", 1), ("Z", 1)],
-        target=(target, target_value),
-    )
-
-    print(
-        f">> Is Z d-separated from Y giving X? {model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'])}"
-    )
-    model.generate_graph_image("two_interventions.png")
-    # model.inference_intervention_query()
-
-
 def discrete_copilot_example():
     raise NotImplementedError
 
@@ -204,7 +178,6 @@ def main():
     binary_balke_pearl_example()
     # discrete_iv_random()
     # binary_copilot_example()
-    # double_intervention()
     # incident_model()
 
 

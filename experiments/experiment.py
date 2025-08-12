@@ -8,7 +8,7 @@ from itertools import product
 import pandas as pd
 
 from pici.causal_model import CausalModel
-from pici.do_calculus_algorithm.column_generation.scalable_problem_column_gen import (
+from pici.intervention_inference_algorithm.column_generation.scalable_problem_column_gen import (
     ScalarProblem,
 )
 from pici.utils.probabilities_helper import (

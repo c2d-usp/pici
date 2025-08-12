@@ -1,23 +1,22 @@
 import logging
 
-import gurobipy as gp
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-from pici.do_calculus_algorithm.linear_programming.linear_constraints import (
+from pici.graph.graph import Graph
+from pici.graph.node import Node
+from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
     generate_constraints,
 )
-from pici.do_calculus_algorithm.linear_programming.obj_function_generator import (
+from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )
-from pici.do_calculus_algorithm.linear_programming.optimizers import (
+from pici.intervention_inference_algorithm.linear_programming.optimizers import (
     Optimizer,
     choose_optimizer,
     compute_bounds,
 )
-from pici.graph.graph import Graph
-from pici.graph.node import Node
 from pici.utils._enum import OptimizersLabels
 
 
