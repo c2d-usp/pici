@@ -1,6 +1,6 @@
+from itertools import product
 import os
 import sys
-from itertools import product
 
 import pandas as pd
 

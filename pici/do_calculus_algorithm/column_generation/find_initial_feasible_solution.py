@@ -9,8 +9,8 @@ if PROJECT_ROOT not in sys.path:
 import array
 
 import gurobipy as gp
-import numpy as np
 from gurobipy import GRB
+import numpy as np
 
 
 class PhaseI:

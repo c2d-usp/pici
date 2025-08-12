@@ -1,8 +1,8 @@
-from typing import List, Tuple
-import logging
 from abc import ABC, abstractmethod
+import logging
+from typing import List, Tuple
 
-from gurobipy import Model, GRB, quicksum
+from gurobipy import GRB, Model, quicksum
 from scipy.optimize import linprog
 
 logger = logging.getLogger(__name__)

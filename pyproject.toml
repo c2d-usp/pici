@@ -32,9 +32,14 @@ black = "^25.1.0"
 ipykernel = "^6.29.5"
 
 [tool.ruff]
-select = ["N", "E", "F", "B"]
-fixable = ["N"]
+select = ["N", "E", "F", "B", "I"]
+fixable = ["ALL"]
 ignore = []
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+
 
 [build-system]
 requires = ["poetry-core"]

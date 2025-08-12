@@ -1,9 +1,11 @@
+from typing import FrozenSet, Iterable, List
+import warnings
+
+from dowhy import CausalModel as DowhyCausalModel
+import networkx as nx
 from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.models import DiscreteBayesianNetwork
-import networkx as nx
-from typing import Iterable, Set, FrozenSet, List
-import warnings
-from dowhy import CausalModel as DowhyCausalModel
+
 
 
 class Identifier:

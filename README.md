@@ -10,13 +10,15 @@ PICI -- Partially Identifiable Causal Inference
    - [Running Examples](#running-examples)
    - [Linters](#linters)
      - [Black](#black)
+     - [Ruff](#ruff)
    - [Unittest](#unittest)
 5. [Acknowledgements](#acknowledgements)
 
 
 ## About
 
-PICI is a causal inference package that can handle Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
+PICI stands for Partially Identifiable Causal Inference.
+It is a causal inference package that can handle Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
 
 This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
 
@@ -112,6 +114,26 @@ python tests/test_causal_model.py
 ### Linters
 
 This project uses some linters to follow a code standardization that improves code consistency and cleanliness.
+
+#### Ruff
+
+This project uses **[Ruff](https://github.com/astral-sh/ruff)** to remove unused imports and sort them.
+
+Usage example for a file:
+
+```bash
+ruff check file.py --fix -s
+```
+
+For all files in the current directory and sub-directories:
+
+```bash
+ruff check . --fix -s
+```
+
+Running this command will change automatically.
+We suggest the use of flag `-s` to silence the countless print logs.
+
 
 #### Black
 
