@@ -22,7 +22,6 @@ class Identifier:
         )
 
     def find_backdoor(self):
-
         backdoors = self.infer.get_all_backdoor_adjustment_sets(X=self.X, Y=self.Y)
         obs_bds = self._filter_observed_sets(backdoors)
         if obs_bds:
@@ -32,7 +31,6 @@ class Identifier:
         return None
 
     def find_frontdoor(self):
-
         frontdoors = self.infer.get_all_frontdoor_adjustment_sets(X=self.X, Y=self.Y)
         obs_fds = self._filter_observed_sets(frontdoors)
         if obs_fds:
@@ -42,7 +40,6 @@ class Identifier:
         return None
 
     def find_instrumental_variable(self):
-
         observed = set(self.G.nodes()) - self.latent_labels
         for z in observed - {self.X, self.Y}:
             if not self.G.has_edge(z, self.X):
@@ -57,7 +54,6 @@ class Identifier:
         return None
 
     def check_unobservable_confounding(self) -> bool:
-
         for U in self.causal_model.unobservables or []:
             if nx.has_path(self.G, U.label, self.X) and nx.has_path(
                 self.G, U.label, self.Y
@@ -67,7 +63,6 @@ class Identifier:
         return False
 
     def graphical_identification(self):
-
         G_do = self.G.copy()
         G_do.remove_edges_from(list(G_do.in_edges(self.X)))
         if nx.is_d_separator(G_do, {self.X}, {self.Y}, set()):
@@ -76,7 +71,6 @@ class Identifier:
         return False
 
     def id_algorithm_identification(self):
-
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             dowhy_model = DowhyCausalModel(
