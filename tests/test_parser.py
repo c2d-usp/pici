@@ -15,13 +15,13 @@ from pici.graph.node import Node
 from pici.utils.parser import (
     _convert_edge_string_to_edge_tuples,
     _parse_default_graph,
-    convert_tuples_list_into_nodes_list,
     _parse_edges,
     _parse_input_graph,
     _parse_to_string_list,
     _parse_tuple_str_int,
     _parse_tuples_str_int_list,
     convert_tuple_into_node,
+    convert_tuples_list_into_nodes_list,
 )
 
 

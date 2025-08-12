@@ -7,7 +7,6 @@ from pgmpy.inference.CausalInference import CausalInference
 from pgmpy.models import DiscreteBayesianNetwork
 
 
-
 class Identifier:
     def __init__(self, causal_model):
         self.causal_model = causal_model

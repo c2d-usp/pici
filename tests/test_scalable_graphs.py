@@ -1,10 +1,10 @@
+import logging
 import os
 import sys
 import unittest
 
-import pandas as pd
 import numpy as np
-import logging
+import pandas as pd
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))

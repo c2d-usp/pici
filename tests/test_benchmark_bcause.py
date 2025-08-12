@@ -3,13 +3,13 @@ Benchmark with bcause (https://github.com/PGM-Lab/bcause).
 The goal is to validate our approach compared to bcause.
 """
 
+import logging
 import os
 import sys
 import unittest
 
-import pandas as pd
 import numpy as np
-import logging
+import pandas as pd
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))

@@ -1,10 +1,10 @@
+import logging
 import os
 import sys
 import unittest
 
-import pandas as pd
 import numpy as np
-import logging
+import pandas as pd
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
@@ -13,12 +13,12 @@ if PROJECT_ROOT not in sys.path:
 
 logging.disable(logging.INFO)
 
+from pici.causal_model import CausalModel
 from pici.utils._enum import DataExamplesPaths
 from pici.utils.scalable_graphs_helper import (
-    generate_scalable_string_edges,
     find_true_value_in_scalable_graphs,
+    generate_scalable_string_edges,
 )
-from pici.causal_model import CausalModel
 
 
 class TestIsIdentifiableIntervention(unittest.TestCase):

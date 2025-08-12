@@ -1,10 +1,10 @@
+import logging
 import os
 import sys
 import unittest
 
 import networkx as nx
 import pandas as pd
-import logging
 
 THIS_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, ".."))
