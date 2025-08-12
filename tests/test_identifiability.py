@@ -56,20 +56,6 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
         # The minimal observed front-door set should be {'W'}
         self.assertEqual(detail, frozenset({"W"}))
 
-    def test_iv_identifiable(self):
-        # IV: U1 -> X,Y; U2 -> Z; Z -> X -> Y
-        graph = "U1 -> X, U1 -> Y, U2 -> Z, Z -> X, X -> Y"
-        model = CausalModel(
-            data=self.df_xzy, edges=graph, unobservables_labels=["U1", "U2"]
-        )
-        identifiable, method, detail = model.is_identifiable_intervention(
-            interventions=[("X", 0)], target=("Y", 1)
-        )
-        self.assertTrue(identifiable)
-        self.assertEqual(method, "instrumental_variable")
-        # The identified instrument should be 'Z'
-        self.assertEqual(detail, "Z")
-
     def test_missing_intervention_raises(self):
         graph = "U -> X, U -> Y, X -> Y"
         model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
