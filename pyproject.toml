@@ -1,6 +1,6 @@
 [project]
 name = "pici"
-version = "0.0.5"
+version = "0.0.7"
 description = "Package for Partially Identifiable Causal Inference"
 authors = [
     { name="Daniel Lawand", email="daniel.lawand@gmail.com" },
@@ -10,8 +10,11 @@ license = "Apache-2.0"
 readme = "README.md"
 keywords = [ "causal inference" ]
 
-packages = [
-    { include = "pici" },
+packages = [{ include = "pici" }]
+
+include = [
+    "README.md",
+    "LICENSE"
 ]
 
 [tool.poetry.dependencies]
