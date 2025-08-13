@@ -198,6 +198,117 @@ class TestInferenceAlgorithm(unittest.TestCase):
             msg="Incident scenario: MS-A_Latency and DB_Change should be d-separated given DB_Latency",
         )
 
+class WeakPnAndWeakPsInferences(unittest.TestCase):
+    def test_weak_pn_and_ps_binary_balke_pearl(self):
+        edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+        card = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+        unobs = ["U1", "U2"]
+        df = pd.read_csv(
+            os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value)
+        )
+
+        model = CausalModel(
+            data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
+        )
+        model.set_interventions([("X", 0)])
+        model.set_target(("Y", 0))
+
+        lower, upper = model.intervention_query()
+
+         #WEAK_PN = P(Y_{X=0} = 0)
+        weak_pn_lower, weak_pn_upper = model.weak_pn_inference(intervention_label='X', target_label='Y')
+
+        self.assertAlmostEqual(
+            float(lower),
+            float(weak_pn_lower),
+            places=3,
+            msg=f"Weak PN: Balke-Pearl lower bound mismatch: expected {weak_pn_lower}, got {lower}",
+        )
+        self.assertAlmostEqual(
+            float(upper),
+            float(weak_pn_upper),
+            places=3,
+            msg=f"Weak PN: Balke-Pearl upper bound mismatch: expected {weak_pn_upper}, got {upper}",
+        )
+
+        model.set_interventions([("X", 1)])
+        model.set_target(("Y", 1))
+
+        lower, upper = model.intervention_query()
+
+         #WEAK_PS = P(Y_{X=1} = 1)
+        weak_ps_lower, weak_ps_upper = model.weak_ps_inference(intervention_label='X', target_label='Y')
+
+        self.assertAlmostEqual(
+            float(lower),
+            float(weak_ps_lower),
+            places=3,
+            msg=f"Weak PS: Balke-Pearl lower bound mismatch: weak_ps {weak_ps_lower}, got {lower}",
+        )
+        self.assertAlmostEqual(
+            float(upper),
+            float(weak_ps_upper),
+            places=3,
+            msg=f"Weak PS: Balke-Pearl upper bound mismatch: weak_ps {weak_ps_upper}, got {upper}",
+        )
+
+    def test_weak_pn_and_ps_binary_copilot_example(self):
+        print("Hello")
+        edges = (
+            "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X,"
+            " U2 -> D, U3 -> E, U1 -> F"
+        )
+        card = {
+            "X": 2,
+            "Y": 2,
+            "D": 2,
+            "E": 2,
+            "F": 2,
+            "U1": 0,
+            "U2": 0,
+            "U3": 0,
+        }
+        unobs = ["U1", "U2", "U3"]
+        df = pd.read_csv(
+            os.path.join(PROJECT_ROOT, DataExamplesPaths.CSV_COPILOT_EXAMPLE.value)
+        )
+
+        model = CausalModel(
+            data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
+        )
+
+        lower, upper = model.intervention_query(interventions=[("X", 0)], target=("Y", 0))
+        expected_lower, expected_upper = model.weak_pn_inference(intervention_label="X", target_label="Y")
+        self.assertAlmostEqual(
+            float(lower),
+            float(expected_lower),
+            places=3,
+            msg=f"Weak PN: Copilot lower bound mismatch: expected {expected_lower}, got {lower}",
+        )
+
+        self.assertAlmostEqual(
+            float(upper),
+            float(expected_upper),
+            places=3,
+            msg=f"Weak PN: Copilot upper bound mismatch: expected {expected_upper}, got {upper}",
+        )
+
+        lower, upper = model.intervention_query(interventions=[("X", 1)], target=("Y", 1))
+        expected_lower, expected_upper = model.weak_ps_inference(intervention_label="X", target_label="Y")
+        self.assertAlmostEqual(
+            float(lower),
+            float(expected_lower),
+            places=3,
+            msg=f"Weak PS: Copilot lower bound mismatch: expected {expected_lower}, got {lower}",
+        )
+
+        self.assertAlmostEqual(
+            float(upper),
+            float(expected_upper),
+            places=3,
+            msg=f"Weak PS: Copilot upper bound mismatch: expected {expected_upper}, got {upper}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
