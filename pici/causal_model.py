@@ -211,21 +211,21 @@ class CausalModel:
         self.target = node
         return True
 
-    def weak_pn_inference(self, intervention_label: str, target_label: str):
+    def weak_pn_inference(self, intervention_label: str, target_label: str) -> str | tuple[str,str]:
         """
         PN = P(Y_{X=0} = 0 | X = 1, Y = 1)
         WEAK_PN = P(Y_{X=0} = 0)
         """
-        return self.partially_identifiable_intervention_query(
+        return self.intervention_query(
             interventions=[(intervention_label, 0)], target=(target_label, 0)
         )
 
-    def weak_ps_inference(self, intervention_label: str, target_label: str):
+    def weak_ps_inference(self, intervention_label: str, target_label: str) -> str | tuple[str,str]:
         """
         PS = P(Y_{X=1} = 1 | X = 0, Y = 0)
         WEAK_PS = P(Y_{X=1} = 1)
         """
-        return self.partially_identifiable_intervention_query(
+        return self.intervention_query(
             interventions=[(intervention_label, 1)], target=(target_label, 1)
         )
 
