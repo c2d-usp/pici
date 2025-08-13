@@ -1,6 +1,6 @@
 [project]
 name = "pici"
-version = "0.0.7"
+version = "0.0.8"
 description = "Package for Partially Identifiable Causal Inference"
 authors = [
     { name="Daniel Lawand", email="daniel.lawand@gmail.com" },
