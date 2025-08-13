@@ -92,7 +92,7 @@ is_identifiable, identifiable_method, additional_detail = model.is_identifiable_
 ```python
 model.intervention_query()
 ```
-Or you can pass the target and intervention as an argument: 
+Or you can pass the target and intervention as arguments: 
 
 ```python
 model.intervention_query([('X', 1)], ('Y', 1))
