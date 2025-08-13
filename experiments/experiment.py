@@ -1,5 +1,6 @@
 import logging
 import time as tm
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ GC_EXPERIMENT_PATH = "./outputs/gc_experiment_results.csv"
 LP_EXPERIMENT_PATH = "./outputs/lp_experiment_results.csv"
 TRUE_VALUE_EXPERIMENT_PATH = "./outputs/true_value_experiment_results.csv"
 ERROR_PATH = "./outputs/error_log.txt"
+Path(GC_EXPERIMENT_PATH).parent.mkdir(parents=True, exist_ok=True)
 
 
 def genGraph(N, M):
@@ -75,10 +77,6 @@ def column_gen_call(N_M, intervention_value=1, target_value=1):
                 "GC_LOWER_BOUND_REQUIRED_ITERATIONS": None,
                 "GC_UPPER_BOUND_REQUIRED_ITERATIONS": None,
                 "GC_SECONDS_TAKEN": None,
-                "LP_LOWER_BOUND": None,
-                "LP_UPPER_BOUND": None,
-                "LP_SECONDS_TAKEN": None,
-                "TRUE_VALUE": None,
             }
             new_row_df = pd.DataFrame([new_row])
 
@@ -155,15 +153,9 @@ def lp_call(N_M, intervention_value=1, target_value=1):
             new_row = {
                 "N": N,
                 "M": M,
-                "GC_LOWER_BOUND": None,
-                "GC_UPPER_BOUND": None,
-                "GC_LOWER_BOUND_REQUIRED_ITERATIONS": None,
-                "GC_UPPER_BOUND_REQUIRED_ITERATIONS": None,
-                "GC_SECONDS_TAKEN": None,
                 "LP_LOWER_BOUND": None,
                 "LP_UPPER_BOUND": None,
                 "LP_SECONDS_TAKEN": None,
-                "TRUE_VALUE": None,
             }
             new_row_df = pd.DataFrame([new_row])
             scalable_df = None
@@ -178,11 +170,9 @@ def lp_call(N_M, intervention_value=1, target_value=1):
                 scalable_model = CausalModel(
                     data=scalable_df,
                     edges=scalable_input,
-                    unobservables=scalable_unobs,
-                    interventions=scalable_intervention,
-                    interventions_value=intervention_value,
-                    target=scalable_target,
-                    target_value=target_value,
+                    unobservables_labels=scalable_unobs,
+                    interventions=(scalable_intervention,intervention_value),
+                    target=(scalable_target,target_value),
                 )
                 lower, upper = (
                     scalable_model.partially_identifiable_intervention_query()
@@ -214,14 +204,6 @@ def true_value_call(N_M, intervention_value=1, target_value=1):
         new_row = {
             "N": N,
             "M": M,
-            "GC_LOWER_BOUND": None,
-            "GC_UPPER_BOUND": None,
-            "GC_LOWER_BOUND_REQUIRED_ITERATIONS": None,
-            "GC_UPPER_BOUND_REQUIRED_ITERATIONS": None,
-            "GC_SECONDS_TAKEN": None,
-            "LP_LOWER_BOUND": None,
-            "LP_UPPER_BOUND": None,
-            "LP_SECONDS_TAKEN": None,
             "TRUE_VALUE": None,
         }
         new_row_df = pd.DataFrame([new_row])
@@ -251,7 +233,7 @@ def true_value_call(N_M, intervention_value=1, target_value=1):
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    df = pd.DataFrame(
+    gc_df = pd.DataFrame(
         columns=[
             "N",
             "M",
@@ -260,32 +242,47 @@ def main():
             "GC_LOWER_BOUND_REQUIRED_ITERATIONS",
             "GC_UPPER_BOUND_REQUIRED_ITERATIONS",
             "GC_SECONDS_TAKEN",
+        ]
+    )
+
+    lp_df = pd.DataFrame(
+        columns=[
+            "N",
+            "M",
             "LP_LOWER_BOUND",
             "LP_UPPER_BOUND",
             "LP_SECONDS_TAKEN",
+        ]
+    )
+
+    true_value_df = pd.DataFrame(
+        columns=[
+            "N",
+            "M",
             "TRUE_VALUE",
         ]
     )
-    df.to_csv(GC_EXPERIMENT_PATH, index=False)
-    df.to_csv(LP_EXPERIMENT_PATH, index=False)
-    df.to_csv(TRUE_VALUE_EXPERIMENT_PATH, index=False)
+    gc_df.to_csv(GC_EXPERIMENT_PATH, index=False)
+    lp_df.to_csv(LP_EXPERIMENT_PATH, index=False)
+    true_value_df.to_csv(TRUE_VALUE_EXPERIMENT_PATH, index=False)
 
     N_M = [
         (1, 1),
-        (2, 1),
-        (3, 1),
-        (4, 1),
-        (5, 1),
-        (1, 2),
-        (2, 2),
-        (3, 2),
-        (4, 2),
-        (1, 3),
-        (2, 3),
-        (1, 4),
+        ''' Commented to avoid running and taking too much time'''
+        # (2, 1),
+        # (3, 1),
+        # (4, 1),
+        # (5, 1),
+        # (1, 2),
+        # (2, 2),
+        # (3, 2),
+        # (4, 2),
+        # (1, 3),
+        # (2, 3),
+        # (1, 4),
     ]
 
-    true_value(N_M)
+    true_value_call(N_M)
     column_gen_call(N_M)
     lp_call(N_M)
 
