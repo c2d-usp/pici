@@ -5,7 +5,7 @@ PICI -- Partially Identifiable Causal Inference
 2. [Usage](#usage)
    - [Install and Import](#install-and-import)
    - [Causal Model Creation](#causal-model-creation)
-   - [Identifiability checker](#indentifiability-checker)
+   - [Identifiability Checker](#indentifiability-checker)
    - [Interventional Query](#interventional-query)
    - [PN & PS Approximations](#pn-and-ps-approximations)
 3. [Theory](#theory-behind)
@@ -29,7 +29,7 @@ This project was based on the work of João Pedro Arroyo and João Gabriel on [G
 
 ## Usage
 
-### Install and Import
+### Install and import
 - Install the package
 ```python
 pip install pici
@@ -40,7 +40,7 @@ pip install pici
 import pici
 ```
 
-### Causal Model Creation
+### Causal model creation
 
 - Create a causal model:
 ```python
@@ -86,7 +86,7 @@ is_identifiable, identifiable_method, additional_detail = model.is_identifiable_
 )
 ```
 
-### Interventional Query
+### Interventional query
 
 - You can make the query.
 ```python
