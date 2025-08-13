@@ -23,7 +23,6 @@ def main():
     suite = unittest.defaultTestLoader.discover(
         start_dir=str(tests_dir),
         pattern=args.pattern,
-        top_level_dir=str(project_root),
     )
 
     result = unittest.TextTestRunner(
