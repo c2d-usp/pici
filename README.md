@@ -3,7 +3,7 @@ PICI -- Partially Identifiable Causal Inference
 ## Table of Contents
 1. [About](#about)
 2. [Usage](#usage)
-3. [How it works](#how-it-works)
+3. [Theory](#theory-behind)
 4. [Developer Tools](#developer-tools)
    - [Install](#install)
    - [Virtual Environment](#virtual-environment)
@@ -41,32 +41,46 @@ df = pd.read_csv(model_csv_path)
 edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
 unobservable_variables = ["U1", "U2"]
 custom_cardinalities = {"Z": 5, "X": 2, "Y": 16, "U1": 0, "U2": 0}
+interventions=[('X',0)]
+target=('Y',0)
 
-model = pici.causal_model.CausalModel(
+model = pici.CausalModel(
   data=df,
   edges=edges,
   custom_cardinalities=custom_cardinalities,
   unobservables_labels=unobservable_variables,
+  interventions=interventions,    # Optional in the model creation
+  target=target,                  # Optional in the model creation
 )
 ```
 
-- Set target and intervetions
+- You can set target and intervetions:
 ```python
 model.set_interventions([('X', 1)])
 model.set_target(('Y', 1))
 ```
 
-- Make the query
+- You can make the query.
 ```python
-lower_bound, upper_bound = model.intervention_query()
+model.intervention_query()
 ```
 Or you can pass the target and intervention as an argument: 
 
 ```python
-lower_bound, upper_bound = model.intervention_query([('X', 1)], ('Y', 1))
+model.intervention_query([('X', 1)], ('Y', 1))
 ```
 
-## How it works
+- If your query is **identifiable**, the return value is a `string`.
+```python
+exact_value = model.intervention_query()
+```
+
+- If your query is **partially identifiable**, the return value is a `tuple` of `strings`.
+```python
+lower_bound, upper_bound = model.intervention_query()
+```
+
+## Theory behind
 
 If you want to understand what is the theory of our approach, you can read the [paper](https://openreview.net/forum?id=aUPT1kEiwP).
 
