@@ -258,7 +258,6 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
         )
 
     def test_weak_pn_and_ps_binary_copilot_example(self):
-        print("Hello")
         edges = (
             "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X,"
             " U2 -> D, U3 -> E, U1 -> F"
