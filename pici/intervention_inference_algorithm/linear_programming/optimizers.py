@@ -158,7 +158,7 @@ class ScipyOptimizer(Optimizer):
             logger.info(f"{msg} query is None")
             return "None"
 
-        if direction:
+        if direction == OptimizationDirection.MINIMIZE:
             return str(result.fun)
 
         return str(-result.fun)
