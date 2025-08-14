@@ -5,8 +5,8 @@ PICI -- Partially Identifiable Causal Inference
 2. [Usage](#usage)
    - [Install and Import](#install-and-import)
    - [Causal Model Creation](#causal-model-creation)
-   - [Identifiability Checker](#indentifiability-checker)
    - [Interventional Query](#interventional-query)
+   - [Identifiability Checker](#identifiability-checker)
    - [PN & PS Approximations](#pn-and-ps-approximations)
 3. [Theory](#theory-behind)
 4. [Developer Tools](#developer-tools)
@@ -24,18 +24,18 @@ PICI -- Partially Identifiable Causal Inference
 PICI stands for Partially Identifiable Causal Inference.
 It is a causal inference package that can handle discrete Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
 
-This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
+This project was based on the work of João Pedro Arroyo and João Gabriel Rodrigues on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
 
 
 ## Usage
 
 ### Install and import
-- Install the package
-```python
+- Install the package.
+```bash
 pip install pici
 ```
 
-- Import the package
+- Import the package.
 ```python
 import pici
 ```
@@ -61,15 +61,39 @@ model = pici.CausalModel(
 )
 ```
 
-- You can set target and intervetions:
+- You can set the target and interventions:
 ```python
 model.set_interventions([('X', 1)])
 model.set_target(('Y', 1))
 ```
 
-### Indentifiability checker
+### Interventional query
 
-- You can check if your intervention is identifiable by Backdoor criterion, Frontdoor criterion or [ID algorithm](https://cdn.aaai.org/AAAI/2006/AAAI06-191.pdf):
+- You can make the query:
+```python
+model.intervention_query()
+```
+
+Or you can pass the target and interventions as arguments:
+
+```python
+model.intervention_query([('X', 1)], ('Y', 1))
+```
+- When `intervention_query` is called, it automatically checks if your query is identifiable or partially identifiable.
+- If your query is **identifiable**, the return value is a `string`.
+
+```python
+exact_value = model.intervention_query()
+```
+
+- If your query is **partially identifiable**, the return value is a `tuple` of `strings`.
+```python
+lower_bound, upper_bound = model.intervention_query()
+```
+
+### Identifiability checker
+
+- You can check if your intervention is identifiable by Backdoor criterion, Frontdoor criterion, or [ID algorithm](https://cdn.aaai.org/AAAI/2006/AAAI06-191.pdf):
 
 ```python
 edges = "U1 -> X, U1 -> Y, X -> W, W -> Y, U2 -> W"
@@ -86,34 +110,9 @@ is_identifiable, identifiable_method, additional_detail = model.is_identifiable_
 )
 ```
 
-### Interventional query
-
-- You can make the query.
-```python
-model.intervention_query()
-```
-Or you can pass the target and intervention as arguments: 
-
-```python
-model.intervention_query([('X', 1)], ('Y', 1))
-```
-
-- When `intervention_query` is called, it is automatically checked if your query is identifiable or partially identifiable.
-- If your query is **identifiable**, the return value is a `string`.
-
-```python
-exact_value = model.intervention_query()
-```
-
-- If your query is **partially identifiable**, the return value is a `tuple` of `strings`.
-```python
-lower_bound, upper_bound = model.intervention_query()
-```
-
 ### PN and PS approximations
 
-- You can make a PN and a PS approximation, that we called *weak-pn* and *weak-ps*.
-This approximation is based on the paper [Laurentino et. al., 2025](https://jems3.sbc.org.br/submissions/10478) (public link soon).
+- You can make PN and PS approximations, which we call *weak-pn* and *weak-ps*. These approximations are based on the paper **Probabilities of Causation and Root Cause Analysis with Quasi-Markovian Models** by Laurentino et al., 2025 (public link soon).
 
 The same way as the `intervention_query`, if it's identifiable it will return a `string` otherwise a `tuple` of `strings`.
 
@@ -124,7 +123,7 @@ ps_value = model.weak_ps_inference(intervention_label='X', target_label='Y')
 
 ## Theory behind
 
-If you want to understand what is the theory of our approach, you can read the paper [Arroyo et al., 2025](https://openreview.net/forum?id=aUPT1kEiwP).
+If you want to understand the theory behind our approach, you can read the paper [Arroyo et al., 2025](https://openreview.net/forum?id=aUPT1kEiwP).
 
 
 ## Developer tools
@@ -134,7 +133,7 @@ To get started, install Poetry by following the [official instructions](https://
 
 ### Install
 
-- Install dependencies. Once you have installed poetry, you can install the required packages:
+- Install dependencies. Once you have installed Poetry, you can install the required packages:
 ```bash
 poetry install
 ```
@@ -144,12 +143,12 @@ poetry install
 
 Activate the virtual environment:
 
-- Activate poetry virtual environment
+- Activate the Poetry virtual environment
 ```bash
 eval $(poetry env activate)
 ```
 
-- To exit the poetry virtual environment run:
+- To exit the Poetry virtual environment, run:
 ```bash
 deactivate
 ```
@@ -187,14 +186,14 @@ For all files in the current directory and sub-directories:
 ruff check . --fix -s
 ```
 
-Running this command will change automatically.
-We suggest the use of flag `-s` to silence the countless print logs.
+Running this command will make changes automatically.
+We suggest using the flag `-s` to silence the numerous print logs.
 
 
 #### Black
 
 This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.
-Black is an code formatter that ensures consistency by enforcing a uniform style.
+Black is a code formatter that ensures consistency by enforcing a uniform style.
 
 Usage example for a file:
 
@@ -213,6 +212,6 @@ Running this command will change automatically.
 
 ## Acknowledgements
 We thank the ICTi, Instituto de Ciência e Tecnologia Itaú, for providing key funding
-for this work through the C2D - Centro de Ciência de Dados at Universidade de São Paulo.
+for this work through C2D - Centro de Ciência de Dados at Universidade de São Paulo.
 
 Any opinions, findings, conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of Itaú Unibanco and Instituto de Ciência e Tecnologia Itaú. All data used in this study comply with the Brazilian General Data Protection Law.
