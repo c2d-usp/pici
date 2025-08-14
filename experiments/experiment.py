@@ -1,6 +1,6 @@
 import logging
-import time as tm
 from pathlib import Path
+import time as tm
 
 logger = logging.getLogger(__name__)
 
@@ -171,8 +171,8 @@ def lp_call(N_M, intervention_value=1, target_value=1):
                     data=scalable_df,
                     edges=scalable_input,
                     unobservables_labels=scalable_unobs,
-                    interventions=(scalable_intervention,intervention_value),
-                    target=(scalable_target,target_value),
+                    interventions=(scalable_intervention, intervention_value),
+                    target=(scalable_target, target_value),
                 )
                 lower, upper = (
                     scalable_model.partially_identifiable_intervention_query()
@@ -268,7 +268,7 @@ def main():
 
     N_M = [
         (1, 1),
-        ''' Commented to avoid running and taking too much time'''
+        """ Commented to avoid running and taking too much time""",
         # (2, 1),
         # (3, 1),
         # (4, 1),

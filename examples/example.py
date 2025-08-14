@@ -53,28 +53,20 @@ def incident_model():
     intervention_2 = "DB_Latency"
     target = "Outage"
 
-    model_2.set_interventions([(intervention_1, 0)])
-    model_2.set_target((target, 0))
     print(
-        f"{intervention_1}: PN = {model_2.partially_identifiable_intervention_query()}"
+        f"Intervention: {intervention_1} Target: {target} --> Weak-PN = {model_2.weak_pn_inference(intervention_label=intervention_1, target_label=target)}"
     )
 
-    model_2.set_interventions([(intervention_1, 1)])
-    model_2.set_target((target, 1))
     print(
-        f"{intervention_1}: PS = {model_2.partially_identifiable_intervention_query()}"
+        f"Intervention: {intervention_1} Target: {target} --> Weak-PS = {model_2.weak_ps_inference(intervention_label=intervention_1, target_label=target)}"
     )
 
-    model_2.set_interventions([(intervention_2, 0)])
-    model_2.set_target((target, 0))
     print(
-        f"{intervention_2}: PN = {model_2.partially_identifiable_intervention_query()}"
+        f"Intervention: {intervention_2} Target: {target} --> Weak-PN = {model_2.weak_pn_inference(intervention_label=intervention_2, target_label=target)}"
     )
 
-    model_2.set_interventions([(intervention_2, 1)])
-    model_2.set_target((target, 1))
     print(
-        f"{intervention_2}: PS = {model_2.partially_identifiable_intervention_query()}"
+        f"Intervention: {intervention_2} Target: {target} --> Weak-PS = {model_2.weak_ps_inference(intervention_label=intervention_2, target_label=target)}"
     )
 
 
@@ -98,14 +90,16 @@ def binary_balke_pearl_example():
         target=(balke_target, balke_target_value),
     )
 
-    # balke_model.set_interventions([(balke_intervention, balke_intervention_value)])
-    # balke_model.set_target((balke_target, balke_target_value))
-    print(balke_model.are_d_separated_in_intervened_graph(["Z"], ["Y"], ["X"]))
+    print(
+        f"Is Z d-separated from node Y given node X? {balke_model.are_d_separated_in_intervened_graph(['Z'], ['Y'], ['X'])}"
+    )
 
     balke_model.generate_graph_image("balke.png")
 
-    # print(f">> Is Z d-separated from Y giving X? {balke_model.are_d_separated(['Z'], ['Y'], ['X'], balke_model.graph.DAG)}")
-    # balke_model.inference_intervention_query()
+    lower, upper = balke_model.intervention_query()
+    print(
+        f"{lower} <= P({balke_target}={balke_target_value}|do({balke_intervention}={balke_intervention_value})) <= {upper}"
+    )
 
 
 def discrete_iv_random():
@@ -128,10 +122,10 @@ def discrete_iv_random():
         target=(iv_target, iv_target_value),
     )
 
-    # print(
-    #     f">> Is Z d-separated from Y giving X? {iv_model.are_d_separated_in_complete_graph(['Z'], ['Y'], ['X'])}"
-    # )
-    # iv_model.inference_intervention_query()
+    lower, upper = iv_model.intervention_query()
+    print(
+        f"{lower} <= P({iv_target}={iv_target_value}|do({iv_intervention}={iv_intervention_value})) <= {upper}"
+    )
     iv_model.generate_graph_image("discrete_iv.png")
 
 
@@ -163,12 +157,8 @@ def binary_copilot_example():
         interventions=(copilot_intervention, 1),
         target=(copilot_target, 1),
     )
-    # copilot_model.inference_intervention_query()
+
     copilot_model.generate_graph_image("copilot.png")
-
-
-def discrete_copilot_example():
-    raise NotImplementedError
 
 
 def main():
@@ -176,9 +166,9 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     binary_balke_pearl_example()
-    # discrete_iv_random()
-    # binary_copilot_example()
-    # incident_model()
+    discrete_iv_random()
+    binary_copilot_example()
+    incident_model()
 
 
 if __name__ == "__main__":

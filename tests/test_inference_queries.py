@@ -198,6 +198,7 @@ class TestInferenceAlgorithm(unittest.TestCase):
             msg="Incident scenario: MS-A_Latency and DB_Change should be d-separated given DB_Latency",
         )
 
+
 class WeakPnAndWeakPsInferences(unittest.TestCase):
     def test_weak_pn_and_ps_binary_balke_pearl(self):
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
@@ -215,8 +216,10 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
 
         lower, upper = model.intervention_query()
 
-         #WEAK_PN = P(Y_{X=0} = 0)
-        weak_pn_lower, weak_pn_upper = model.weak_pn_inference(intervention_label='X', target_label='Y')
+        # WEAK_PN = P(Y_{X=0} = 0)
+        weak_pn_lower, weak_pn_upper = model.weak_pn_inference(
+            intervention_label="X", target_label="Y"
+        )
 
         self.assertAlmostEqual(
             float(lower),
@@ -236,8 +239,10 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
 
         lower, upper = model.intervention_query()
 
-         #WEAK_PS = P(Y_{X=1} = 1)
-        weak_ps_lower, weak_ps_upper = model.weak_ps_inference(intervention_label='X', target_label='Y')
+        # WEAK_PS = P(Y_{X=1} = 1)
+        weak_ps_lower, weak_ps_upper = model.weak_ps_inference(
+            intervention_label="X", target_label="Y"
+        )
 
         self.assertAlmostEqual(
             float(lower),
@@ -277,8 +282,12 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
             data=df, edges=edges, custom_cardinalities=card, unobservables_labels=unobs
         )
 
-        lower, upper = model.intervention_query(interventions=[("X", 0)], target=("Y", 0))
-        expected_lower, expected_upper = model.weak_pn_inference(intervention_label="X", target_label="Y")
+        lower, upper = model.intervention_query(
+            interventions=[("X", 0)], target=("Y", 0)
+        )
+        expected_lower, expected_upper = model.weak_pn_inference(
+            intervention_label="X", target_label="Y"
+        )
         self.assertAlmostEqual(
             float(lower),
             float(expected_lower),
@@ -293,8 +302,12 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
             msg=f"Weak PN: Copilot upper bound mismatch: expected {expected_upper}, got {upper}",
         )
 
-        lower, upper = model.intervention_query(interventions=[("X", 1)], target=("Y", 1))
-        expected_lower, expected_upper = model.weak_ps_inference(intervention_label="X", target_label="Y")
+        lower, upper = model.intervention_query(
+            interventions=[("X", 1)], target=("Y", 1)
+        )
+        expected_lower, expected_upper = model.weak_ps_inference(
+            intervention_label="X", target_label="Y"
+        )
         self.assertAlmostEqual(
             float(lower),
             float(expected_lower),
