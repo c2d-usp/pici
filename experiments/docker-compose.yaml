@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  experiment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: column_generation
+    command: python3 experiment.py
+    volumes:
+      - /home/danlawand/.gurobi/gurobi.lic:/opt/gurobi/gurobi.lic:ro
+      - /home/danlawand/causal-reasoning/resultados:/code/outputs
+    # restart: unless-stopped
+    container_name: experiment_container

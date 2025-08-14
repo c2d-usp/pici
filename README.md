@@ -1,149 +1,218 @@
-# Causal Reasoning (WIP)
+PICI -- Partially Identifiable Causal Inference
+=======================
+## Table of Contents
+1. [About](#about)
+2. [Usage](#usage)
+   - [Install and Import](#install-and-import)
+   - [Causal Model Creation](#causal-model-creation)
+   - [Identifiability Checker](#indentifiability-checker)
+   - [Interventional Query](#interventional-query)
+   - [PN & PS Approximations](#pn-and-ps-approximations)
+3. [Theory](#theory-behind)
+4. [Developer Tools](#developer-tools)
+   - [Install](#install)
+   - [Virtual Environment](#virtual-environment)
+   - [Running Examples](#running-examples)
+   - [Linters](#linters)
+     - [Black](#black)
+     - [Ruff](#ruff)
+5. [Acknowledgements](#acknowledgements)
 
-This project was carried out with the support of Itaú Unibanco S.A., through the Itaú Scholarship Program (PBI).
 
-This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries) 
+## About
+
+PICI stands for Partially Identifiable Causal Inference.
+It is a causal inference package that can handle discrete Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
+
+This project was based on the work of João Pedro Arroyo and João Gabriel on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
 
 
-## Install Dependencies
-### Linux
-<a name="poetry"></a>
-#### Poetry
-We're using [poetry](https://python-poetry.org/docs/) as pyhton dependency management.
+## Usage
 
-- Install dependencies
+### Install and import
+- Install the package
+```python
+pip install pici
+```
+
+- Import the package
+```python
+import pici
+```
+
+### Causal model creation
+
+- Create a causal model:
+```python
+df = pd.read_csv(model_csv_path)
+edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+unobservable_variables = ["U1", "U2"]
+custom_cardinalities = {"Z": 5, "X": 2, "Y": 16, "U1": 0, "U2": 0}
+interventions=[('X',0)]
+target=('Y',0)
+
+model = pici.CausalModel(
+  data=df,
+  edges=edges,
+  custom_cardinalities=custom_cardinalities,
+  unobservables_labels=unobservable_variables,
+  interventions=interventions,    # Optional in the model creation
+  target=target,                  # Optional in the model creation
+)
+```
+
+- You can set target and intervetions:
+```python
+model.set_interventions([('X', 1)])
+model.set_target(('Y', 1))
+```
+
+### Indentifiability checker
+
+- You can check if your intervention is identifiable by Backdoor criterion, Frontdoor criterion or [ID algorithm](https://cdn.aaai.org/AAAI/2006/AAAI06-191.pdf):
+
+```python
+edges = "U1 -> X, U1 -> Y, X -> W, W -> Y, U2 -> W"
+unobservables_labels=["U1", "U2"]
+
+model = CausalModel(
+    data=df,
+    edges=edges,
+    unobservables_labels=unobservables_labels
+)
+
+is_identifiable, identifiable_method, additional_detail = model.is_identifiable_intervention(
+    interventions=[("X", 0)], target=("Y", 1)
+)
+```
+
+### Interventional query
+
+- You can make the query.
+```python
+model.intervention_query()
+```
+Or you can pass the target and intervention as arguments: 
+
+```python
+model.intervention_query([('X', 1)], ('Y', 1))
+```
+
+- When `intervention_query` is called, it is automatically checked if your query is identifiable or partially identifiable.
+- If your query is **identifiable**, the return value is a `string`.
+
+```python
+exact_value = model.intervention_query()
+```
+
+- If your query is **partially identifiable**, the return value is a `tuple` of `strings`.
+```python
+lower_bound, upper_bound = model.intervention_query()
+```
+
+### PN and PS approximations
+
+- You can make a PN and a PS approximation, that we called *weak-pn* and *weak-ps*.
+This approximation is based on the paper [Laurentino et. al., 2025](https://jems3.sbc.org.br/submissions/10478) (public link soon).
+
+The same way as the `intervention_query`, if it's identifiable it will return a `string` otherwise a `tuple` of `strings`.
+
+```python
+pn_value = model.weak_pn_inference(intervention_label='X', target_label='Y')
+ps_value = model.weak_ps_inference(intervention_label='X', target_label='Y')
+```
+
+## Theory behind
+
+If you want to understand what is the theory of our approach, you can read the paper [Arroyo et al., 2025](https://openreview.net/forum?id=aUPT1kEiwP).
+
+
+## Developer tools
+
+All development tools are managed with [Poetry](https://python-poetry.org/docs/).  
+To get started, install Poetry by following the [official instructions](https://python-poetry.org/docs/#installation), then activate the virtual environment.
+
+### Install
+
+- Install dependencies. Once you have installed poetry, you can install the required packages:
 ```bash
 poetry install
 ```
 
-## How to run
-### Linux
+
+### Virtual Environment
+
+Activate the virtual environment:
+
 - Activate poetry virtual environment
 ```bash
 eval $(poetry env activate)
 ```
 
-```bash
-python script.py
-```
-
-Example:
-```bash
-python causal_reasoning/example/scipy_example.py
-```
-The output should be:
-```
-Using the complete objective function, the results are:
-Lower bound: -0.23 - Upper bound: -0.15
-
-Using the complete objective function, the result for the positive query is:
-Lower bound: 0.45 - Upper bound: 0.52
-Using the complete objective function, the result for the negative query is:
-Lower bound: 0.67 - Upper bound: 0.68
-
-With the first method, we obtain the interval: [-0.23,-0.15]
-With the second method, we obtain the interval: [-0.23,-0.15]
-```
-
 - To exit the poetry virtual environment run:
-
 ```bash
 deactivate
 ```
-<br>
 
-## Sofwtare Engineering Best Practices
+### Running Examples
 
-There following tools are automatically installed with [poetry](#poetry).
-Therefore, you don't need to install them on your machine. 
-
-<a name="flake8"></a>
-### Flake8 
-**Flake8** is a powerful tool for enforcing style guidelines. It scans your code to identify deviations from PEP 8, such as improper indentation, excessive line lengths, and unused imports. By integrating Flake8 into your development workflow, you can maintain clean and consistent code, making it easier to read and maintain.
-
-Key Features:
-- **Syntax Checking:** Detects syntax errors that could cause your code to fail.
-- **Style Enforcement:** Ensures adherence to PEP 8 guidelines, promoting uniform coding practices.
-- **Plugin Support:** Extensible with plugins to add more checks or customize existing ones.
-
-Usage Example:
-
-```shell
-flake8 your_script.py
+Example:
+```bash
+python3 examples/example.py
 ```
 
-Running this command will output any style violations or errors found in `your_script.py`, allowing you to address them promptly.
+- You also can run unit tests:
+```bash
+python3 tests/run_all_tests.py
+```
 
-<br>
 
-<a name="black"></a>
-### Black 
-This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.  
+### Linters
+
+This project uses some linters to follow a code standardization that improves code consistency and cleanliness.
+
+#### Ruff
+
+This project uses **[Ruff](https://github.com/astral-sh/ruff)** to remove unused imports and sort them.
+
+Usage example for a file:
+
+```bash
+ruff check your_file.py --fix -s
+```
+
+For all files in the current directory and sub-directories:
+
+```bash
+ruff check . --fix -s
+```
+
+Running this command will change automatically.
+We suggest the use of flag `-s` to silence the countless print logs.
+
+
+#### Black
+
+This project uses **[Black](https://black.readthedocs.io/en/stable/)** for automatic Python code formatting.
 Black is an code formatter that ensures consistency by enforcing a uniform style.
 
-Usage Example:
+Usage example for a file:
 
-```shell
-black your_script.py
+```bash
+black your_file.py
+```
+
+For all files in the current directory and sub-directories:
+
+```bash
+black .
 ```
 
 Running this command will change automatically.
 
-<br>
 
-### Imports
+## Acknowledgements
+We thank the ICTi, Instituto de Ciência e Tecnologia Itaú, for providing key funding
+for this work through the C2D - Centro de Ciência de Dados at Universidade de São Paulo.
 
-<a name="isort"></a>
-#### Isort
-**isort** focuses specifically on the organization of import statements. It automatically sorts imports alphabetically and separates them into sections (standard library, third-party, and local imports), ensuring that your import statements are both orderly and compliant with best practices. This not only enhances readability but also helps prevent merge conflicts and import-related errors.
-
-Key Features:
-- **Automatic Sorting:** Organizes imports alphabetically and by category.
-- **Customization:** Allows configuration to match specific project requirements.
-
-Usage Example:
-
-isort is very easy to use. You can sort the imports in a Python file by running the following command in your terminal:
-
-```shell
-isort your_script.py
-```
-
-Or for all files:
-```shell
-isort .
-```
-
-After running the command, save the file to apply the sorted imports.
-
-**Example of isort in Action:**
-
-_Before isort:_
-```python
-import os
-import sys
-import requests
-from mymodule import myfunction
-import numpy as np
-```
-
-_After isort:_
-
-```python
-import os
-import sys
-
-import numpy as np
-import requests
-
-from mymodule import myfunction
-```
-
-In this example, isort has organized the imports into three distinct sections:
-- **Standard Library Imports:** os, sys
-- **Third-Party Imports:** numpy, requests
-- **Local Application Imports:** mymodule
-
-This separation improves readability and maintainability of your code by clearly distinguishing between different types of dependencies.
-
-<br>
+Any opinions, findings, conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of Itaú Unibanco and Instituto de Ciência e Tecnologia Itaú. All data used in this study comply with the Brazilian General Data Protection Law.
