@@ -1,9 +1,12 @@
 [project]
 name = "pici"
-version = "0.0.8"
+version = "0.0.1"
 description = "Package for Partially Identifiable Causal Inference"
 authors = [
     { name="Daniel Lawand", email="daniel.lawand@gmail.com" },
+    { name="Davi Coelho", email="davigc1942@gmail.com" },
+    { name="João Gabriel Rodrigues", email="joaog.br51@gmail.com" },
+    { name="João Pedro Arroyo", email="comp.arroyo@gmail.com" },
 ]
 
 license = "Apache-2.0"
