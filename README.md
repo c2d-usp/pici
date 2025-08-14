@@ -134,8 +134,7 @@ To get started, install Poetry by following the [official instructions](https://
 
 ### Install
 
-- Install dependencies
-Once you have installed poetry, you can install the required packages:
+- Install dependencies. Once you have installed poetry, you can install the required packages:
 ```bash
 poetry install
 ```
@@ -159,12 +158,12 @@ deactivate
 
 Example:
 ```bash
-python main.py
+python3 examples/example.py
 ```
 
-You also can run unit tests:
+- You also can run unit tests:
 ```bash
-python tests/test_causal_model.py
+python3 tests/run_all_tests.py
 ```
 
 
