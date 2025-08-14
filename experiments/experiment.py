@@ -268,7 +268,7 @@ def main():
 
     N_M = [
         (1, 1),
-        """ Commented to avoid running and taking too much time""",
+        # Commented to avoid running and taking too much time
         # (2, 1),
         # (3, 1),
         # (4, 1),
