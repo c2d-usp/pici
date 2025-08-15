@@ -210,7 +210,7 @@ class ObjFunctionGenerator:
                 current_conditionable_ancestors.append(conditionable_ancestors[i])
         return current_conditionable_ancestors
 
-    def generate_symbolic_objective_function(self) -> list[tuple]:
+    def generate_symbolic_objective_function_probabilities(self) -> list[tuple]:
         """
         Constructs a symbolic representation of the objective function for the linear program.
 
@@ -221,12 +221,14 @@ class ObjFunctionGenerator:
                 where conditioned_nodes is a list of nodes the probability is conditioned on.
                 Example: P(A|B)
         """
-        objective_function: list[tuple] = []
+        objective_function_probabilities: list[tuple] = []
         for node in self.empiricalProbabilitiesVariables:
-            objective_function.append((node, None))
+            if node.isLatent:
+                continue
+            objective_function_probabilities.append((node.label, None))
         for node, conditioned_node in self.conditionalProbabilities.items():
-            objective_function.append((node, conditioned_node))
-        return objective_function
+            objective_function_probabilities.append((node.label, conditioned_node))
+        return objective_function_probabilities
 
     def generate_symbolic_decision_function(self) -> dict[tuple, int]:
         """
@@ -245,6 +247,7 @@ class ObjFunctionGenerator:
             parent_labels = [p.label for p in non_latent_parents]
             parent_cardinalities = [p.cardinality for p in non_latent_parents]
             for values in itertools.product(*[range(c) for c in parent_cardinalities]):
+                # Não é melhor string? "A,B=,C=..."
                 key = (node.label,) + tuple(zip(parent_labels, values))
                 decision_function[key] = -1
         return decision_function
