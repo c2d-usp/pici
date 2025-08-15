@@ -32,7 +32,7 @@ def calculate_latent_bit_length(latent: Node) -> int:
     """
     latent_bit_length = 0
     for child in latent.children:
-        child_bit_length = 0
+        child_bit_length = 1
         for parent in child.parents:
             if parent.isLatent:
                 continue
