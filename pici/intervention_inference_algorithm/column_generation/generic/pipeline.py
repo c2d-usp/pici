@@ -24,7 +24,3 @@ def calculate_optimization_problem(
     # step 2: initialization()
     # step 3: lower, upper = solve()
     pass
-
-
-def generate_symbolic_objective_function():
-    pass
