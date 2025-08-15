@@ -33,7 +33,6 @@ def build_linear_problem(
         intervention=intervention,
         target=target,
     )
-    objFG.find_linear_good_set()
     mechanisms = objFG.get_mechanisms_pruned()
 
     interventionLatentParent = objFG.intervention.latentParent
