@@ -201,7 +201,8 @@ class TestBitsCalculation(unittest.TestCase):
         Y.latentParent = U1
         Y.parents = [X]
         U1.children = [X, Y]
+        with self.assertRaisesRegex(AttributeError, "'NoneType' object has no attribute 'children'",msg=f"Expects Exception raised."):
+            generate_optimization_problem_bit_list(X)
 
-        self.assertRaises(AttributeError, generate_optimization_problem_bit_list(X), msg=f"Expects Exception raised.")
 if __name__ == "__main__":
     unittest.main()
