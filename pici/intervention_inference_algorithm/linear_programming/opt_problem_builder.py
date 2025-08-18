@@ -38,7 +38,7 @@ def build_linear_problem(
     interventionLatentParent = objFG.intervention.latentParent
     cComponentEndogenous = interventionLatentParent.children
     consideredEndogenousNodes = list(
-        (set(cComponentEndogenous) & set(objFG.debugOrder)) | {objFG.intervention}
+        (set(cComponentEndogenous) & set(objFG.consideredGraphNodes)) | {objFG.intervention}
     )
 
     probs, decision_matrix = generate_constraints(

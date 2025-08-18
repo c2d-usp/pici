@@ -46,7 +46,7 @@ class ObjFunctionGenerator:
         self.empiricalProbabilitiesVariables: list[Node] = []
         self.mechanismVariables: list[Node] = []
         self.conditionalProbabilities: dict[Node, list[Node]] = {}
-        self.debugOrder = []
+        self.consideredGraphNodes: list[Node] = []
 
         self.setup()
 
@@ -70,7 +70,7 @@ class ObjFunctionGenerator:
         # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
         # function
         conditionalProbabilities: dict[Node, list[Node]] = {}
-        debugOrder: list[Node] = []
+        consideredGraphNodes: list[Node] = []
         while len(current_targets) > 0:
             logger.debug("---- Current targets array:")
             for tg in current_targets:
@@ -83,7 +83,7 @@ class ObjFunctionGenerator:
             )
             logger.debug(f"__>>{current_target.label}<<__")
             current_targets.remove(current_target)
-            debugOrder.append(current_target)
+            consideredGraphNodes.append(current_target)
             logger.debug(f"Current target: {current_target.label}")
 
             if not self.graph.is_descendant(
@@ -113,7 +113,7 @@ class ObjFunctionGenerator:
         self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
         self.mechanismVariables = mechanismVariables
         self.conditionalProbabilities = conditionalProbabilities
-        self.debugOrder = debugOrder
+        self.consideredGraphNodes = consideredGraphNodes
         logger.debug("Test completed")
 
     def _find_d_separator_set(
@@ -259,7 +259,7 @@ class ObjFunctionGenerator:
         interventionLatentParent = self.intervention.latentParent
         cComponentEndogenous = interventionLatentParent.children
 
-        endogenousNodes = (set(cComponentEndogenous) & set(self.debugOrder)) | {
+        endogenousNodes = (set(cComponentEndogenous) & set(self.consideredGraphNodes)) | {
             self.intervention
         }
 
@@ -275,18 +275,18 @@ class ObjFunctionGenerator:
         Must be called after generate restrictions. Returns the objective function with the following encoding
 
         For each mechanism, find the coefficient in the objective function.
-            Open a sum on this.debugOrder variables <=> consider all cases (cartesian product).
+            Open a sum on this.consideredGraphNodes variables <=> consider all cases (cartesian product).
             Only the intervention has a fixed value.
         """
 
         # (3) Generate all the cases: cartesian product!
-        debug_variables_label = [node.label for node in self.debugOrder]
+        debug_variables_label = [node.label for node in self.consideredGraphNodes]
         logger.debug(f"Debug variables: {debug_variables_label}")
-        if self.intervention in self.debugOrder:
-            self.debugOrder.remove(self.intervention)
+        if self.intervention in self.consideredGraphNodes:
+            self.consideredGraphNodes.remove(self.intervention)
 
         summandNodes = list(
-            set(self.debugOrder)
+            set(self.consideredGraphNodes)
             - {
                 self.intervention,
                 self.intervention.latentParent,
