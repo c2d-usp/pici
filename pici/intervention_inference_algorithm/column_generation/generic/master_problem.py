@@ -21,7 +21,8 @@ class MasterProblem:
         self.model = gp.Model("master")
         self.vars = None
         self.constrs = None
-
+    # TODO: Falar com João Gabriel sobre como ele fez o calculateEmpiricals.
+    # Basicamente, essa lista indica o valor da prob pra cada realização
     def setup(self, columns_base: list[list[int]], empiricalProbabilities: list[float]):
         num_columns_base = len(columns_base)
         self.vars = self.model.addVars(num_columns_base, obj=BIG_M, name="BaseColumns")
