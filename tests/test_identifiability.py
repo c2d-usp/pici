@@ -82,7 +82,7 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
 class TestIdentifiableInterventionQueries(unittest.TestCase):
     def test_identifiable_queries_via_subtests(self):
         """
-        Test identifiable intervention queries via subtests, using the scalable graph 
+        Test identifiable intervention queries via subtests, using the scalable graph
         """
         cases = [
             (1, 1, DataExamplesPaths.CSV_N1M1),
