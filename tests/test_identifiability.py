@@ -32,7 +32,9 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
         )
 
     def test_backdoor_non_identifiable(self):
-        # Pure confounder U -> X, U -> Y
+        """
+        Test the pure unobservable confounder partial identifiability case.
+        """
         graph = "U -> X, U -> Y, X -> Y"
         model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         identifiable, method, detail = model.is_identifiable_intervention(
@@ -43,7 +45,9 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
         self.assertIsNone(detail)
 
     def test_frontdoor_identifiable(self):
-        # Front-door: U1 -> X,Y; X -> W -> Y; U2 -> W (harmless latent on W)
+        """
+        Test the front-door identifiability case, with W as a mediator.
+        """
         graph = "U1 -> X, U1 -> Y, X -> W, W -> Y, U2 -> W"
         model = CausalModel(
             data=self.df_xwy, edges=graph, unobservables_labels=["U1", "U2"]
@@ -57,12 +61,18 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
         self.assertEqual(detail, frozenset({"W"}))
 
     def test_missing_intervention_raises(self):
+        """
+        Test the missing intervention error case.
+        """
         graph = "U -> X, U -> Y, X -> Y"
         model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         with self.assertRaises(Exception):
             model.is_identifiable_intervention(interventions=[], target=("Y", 1))
 
     def test_missing_target_raises(self):
+        """
+        Test the missing target error case.
+        """
         graph = "U -> X, U -> Y, X -> Y"
         model = CausalModel(data=self.df_xy, edges=graph, unobservables_labels=["U"])
         with self.assertRaises(Exception):
@@ -71,6 +81,9 @@ class TestIsIdentifiableIntervention(unittest.TestCase):
 
 class TestIdentifiableInterventionQueries(unittest.TestCase):
     def test_identifiable_queries_via_subtests(self):
+        """
+        Test identifiable intervention queries via subtests, using the scalable graph 
+        """
         cases = [
             (1, 1, DataExamplesPaths.CSV_N1M1),
             (2, 1, DataExamplesPaths.CSV_N2M1),

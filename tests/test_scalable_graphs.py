@@ -20,6 +20,9 @@ from pici.utils.scalable_graphs_helper import generate_scalable_string_edges
 
 class TestMNCases(unittest.TestCase):
     def test_intervention_queries_via_subtests(self):
+        """
+        Test partially identifiable intervention queries via subtests, using the scalable graph
+        """
         cases = [
             (1, 1, DataExamplesPaths.CSV_N1M1),
             (2, 1, DataExamplesPaths.CSV_N2M1),

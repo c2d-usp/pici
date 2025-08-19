@@ -24,6 +24,9 @@ from pici.utils._enum import DataExamplesPaths
 
 class TestBenchmarkBcauseInference(unittest.TestCase):
     def test_bcause_1(self):
+        """
+        Test the intervention query with a simple graph, using the bcause library as a benchmark
+        """
         edges = "X -> Y, U -> X, U -> Y"
         unobs = ["U"]
         df = pd.read_csv(
@@ -69,7 +72,9 @@ class TestBenchmarkBcauseInference(unittest.TestCase):
                 )
 
     def test_bcause_2(self):
-
+        """
+        Test the intervention query with a moderately complex graph, using the bcause library as a benchmark
+        """
         edges = "X -> Y, U -> X, U -> Y, X -> W, W -> Y, U2 -> W"
         unobs = ["U", "U2"]
         df = pd.read_csv(
