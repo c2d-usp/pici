@@ -7,10 +7,21 @@ from gurobipy import GRB
 from pici.graph.graph import Graph
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic import bits
-from pici.intervention_inference_algorithm.column_generation.generic.master_problem import MasterProblem
-from pici.intervention_inference_algorithm.column_generation.generic.subproblem import SubProblem
-from pici.intervention_inference_algorithm.linear_programming.linear_constraints import find_c_component_and_tail_set, get_c_component_in_reverse_topological_order, get_symbolical_constraints_probabilities_and_wc
-from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import ObjFunctionGenerator
+from pici.intervention_inference_algorithm.column_generation.generic.master_problem import (
+    MasterProblem,
+)
+from pici.intervention_inference_algorithm.column_generation.generic.subproblem import (
+    SubProblem,
+)
+from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
+    calculate_constraints_empirical_probabilities,
+    find_c_component_and_tail_set,
+    get_c_component_in_reverse_topological_order,
+    get_symbolical_constraints_probabilities_and_wc,
+)
+from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
+    ObjFunctionGenerator,
+)
 from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 
 logger = logging.getLogger(__name__)
@@ -39,14 +50,12 @@ class ColumnGenerationProblemBuilder:
         betaVarsCost: list[float],
         betaVarsBitsX0: list[tuple[str]],
         betaVarsBitsX1: list[tuple[str]],
-
         dag: Graph,
         intervention: Node,
         target: Node,
-
         minimum: bool,
     ):
-        
+
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
@@ -61,16 +70,27 @@ class ColumnGenerationProblemBuilder:
         interventionLatentParent = objective_function.intervention.latentParent
         cComponentEndogenous = interventionLatentParent.children
         consideredCcomp = list(
-            (set(cComponentEndogenous) & set(objective_function.consideredGraphNodes)) | {objective_function.intervention}
+            (set(cComponentEndogenous) & set(objective_function.consideredGraphNodes))
+            | {objective_function.intervention}
         )
 
         topoOrder: list[Node] = dag.topologicalOrder
 
         cCompOrder = get_c_component_in_reverse_topological_order(
-            topoOrder=topoOrder, unob=intervention.latentParent, consideredCcomp=consideredCcomp
+            topoOrder=topoOrder,
+            unob=intervention.latentParent,
+            consideredCcomp=consideredCcomp,
         )
-        c_component_and_tail: list[Node] = find_c_component_and_tail_set(intervention.latentParent, cCompOrder)
-        symbolical_constraints_probabilities, W = get_symbolical_constraints_probabilities_and_wc(cCompOrder=cCompOrder, c_component_and_tail=c_component_and_tail, topoOrder=topoOrder)
+        c_component_and_tail: list[Node] = find_c_component_and_tail_set(
+            intervention.latentParent, cCompOrder
+        )
+        symbolical_constraints_probabilities, W = (
+            get_symbolical_constraints_probabilities_and_wc(
+                cCompOrder=cCompOrder,
+                c_component_and_tail=c_component_and_tail,
+                topoOrder=topoOrder,
+            )
+        )
 
         self.amountNonTrivialRestrictions = len(W)
 
@@ -79,14 +99,25 @@ class ColumnGenerationProblemBuilder:
             auxDict[i] = BIG_M
         self.duals = auxDict.copy()
 
-        self.symbolic_objective_function_probabilites: list[tuple] = objective_function.generate_symbolic_objective_function_probabilities()
+        self.symbolic_objective_function_probabilites: list[tuple] = (
+            objective_function.generate_symbolic_objective_function_probabilities()
+        )
 
-        self.symbolic_decision_function: dict[tuple, int] = objective_function.generate_symbolic_decision_function()
+        self.symbolic_decision_function: dict[tuple, int] = (
+            objective_function.generate_symbolic_decision_function()
+        )
 
-        self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(intervention)
+        self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(
+            intervention
+        )
 
-        # TODO: Empirical não é symbolical_objective_function_probabilities 
-        self.empiricalProbabilities: list[float] = empiricalProbabilities
+        self.constraints_empirical_probabilities: list[float] = (
+            calculate_constraints_empirical_probabilities(
+                data=dataFrame,
+                Wc=W,
+                symbolical_constraints_probabilities=symbolical_constraints_probabilities,
+            )
+        )
 
         self.columns_base = None
 
@@ -119,8 +150,8 @@ class ColumnGenerationProblemBuilder:
 
     def _generate_patterns(self):
         self._initialize_column_base()
-        ####
-        self.master.setup(self.columns_base, self.empiricalProbabilities)
+        self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
+        #### We're here
         self.subproblem.setup(
             amountBitsPerCluster=self.amountBitsPerCluster,
             amountBetaVarsPerX=self.amountBetaVarsPerX,
@@ -198,9 +229,9 @@ class ColumnGenerationProblemBuilder:
                     )
 
             self.master.update(
-                newColumn=newColumn,
+                new_column=newColumn,
                 index=len(self.columns_base),
-                objCoeff=objCoeff,
+                obj_coeff=objCoeff,
                 minimun=self.minimum,
             )
             self.columns_base.append(newColumn)
@@ -275,8 +306,8 @@ def buildScalarProblem(
         betaVarsCoeffObjSubproblem = copy.deepcopy(betaVarsCoeffObjSubproblemX0)
 
     # Parametric_columns:
-    parametric_columns: list[tuple[list[str]]] = (
-        InitScalable.defineParametricColumn(M=M, N=N)
+    parametric_columns: list[tuple[list[str]]] = InitScalable.defineParametricColumn(
+        M=M, N=N
     )
     return ColumnGenerationProblemBuilder(
         dataFrame=df,
