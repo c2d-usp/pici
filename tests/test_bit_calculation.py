@@ -27,8 +27,8 @@ class TestBitsCalculation(unittest.TestCase):
         Z = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -37,8 +37,8 @@ class TestBitsCalculation(unittest.TestCase):
         X = Node(
             children=[],
             parents=[Z],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -47,8 +47,8 @@ class TestBitsCalculation(unittest.TestCase):
         Y = Node(
             children=[],
             parents=[X],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -57,8 +57,8 @@ class TestBitsCalculation(unittest.TestCase):
         U1 = Node(
             children=[Y, X],
             parents=[],
-            latentParent=None,
-            isLatent=True,
+            latent_parent=None,
+            is_latent=True,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -66,8 +66,8 @@ class TestBitsCalculation(unittest.TestCase):
         Z.children = [X]
         X.parents = [U1, Z]
         X.children = [Y]
-        X.latentParent = U1
-        Y.latentParent = U1
+        X.latent_parent = U1
+        Y.latent_parent = U1
         Y.parents = [X]
 
         bits_list = generate_optimization_problem_bit_list(X)
@@ -87,8 +87,8 @@ class TestBitsCalculation(unittest.TestCase):
         Z = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -97,8 +97,8 @@ class TestBitsCalculation(unittest.TestCase):
         W = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -107,8 +107,8 @@ class TestBitsCalculation(unittest.TestCase):
         K = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -118,8 +118,8 @@ class TestBitsCalculation(unittest.TestCase):
         X = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -128,8 +128,8 @@ class TestBitsCalculation(unittest.TestCase):
         Y = Node(
             children=[],
             parents=[X],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -138,8 +138,8 @@ class TestBitsCalculation(unittest.TestCase):
         U1 = Node(
             children=[K, X],
             parents=[],
-            latentParent=None,
-            isLatent=True,
+            latent_parent=None,
+            is_latent=True,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -149,7 +149,7 @@ class TestBitsCalculation(unittest.TestCase):
         W.children = [K]
         X.parents = [U1]
         X.children = [Y]
-        X.latentParent = U1
+        X.latent_parent = U1
         Y.parents = [X]
 
         bits_list = generate_optimization_problem_bit_list(X)
@@ -169,8 +169,8 @@ class TestBitsCalculation(unittest.TestCase):
         Z = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -179,8 +179,8 @@ class TestBitsCalculation(unittest.TestCase):
         X = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -189,8 +189,8 @@ class TestBitsCalculation(unittest.TestCase):
         Y = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -199,8 +199,8 @@ class TestBitsCalculation(unittest.TestCase):
         U1 = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=True,
+            latent_parent=None,
+            is_latent=True,
             label=node_label,
             cardinality=node_cardinality,
         )
@@ -209,7 +209,7 @@ class TestBitsCalculation(unittest.TestCase):
         X.parents = [U1, Z]
         X.children = [Y]
         # Error cause: # X.latentParent = U1
-        Y.latentParent = U1
+        Y.latent_parent = U1
         Y.parents = [X]
         U1.children = [X, Y]
         with self.assertRaisesRegex(

@@ -60,7 +60,7 @@ class ObjFunctionGenerator:
         """
         intervention: Node = self.intervention
         current_targets: list[Node] = [self.target]
-        interventionLatent: Node = intervention.latentParent
+        interventionLatent: Node = intervention.latent_parent
 
         empiricalProbabilitiesVariables: list[Node] = []
         # If V in this array then it implies P(v) in the objective function
@@ -91,7 +91,7 @@ class ObjFunctionGenerator:
             ):
                 logger.debug("------- Case 1: Not a descendant")
                 empiricalProbabilitiesVariables.append(current_target)
-            elif current_target.latentParent == interventionLatent:
+            elif current_target.latent_parent == interventionLatent:
                 logger.debug("------- Case 2: Mechanisms")
                 mechanismVariables.append(current_target)
                 for parent in current_target.parents:
@@ -223,7 +223,7 @@ class ObjFunctionGenerator:
         """
         objective_function_probabilities: list[tuple] = []
         for node in self.empiricalProbabilitiesVariables:
-            if node.isLatent:
+            if node.is_latent:
                 continue
             objective_function_probabilities.append((node.label, None))
         for node, conditioned_node in self.conditionalProbabilities.items():
@@ -243,7 +243,7 @@ class ObjFunctionGenerator:
         """
         decision_function = {}
         for node in self.mechanismVariables:
-            non_latent_parents = [p for p in node.parents if not p.isLatent]
+            non_latent_parents = [p for p in node.parents if not p.is_latent]
             parent_labels = [p.label for p in non_latent_parents]
             parent_cardinalities = [p.cardinality for p in non_latent_parents]
             for values in itertools.product(*[range(c) for c in parent_cardinalities]):
@@ -256,7 +256,7 @@ class ObjFunctionGenerator:
         """
         Remove c-component variables that do not appear in the objective function
         """
-        interventionLatentParent = self.intervention.latentParent
+        interventionLatentParent = self.intervention.latent_parent
         cComponentEndogenous = interventionLatentParent.children
 
         endogenousNodes = (
@@ -289,7 +289,7 @@ class ObjFunctionGenerator:
             set(self.consideredGraphNodes)
             - {
                 self.intervention,
-                self.intervention.latentParent,
+                self.intervention.latent_parent,
                 self.target,
             }
         )
@@ -344,7 +344,7 @@ class ObjFunctionGenerator:
                         current_mechanism_key = []
                         mechanismKey: str = ""
                         for _key, node_item in self.graph.graph_nodes.items():
-                            if not node_item.isLatent and (
+                            if not node_item.is_latent and (
                                 variable in node_item.children
                             ):
                                 current_mechanism_key.append(

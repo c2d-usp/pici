@@ -66,7 +66,7 @@ class ColumnGenerationProblemBuilder:
             target=target,
         )
 
-        intervention_latent_parent = objective_function.intervention.latentParent
+        intervention_latent_parent = objective_function.intervention.latent_parent
         c_component_endogenous_nodes = intervention_latent_parent.children
         considered_c_comp = list(
             (set(c_component_endogenous_nodes) & set(objective_function.consideredGraphNodes))
@@ -77,11 +77,11 @@ class ColumnGenerationProblemBuilder:
 
         c_comp_order = get_c_component_in_reverse_topological_order(
             topo_order=topological_order,
-            unob=intervention.latentParent,
+            unob=intervention.latent_parent,
             considered_c_comp=considered_c_comp,
         )
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
-            intervention.latentParent, c_comp_order
+            intervention.latent_parent, c_comp_order
         )
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(

@@ -35,7 +35,7 @@ def build_linear_problem(
     )
     mechanisms = objFG.get_mechanisms_pruned()
 
-    interventionLatentParent = objFG.intervention.latentParent
+    interventionLatentParent = objFG.intervention.latent_parent
     cComponentEndogenous = interventionLatentParent.children
     consideredEndogenousNodes = list(
         (set(cComponentEndogenous) & set(objFG.consideredGraphNodes))

@@ -11,7 +11,7 @@ def generate_optimization_problem_bit_list(intervention: Node) -> list[int]:
     Returns:
         list[int]: A list of the bit indices for the problem optimization variable's configuration.
     """
-    n = calculate_latent_bit_length(latent=intervention.latentParent)
+    n = calculate_latent_bit_length(latent=intervention.latent_parent)
     bits = [i for i in range(n)]
     return bits
 
@@ -34,7 +34,7 @@ def calculate_latent_bit_length(latent: Node) -> int:
     for child in latent.children:
         child_bit_length = 1
         for parent in child.parents:
-            if parent.isLatent:
+            if parent.is_latent:
                 continue
             child_bit_length *= parent.cardinality
         latent_bit_length += child_bit_length

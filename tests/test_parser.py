@@ -283,16 +283,16 @@ class TestTupleIntoNode(unittest.TestCase):
         self.nodeA = Node(
             children=[],  # no children yet
             parents=[],  # no parents yet
-            latentParent=None,  # no latent parent
-            isLatent=False,  # not a latent node
+            latent_parent=None,  # no latent parent
+            is_latent=False,  # not a latent node
             label="A",  # string label "A"
             cardinality=2,  # arbitrary cardinality
         )
         self.nodeB = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="B",
             cardinality=2,
         )
@@ -389,24 +389,24 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         self.nodeA = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="A",
             cardinality=2,
         )
         self.nodeB = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="B",
             cardinality=2,
         )
         self.nodeC = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="C",
             cardinality=2,
         )

@@ -201,8 +201,8 @@ def _define_graph(
             new_node = Node(
                 children=[],
                 parents=[],
-                latentParent=None,
-                isLatent=True,
+                latent_parent=None,
+                is_latent=True,
                 label=node_label,
                 cardinality=node_cardinalities[node_label],
             )
@@ -219,8 +219,8 @@ def _define_graph(
             new_node = Node(
                 children=[],
                 parents=[],
-                latentParent=None,
-                isLatent=False,
+                latent_parent=None,
+                is_latent=False,
                 label=node_label,
                 cardinality=node_cardinalities[node_label],
             )
@@ -235,11 +235,11 @@ def _define_graph(
 
     for i, node_label in enumerate(node_labels_set):
         node = graphNodes[node_label]
-        if node.isLatent:
+        if node.is_latent:
             exogenous.append(node)
             node.children = _get_node_list(graphNodes, children_labels[node.label])
         else:
-            node.latentParent = graphNodes[parent_latent_labels[node_label]]
+            node.latent_parent = graphNodes[parent_latent_labels[node_label]]
             endogenous.append(node)
             node.children = _get_node_list(graphNodes, children_labels[node.label])
             node.parents = _get_node_list(graphNodes, parents_labels[node.label])
