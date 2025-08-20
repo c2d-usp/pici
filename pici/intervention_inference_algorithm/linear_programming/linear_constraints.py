@@ -40,14 +40,19 @@ def generate_constraints(
         )
     )
 
-    probs, decision_matrix = calculate_numerical_constraints(
+    probs = calculate_constraints_empirical_probabilities(
         data=data,
-        mechanisms=mechanisms,
         Wc=Wc,
         symbolical_constraints_probabilities=symbolical_constraints_probabilities,
+    )
+
+    decision_matrix = calculate_decision_matrix(
+        mechanisms=mechanisms,
+        Wc=Wc,
         consideredCcomp=consideredCcomp,
         unob=unob,
     )
+
     return probs, decision_matrix
 
 
@@ -97,16 +102,45 @@ def get_symbolical_constraints_probabilities_and_wc(
     return symbolical_constraints_probabilities, Wc
 
 
-def calculate_numerical_constraints(
-    data: pd.DataFrame,
+def calculate_decision_matrix(
     mechanisms: MechanismType,
     Wc: list[Node],
-    symbolical_constraints_probabilities: list[dict[Node, list[Node]]],
     consideredCcomp: list[Node],
     unob: Node,
-) -> tuple[list[float], list[list[int]]]:
-    probs: list[float] = [1.0]
+) -> list[list[int]]:
     decision_matrix: list[list[int]] = [[1 for _ in range(len(mechanisms))]]
+    spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
+    cartesianProduct: list[list[int]] = MechanismGenerator.generate_cross_products(
+        listSpaces=spaces
+    )
+    for rlt in cartesianProduct:
+        aux: list[int] = []
+        for u in range(len(mechanisms)):
+            coef: bool = True
+            for var in Wc:
+                if var in consideredCcomp:
+                    endoParents: list[Node] = var.parents.copy()
+                    endoParents.remove(unob)
+                    key = create_dict_index(
+                        parents=endoParents, rlt=rlt, indexerList=Wc
+                    )
+                    endoParents.clear()
+                    if mechanisms[u][key] == rlt[Wc.index(var)]:
+                        coef *= 1
+                    else:
+                        coef *= 0
+                        break
+            aux.append(float(coef))
+        decision_matrix.append(aux)
+    return decision_matrix
+
+
+def calculate_constraints_empirical_probabilities(
+    data: pd.DataFrame,
+    Wc: list[Node],
+    symbolical_constraints_probabilities: list[dict[Node, list[Node]]],
+) -> list[float]:
+    probs: list[float] = [1.0]
     spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
     cartesianProduct: list[list[int]] = MechanismGenerator.generate_cross_products(
         listSpaces=spaces
@@ -129,24 +163,5 @@ def calculate_numerical_constraints(
             )
             targetRealizationNodes.clear()
             conditionRealizationNodes.clear()
-
         probs.append(prob)
-        aux: list[int] = []
-        for u in range(len(mechanisms)):
-            coef: bool = True
-            for var in Wc:
-                if var in consideredCcomp:
-                    endoParents: list[Node] = var.parents.copy()
-                    endoParents.remove(unob)
-                    key = create_dict_index(
-                        parents=endoParents, rlt=rlt, indexerList=Wc
-                    )
-                    endoParents.clear()
-                    if mechanisms[u][key] == rlt[Wc.index(var)]:
-                        coef *= 1
-                    else:
-                        coef *= 0
-                        break
-            aux.append(float(coef))
-        decision_matrix.append(aux)
-    return probs, decision_matrix
+    return probs
