@@ -132,6 +132,15 @@ class ColumnGenerationProblemBuilder:
         self.subproblem = SubProblem(N=N, M=M)
 
     def setup(self, method=1):
+        """
+        Sets up the master and subproblem models for column generation.
+
+        Configures the Gurobi solving method, initializes the base columns, sets up the master problem with
+        empirical probability constraints, and initializes the subproblem with all required parameters.
+
+        Args:
+            method (int, optional): The Gurobi solving method to use. Defaults to 1.
+        """
         # Define gurobi running method
         self.master.model.params.Method = method
         self.subproblem.model.params.Method = method
@@ -156,8 +165,13 @@ class ColumnGenerationProblemBuilder:
         )
 
     def _initialize_column_base(self):
-        # Initialize big-M problem with the identity block of size
-        # equal to the amount of restrictions.
+        """
+        Initializes the base columns for the master problem as an identity matrix.
+
+        This method creates an identity matrix of size (number_of_restrictions + 1) x (number_of_restrictions + 1),
+        where each column corresponds to a basic feasible solution for the initial master problem.
+        The resulting matrix is stored in self.columns_base.
+        """
         columns_base: list[list[int]] = []
         for index in range(self.number_of_restrictions + 1):
             new_column = [0] * (self.number_of_restrictions + 1)
@@ -165,8 +179,19 @@ class ColumnGenerationProblemBuilder:
             columns_base.append(new_column)
         self.columns_base = columns_base
 
-    def exec(self):
-        counter = 0
+    def exec(self) -> int:
+        """
+        Executes the column generation algorithm.
+
+        Alternates between solving the master problem and the subproblem, adding new columns to the master problem
+        until no columns with negative reduced cost are found or the maximum number of iterations is reached.
+
+        Returns:
+            int: The number of iterations performed.
+        Raises:
+            TimeoutError: If the maximum number of allowed iterations is exceeded.
+        """
+        iterations_counter = 0
         while True:
             self.master.model.optimize()
             if self.master.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -234,16 +259,27 @@ class ColumnGenerationProblemBuilder:
                 minimizes_objective_function=self.minimizes_objective_function,
             )
             self.columns_base.append(newColumn)
-            counter += 1
-            if counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
+            iterations_counter += 1
+            if iterations_counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
                     f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
-            logger.info(f"Iteration Number = {counter}")
+            logger.info(f"Iteration Number = {iterations_counter}")
 
-        return counter
+        return iterations_counter
     
-    def optimize_master(self):
+    def optimize_master(self) -> float:
+        """
+        Optimizes the master problem with continuous variables and writes the model to disk.
+
+        Probelm master handles continuous probabilities in the interval [0,1].
+
+        Sets all master problem variables to continuous type, solves the master problem using Gurobi,
+        and writes the model to both LP and MPS file formats for inspection or debugging.
+
+        Returns:
+            float: The objective value of the optimized master problem.
+        """
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
         self.master.model.write("model.lp")
@@ -252,17 +288,19 @@ class ColumnGenerationProblemBuilder:
 
 def solve(problem: ColumnGenerationProblemBuilder, method=1) -> tuple[int, float]:
     """
-    Gurobi does not support branch-and-price, as this requires to add columns
-    at local nodes of the search tree. A heuristic is used instead, where the
-    integrality constraints for the variables of the final root LP relaxation
-    are installed and the resulting MIP is solved. Note that the optimal
-    solution could be overlooked, as additional columns are not generated at
-    the local nodes of the search tree.
+    Solves the column generation problem using the BIG_M approach.
+
+    Args:
+        problem (ColumnGenerationProblemBuilder): The column generation problem instance.
+        method (int, optional): The Gurobi solving method to use. Defaults to 1.
+
+    Returns:
+        tuple[int, float]: A tuple containing the final objective bound and the number of iterations performed.
     """
     problem.setup(method)
-    numberIterations = problem.exec()
+    number_of_iterations = problem.exec()
     bound = problem.optimize_master()
-    return bound, numberIterations
+    return bound, number_of_iterations
 
 
 def buildScalarProblem(
