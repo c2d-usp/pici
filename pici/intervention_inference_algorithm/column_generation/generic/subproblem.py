@@ -345,4 +345,3 @@ class SubProblem:
             "obj", self.bitsParametric, [-duals[dualKey] for dualKey in duals]
         )
         self.model.update()
-

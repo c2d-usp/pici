@@ -241,7 +241,7 @@ class ObjFunctionGenerator:
         Returns:
             dict[tuple, int]: A dictionary mapping each mechanism variable realization to -1.
         """
-        decision_function = {}  
+        decision_function = {}
         for node in self.mechanismVariables:
             non_latent_parents = [p for p in node.parents if not p.isLatent]
             parent_labels = [p.label for p in non_latent_parents]
@@ -259,9 +259,9 @@ class ObjFunctionGenerator:
         interventionLatentParent = self.intervention.latentParent
         cComponentEndogenous = interventionLatentParent.children
 
-        endogenousNodes = (set(cComponentEndogenous) & set(self.consideredGraphNodes)) | {
-            self.intervention
-        }
+        endogenousNodes = (
+            set(cComponentEndogenous) & set(self.consideredGraphNodes)
+        ) | {self.intervention}
 
         _, _, mechanisms = MechanismGenerator.mechanisms_generator(
             latentNode=interventionLatentParent,

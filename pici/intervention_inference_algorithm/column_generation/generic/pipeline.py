@@ -17,7 +17,9 @@ logging.basicConfig(level=logging.INFO)
 from pici.graph.graph import Graph
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic import bits
-from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import ObjFunctionGenerator
+from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
+    ObjFunctionGenerator,
+)
 
 
 def calculate_optimization_problem(
@@ -33,16 +35,23 @@ def calculate_optimization_problem(
         target=target,
     )
 
-    symbolic_objective_function_probabilites: list[tuple] = objective_function.generate_symbolic_objective_function_probabilities()
-    print(f"symbolic_objective_function_probabilites: {symbolic_objective_function_probabilites}")
+    symbolic_objective_function_probabilites: list[tuple] = (
+        objective_function.generate_symbolic_objective_function_probabilities()
+    )
+    print(
+        f"symbolic_objective_function_probabilites: {symbolic_objective_function_probabilites}"
+    )
 
-    symbolic_decision_function: dict[tuple, int] = objective_function.generate_symbolic_decision_function()
+    symbolic_decision_function: dict[tuple, int] = (
+        objective_function.generate_symbolic_decision_function()
+    )
     print(f"symbolic_decision_function: {symbolic_decision_function}")
 
     bits_list = bits.generate_optimization_problem_bit_list(intervention)
     print(f"bits_list: {bits_list}")
     # step 2: initialization()
     # step 3: lower, upper = solve()
+
 
 def main():
     edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
@@ -57,7 +66,13 @@ def main():
     )
     model.set_interventions([("X", 1)])
     model.set_target(("Y", 1))
-    calculate_optimization_problem(graph=model.graph, df=df, intervention=model.interventions[0], target=model.target)
+    calculate_optimization_problem(
+        graph=model.graph,
+        df=df,
+        intervention=model.interventions[0],
+        target=model.target,
+    )
+
 
 if __name__ == "__main__":
     main()
