@@ -33,10 +33,7 @@ from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
-
-BIG_M = 1e4
-DBG = False
-MAX_ITERACTIONS_ALLOWED = 2000
+from pici.utils._enum import ColumnGenerationParameters
 
 
 class ColumnGenerationProblemBuilder:
@@ -94,7 +91,7 @@ class ColumnGenerationProblemBuilder:
 
         self.duals = {}
         for i in range(self.number_of_restrictions):
-            self.duals[i] = BIG_M
+            self.duals[i] = ColumnGenerationParameters.BIG_M.value
 
         self.symbolic_objective_function_probabilites: list[tuple] = (
             objective_function.generate_symbolic_objective_function_probabilities()
@@ -178,7 +175,7 @@ class ColumnGenerationProblemBuilder:
             elif self.master.model.Status == gp.GRB.USER_OBJ_LIMIT:
                 b = self.master.model.objVal
                 logger.info(
-                    f"--------->> BIG_M Limit reached! Master solution found: {b}"
+                    f"--------->> ColumnGenerationParameters.BIG_M.value Limit reached! Master solution found: {b}"
                 )
             else:
                 logger.error(
@@ -195,7 +192,7 @@ class ColumnGenerationProblemBuilder:
             elif self.subproblem.model.Status == gp.GRB.USER_OBJ_LIMIT:
                 b = self.subproblem.model.objVal
                 logger.info(
-                    f"--------->> BIG_M Limit reached! Subproblem solution found: {b}"
+                    f"--------->> ColumnGenerationParameters.BIG_M.value Limit reached! Subproblem solution found: {b}"
                 )
             else:
                 logger.error(
@@ -238,9 +235,9 @@ class ColumnGenerationProblemBuilder:
             )
             self.columns_base.append(newColumn)
             counter += 1
-            if counter >= MAX_ITERACTIONS_ALLOWED:
+            if counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
-                    f"Too many iterations (MAX:{MAX_ITERACTIONS_ALLOWED})"
+                    f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {counter}")
 
@@ -273,18 +270,18 @@ def buildScalarProblem(
 ):
     # Calculate the empirical probs (RHS of the restrictions, so b in Ax=b)
     empiricalProbabilities: list[float] = InitScalable.calculateEmpiricals(
-        N=N, M=M, df=df, DBG=DBG
+        N=N, M=M, df=df
     )
     # Auxiliary Gamma U variables (beta): calculate the obj coeff in the subproblem and the relation to the bit variables that compose them
     betaVarsCoeffObjSubproblem: list[float] = []
     betaVarsBitsX0, betaVarsCoeffObjSubproblemX0 = (
         InitScalable.defineGammaUAuxiliaryVariables(
-            M=M, N=N, df=df, targetValue=targetValue, XValue=0, DBG=DBG
+            M=M, N=N, df=df, targetValue=targetValue, XValue=0,
         )
     )
     betaVarsBitsX1, betaVarsCoeffObjSubproblemX1 = (
         InitScalable.defineGammaUAuxiliaryVariables(
-            M=M, N=N, df=df, targetValue=targetValue, XValue=1, DBG=DBG
+            M=M, N=N, df=df, targetValue=targetValue, XValue=1,
         )
     )
     if interventionValue == 1:
