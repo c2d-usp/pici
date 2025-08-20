@@ -43,7 +43,7 @@ class SubProblem:
         N: int,
         M: int,
         interventionValue: int,
-        minimum: bool,
+        minimizes_objective_function: bool,
     ):
 
         # Bit that determines the value of X.
@@ -63,7 +63,7 @@ class SubProblem:
         betaVarX0Names: list[str] = []
         for i in range(amountBetaVarsPerX):
             betaVarX0Names.append(f"BX0_{i}")
-        if minimum:
+        if minimizes_objective_function:
             self.beta_varsX0 = self.model.addVars(
                 amountBetaVarsPerX,
                 obj=[cost * (1 - interventionValue) for cost in betaVarsCost],
@@ -83,7 +83,7 @@ class SubProblem:
         for i in range(amountBetaVarsPerX):
             betaVarX1Names.append(f"BX1_{i}")
 
-        if minimum:
+        if minimizes_objective_function:
             self.beta_varsX1 = self.model.addVars(
                 amountBetaVarsPerX,
                 obj=[cost * interventionValue for cost in betaVarsCost],
