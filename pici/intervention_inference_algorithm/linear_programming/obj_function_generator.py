@@ -247,7 +247,7 @@ class ObjFunctionGenerator:
             parent_labels = [p.label for p in non_latent_parents]
             parent_cardinalities = [p.cardinality for p in non_latent_parents]
             for values in itertools.product(*[range(c) for c in parent_cardinalities]):
-                # Não é melhor string? "A,B=,C=..."
+                # TODO: Não é melhor string? "A,B=,C=..."
                 key = (node.label,) + tuple(zip(parent_labels, values))
                 decision_function[key] = -1
         return decision_function
