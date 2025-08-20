@@ -10,37 +10,37 @@ from pici.graph.node import Node
 
 def find_conditional_probability(
     dataFrame: pd.DataFrame,
-    targetRealization: list[Node],
-    conditionRealization: list[Node],
+    target_realization: list[Node],
+    condition_realization: list[Node],
 ):
     """
     dataFrame              : pandas dataFrama that contains the data from the csv
-    targetRealization      : specifies the values assumed by the endogenous variables V
-    conditionalRealization : specifies the values assumed by the c-component tail T
+    target_realization      : specifies the values assumed by the endogenous variables V
+    conditional_realization : specifies the values assumed by the c-component tail T
 
     Calculates: P(V|T) = P(V,T) / P(T)
 
         Calculates: P(Target|Condition) = P(Target,Condition) / P(Condition)
     """
-    conditionProbability = find_probability(dataFrame, conditionRealization)
+    conditionProbability = find_probability(dataFrame, condition_realization)
 
     if conditionProbability == 0:
         return 0
 
-    targetAndConditionRealization = targetRealization + conditionRealization
+    target_and_condition_realization = target_realization + condition_realization
 
-    targetAndConditionProbability = find_probability(
-        dataFrame, targetAndConditionRealization
+    target_and_condition_probability = find_probability(
+        dataFrame, target_and_condition_realization
     )
-    return targetAndConditionProbability / conditionProbability
+    return target_and_condition_probability / conditionProbability
 
 
 def find_probability(dataFrame: pd.DataFrame, variables: list[Node]):
-    compatibleCasesCount = count_occurrences(dataFrame, variables)
-    totalCases = dataFrame.shape[0]
-    logger.debug(f"Count compatible cases: {compatibleCasesCount}")
-    logger.debug(f"Total cases: {totalCases}")
-    return compatibleCasesCount / totalCases
+    compatible_cases_count = count_occurrences(dataFrame, variables)
+    total_cases = dataFrame.shape[0]
+    logger.debug(f"Count compatible cases: {compatible_cases_count}")
+    logger.debug(f"Total cases: {total_cases}")
+    return compatible_cases_count / total_cases
 
 
 def count_occurrences(dataFrame: pd.DataFrame, variables: list[Node]):
