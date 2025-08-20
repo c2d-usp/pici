@@ -56,7 +56,7 @@ def generate_constraints(
             - List of empirical probabilities for each constraint.
             - Decision matrix as a list of lists of coefficients.
     """
-    topo_order: list[Node] = dag.topologicalOrder
+    topo_order: list[Node] = dag.topological_order
     c_comp_order = get_c_component_in_reverse_topological_order(
         topo_order, unob, considered_c_comp
     )

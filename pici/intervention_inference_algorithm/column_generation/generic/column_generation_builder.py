@@ -73,7 +73,7 @@ class ColumnGenerationProblemBuilder:
             | {objective_function.intervention}
         )
 
-        topological_order: list[Node] = dag.topologicalOrder
+        topological_order: list[Node] = dag.topological_order
 
         c_comp_order = get_c_component_in_reverse_topological_order(
             topo_order=topological_order,

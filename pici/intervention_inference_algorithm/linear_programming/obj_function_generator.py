@@ -343,7 +343,7 @@ class ObjFunctionGenerator:
                         logger.debug("Case 2")
                         current_mechanism_key = []
                         mechanismKey: str = ""
-                        for _key, node_item in self.graph.graphNodes.items():
+                        for _key, node_item in self.graph.graph_nodes.items():
                             if not node_item.isLatent and (
                                 variable in node_item.children
                             ):
