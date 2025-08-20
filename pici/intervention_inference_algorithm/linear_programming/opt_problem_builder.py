@@ -46,7 +46,7 @@ def build_linear_problem(
         data=df,
         dag=objFG.graph,
         unob=interventionLatentParent,
-        consideredCcomp=consideredEndogenousNodes,
+        considered_c_comp=consideredEndogenousNodes,
         mechanisms=mechanisms,
     )
 
