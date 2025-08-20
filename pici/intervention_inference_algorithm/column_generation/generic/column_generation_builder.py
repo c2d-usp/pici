@@ -68,7 +68,7 @@ class ColumnGenerationProblemBuilder:
         intervention_latent_parent = objective_function.intervention.latent_parent
         c_component_endogenous_nodes = intervention_latent_parent.children
         considered_c_comp = list(
-            (set(c_component_endogenous_nodes) & set(objective_function.consideredGraphNodes))
+            (set(c_component_endogenous_nodes) & set(objective_function.considered_graph_nodes))
             | {objective_function.intervention}
         )
 

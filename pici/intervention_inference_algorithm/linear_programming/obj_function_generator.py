@@ -43,10 +43,10 @@ class ObjFunctionGenerator:
         self.target = target
         self.dataFrame = dataFrame
 
-        self.empiricalProbabilitiesVariables: list[Node] = []
-        self.mechanismVariables: list[Node] = []
-        self.conditionalProbabilities: dict[Node, list[Node]] = {}
-        self.consideredGraphNodes: list[Node] = []
+        self.empirical_probabilities_variables: list[Node] = []
+        self.mechanism_variables: list[Node] = []
+        self.conditional_probabilities: dict[Node, list[Node]] = {}
+        self.considered_graph_nodes: list[Node] = []
 
         self.setup()
 
@@ -60,17 +60,17 @@ class ObjFunctionGenerator:
         """
         intervention: Node = self.intervention
         current_targets: list[Node] = [self.target]
-        interventionLatent: Node = intervention.latent_parent
+        intervention_latent: Node = intervention.latent_parent
 
-        empiricalProbabilitiesVariables: list[Node] = []
+        empirical_probabilities_variables: list[Node] = []
         # If V in this array then it implies P(v) in the objective function
         # If V in this array then it implies a decision function: 1(Pa(v) => v=
         # some value)
-        mechanismVariables: list[Node] = []
+        mechanism_variables: list[Node] = []
         # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
         # function
-        conditionalProbabilities: dict[Node, list[Node]] = {}
-        consideredGraphNodes: list[Node] = []
+        conditional_probabilities: dict[Node, list[Node]] = {}
+        considered_graph_nodes: list[Node] = []
         while len(current_targets) > 0:
             logger.debug("---- Current targets array:")
             for tg in current_targets:
@@ -83,24 +83,24 @@ class ObjFunctionGenerator:
             )
             logger.debug(f"__>>{current_target.label}<<__")
             current_targets.remove(current_target)
-            consideredGraphNodes.append(current_target)
+            considered_graph_nodes.append(current_target)
             logger.debug(f"Current target: {current_target.label}")
 
             if not self.graph.is_descendant(
                 ancestor=self.intervention, descendant=current_target
             ):
                 logger.debug("------- Case 1: Not a descendant")
-                empiricalProbabilitiesVariables.append(current_target)
-            elif current_target.latent_parent == interventionLatent:
+                empirical_probabilities_variables.append(current_target)
+            elif current_target.latent_parent == intervention_latent:
                 logger.debug("------- Case 2: Mechanisms")
-                mechanismVariables.append(current_target)
+                mechanism_variables.append(current_target)
                 for parent in current_target.parents:
                     if (parent not in current_targets) and parent != intervention:
                         current_targets.append(parent)
             else:
                 logger.debug("------- Case 3: Find d-separator set")
                 valid_d_separator_set = self._find_d_separator_set(
-                    current_target, current_targets, interventionLatent, intervention
+                    current_target, current_targets, intervention_latent, intervention
                 )
 
                 current_targets = list(
@@ -108,12 +108,12 @@ class ObjFunctionGenerator:
                     - {current_target}
                 )
 
-                conditionalProbabilities[current_target] = valid_d_separator_set
+                conditional_probabilities[current_target] = valid_d_separator_set
 
-        self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
-        self.mechanismVariables = mechanismVariables
-        self.conditionalProbabilities = conditionalProbabilities
-        self.consideredGraphNodes = consideredGraphNodes
+        self.empirical_probabilities_variables = empirical_probabilities_variables
+        self.mechanism_variables = mechanism_variables
+        self.conditional_probabilities = conditional_probabilities
+        self.considered_graph_nodes = considered_graph_nodes
         logger.debug("Test completed")
 
     def _find_d_separator_set(
@@ -178,11 +178,11 @@ class ObjFunctionGenerator:
             if intervention in current_conditioned_nodes:
                 condition2 = True
             else:
-                operatedDigraph = copy.deepcopy(self.graph.DAG)
+                operated_digraph = copy.deepcopy(self.graph.DAG)
                 outgoing_edgesX = list(self.graph.DAG.out_edges(intervention.label))
-                operatedDigraph.remove_edges_from(outgoing_edgesX)
+                operated_digraph.remove_edges_from(outgoing_edgesX)
                 condition2 = nx.is_d_separator(
-                    G=operatedDigraph,
+                    G=operated_digraph,
                     x={current_target.label},
                     y={intervention.label},
                     z=set(current_conditioned_nodes_labels),
@@ -222,11 +222,11 @@ class ObjFunctionGenerator:
                 Example: P(A|B)
         """
         objective_function_probabilities: list[tuple] = []
-        for node in self.empiricalProbabilitiesVariables:
+        for node in self.empirical_probabilities_variables:
             if node.is_latent:
                 continue
             objective_function_probabilities.append((node.label, None))
-        for node, conditioned_node in self.conditionalProbabilities.items():
+        for node, conditioned_node in self.conditional_probabilities.items():
             objective_function_probabilities.append((node.label, conditioned_node))
         return objective_function_probabilities
 
@@ -242,7 +242,7 @@ class ObjFunctionGenerator:
             dict[tuple, int]: A dictionary mapping each mechanism variable realization to -1.
         """
         decision_function = {}
-        for node in self.mechanismVariables:
+        for node in self.mechanism_variables:
             non_latent_parents = [p for p in node.parents if not p.is_latent]
             parent_labels = [p.label for p in non_latent_parents]
             parent_cardinalities = [p.cardinality for p in non_latent_parents]
@@ -256,16 +256,16 @@ class ObjFunctionGenerator:
         """
         Remove c-component variables that do not appear in the objective function
         """
-        interventionLatentParent = self.intervention.latent_parent
-        cComponentEndogenous = interventionLatentParent.children
+        intervention_latent_parent = self.intervention.latent_parent
+        c_component_endogenous = intervention_latent_parent.children
 
-        endogenousNodes = (
-            set(cComponentEndogenous) & set(self.consideredGraphNodes)
+        endogenous_nodes = (
+            set(c_component_endogenous) & set(self.considered_graph_nodes)
         ) | {self.intervention}
 
         _, _, mechanisms = MechanismGenerator.mechanisms_generator(
-            latentNode=interventionLatentParent,
-            endogenousNodes=endogenousNodes,
+            latentNode=intervention_latent_parent,
+            endogenousNodes=endogenous_nodes,
         )
         return mechanisms
 
@@ -280,13 +280,13 @@ class ObjFunctionGenerator:
         """
 
         # (3) Generate all the cases: cartesian product!
-        debug_variables_label = [node.label for node in self.consideredGraphNodes]
+        debug_variables_label = [node.label for node in self.considered_graph_nodes]
         logger.debug(f"Debug variables: {debug_variables_label}")
-        if self.intervention in self.consideredGraphNodes:
-            self.consideredGraphNodes.remove(self.intervention)
+        if self.intervention in self.considered_graph_nodes:
+            self.considered_graph_nodes.remove(self.intervention)
 
-        summandNodes = list(
-            set(self.consideredGraphNodes)
+        summand_nodes = list(
+            set(self.considered_graph_nodes)
             - {
                 self.intervention,
                 self.intervention.latent_parent,
@@ -295,54 +295,54 @@ class ObjFunctionGenerator:
         )
 
         spaces: list[list[int]] = MechanismGenerator.helper_generate_spaces(
-            nodes=summandNodes
+            nodes=summand_nodes
         )
-        summandNodes.append(self.target)
+        summand_nodes.append(self.target)
         spaces.append([self.target.intervened_value])
-        inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
+        input_cases: list[list[int]] = MechanismGenerator.generate_cross_products(
             listSpaces=spaces
         )
 
         obj_function_coefficients: list[float] = []
         logger.debug("Debug input cases:")
-        logger.debug(f"Size of #inputs: {len(inputCases)}")
+        logger.debug(f"Size of #inputs: {len(input_cases)}")
         logger.debug("first component:")
-        logger.debug(inputCases[0])
+        logger.debug(input_cases[0])
 
         logger.debug("Debug summand nodes")
-        for node in summandNodes:
+        for node in summand_nodes:
             logger.debug(f"Node={node.label}")
 
         logger.debug("--- DEBUG OBJ FUNCTION GENERATION ---")
         for mechanism in mechanisms:
             logger.debug("-- START MECHANISM --")
-            mechanismCoefficient: int = 0
-            for inputCase in inputCases:
+            mechanism_coefficient: int = 0
+            for input_case in input_cases:
                 logger.debug("---- START INPUT CASE ----")
-                partialCoefficient = 1
+                partial_coefficient = 1
 
-                for index, variableValue in enumerate(inputCase):
-                    logger.debug(f"{summandNodes[index].label} = {variableValue}")
-                    summandNodes[index].value = variableValue
+                for index, variable_value in enumerate(input_case):
+                    logger.debug(f"{summand_nodes[index].label} = {variable_value}")
+                    summand_nodes[index].value = variable_value
 
-                for variable in summandNodes:
+                for variable in summand_nodes:
                     logger.debug(f"\nCurrent variable: {variable.label}")
                     if (
-                        variable in self.empiricalProbabilitiesVariables
+                        variable in self.empirical_probabilities_variables
                     ):  # Case 1: coff *= P(V=value)
                         logger.debug("Case 1")
-                        variableProbability = find_probability(
+                        variable_probability = find_probability(
                             dataFrame=self.dataFrame,
                             variables=[variable],
                         )
-                        partialCoefficient *= variableProbability
+                        partial_coefficient *= variable_probability
                     elif (
-                        variable in self.mechanismVariables
+                        variable in self.mechanism_variables
                     ):  # Case 2: terminate with coeff 0 if the decision function is 0.
                         # Do nothing otherwise
                         logger.debug("Case 2")
                         current_mechanism_key = []
-                        mechanismKey: str = ""
+                        mechanism_key: str = ""
                         for _key, node_item in self.graph.graph_nodes.items():
                             if not node_item.is_latent and (
                                 variable in node_item.children
@@ -351,31 +351,31 @@ class ObjFunctionGenerator:
                                     f"{node_item.label}={node_item.value}"
                                 )
                         for e in sorted(current_mechanism_key):
-                            mechanismKey += f"{e},"
-                        logger.debug(f"key: {mechanismKey[:-1]}")
-                        expectedValue = mechanism[mechanismKey[:-1]]
+                            mechanism_key += f"{e},"
+                        logger.debug(f"key: {mechanism_key[:-1]}")
+                        expected_value = mechanism[mechanism_key[:-1]]
 
-                        if expectedValue != variable.value:
-                            partialCoefficient = 0
+                        if expected_value != variable.value:
+                            partial_coefficient = 0
                             logger.debug("End process")
                     else:  # Case 3: coeff *= P(V|some endo parents)
                         logger.debug("Case 3")
-                        conditionalProbability = find_conditional_probability(
+                        conditional_probability = find_conditional_probability(
                             dataFrame=self.dataFrame,
-                            targetRealization=[variable],
-                            conditionRealization=self.conditionalProbabilities[
+                            target_realization=[variable],
+                            condition_realization=self.conditional_probabilities[
                                 variable
                             ],
                         )
-                        partialCoefficient *= conditionalProbability
+                        partial_coefficient *= conditional_probability
 
-                    logger.debug(f"current partial coefficient: {partialCoefficient}")
-                    if partialCoefficient == 0:
+                    logger.debug(f"current partial coefficient: {partial_coefficient}")
+                    if partial_coefficient == 0:
                         break
 
-                mechanismCoefficient += partialCoefficient
-                logger.debug(f"current coef = {mechanismCoefficient}")
+                mechanism_coefficient += partial_coefficient
+                logger.debug(f"current coef = {mechanism_coefficient}")
 
-            obj_function_coefficients.append(mechanismCoefficient)
+            obj_function_coefficients.append(mechanism_coefficient)
 
         return obj_function_coefficients

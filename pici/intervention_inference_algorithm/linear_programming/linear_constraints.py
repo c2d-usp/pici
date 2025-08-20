@@ -240,8 +240,8 @@ def calculate_constraints_empirical_probabilities(
                     condition_realization_nodes.append(cVar)
             prob *= find_conditional_probability(
                 dataFrame=data,
-                targetRealization=target_realization_nodes,
-                conditionRealization=condition_realization_nodes,
+                target_realization=target_realization_nodes,
+                condition_realization=condition_realization_nodes,
             )
             target_realization_nodes.clear()
             condition_realization_nodes.clear()

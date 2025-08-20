@@ -17,95 +17,95 @@ class MechanismGenerator:
             spaces.append(range(0, node.cardinality))
         return spaces
 
-    def generate_cross_products(listSpaces: list[list[int]]):
-        crossProductsTuples = itertools.product(*listSpaces)
-        return [list(combination) for combination in crossProductsTuples]
+    def generate_cross_products(list_spaces: list[list[int]]):
+        cross_products_tuples = itertools.product(*list_spaces)
+        return [list(combination) for combination in cross_products_tuples]
 
     def mechanisms_generator(
-        latentNode: Node,
-        endogenousNodes: list[Node],
+        latent_node: Node,
+        endogenous_nodes: list[Node],
     ):
         """
         Generates an enumeration (list) of all mechanism a latent value can assume in its c-component. The c-component has to have
         exactly one latent variable.
 
-        latentNode: an identifier for the latent node of the c-component
-        endogenousNodes: list of endogenous node of the c-component
+        latent_node: an identifier for the latent node of the c-component
+        endogenous_nodes: list of endogenous node of the c-component
         PS: Note that some parents may not be in the c-component, but the ones in the tail are also necessary for this function, so they
         must be included.
 
         """
-        auxSpaces: list[list[int]] = []
-        headerArray: list[str] = []
-        allCasesList: list[list[list[int]]] = []
-        dictKeys: list[str] = []
+        aux_spaces: list[list[int]] = []
+        header_array: list[str] = []
+        all_cases_list: list[list[list[int]]] = []
+        dict_keys: list[str] = []
 
-        for endogenous_node in endogenousNodes:
-            auxSpaces.clear()
+        for endogenous_node in endogenous_nodes:
+            aux_spaces.clear()
             header: str = f"determines variable: {endogenous_node.label}"
             amount: int = 1
             ordered_parents: list[Node] = []
             for parent in endogenous_node.parents:
-                if parent.label != latentNode.label:
+                if parent.label != latent_node.label:
                     ordered_parents.append(parent)
                     header = f"{parent.label}, " + header
-                    auxSpaces.append(range(parent.cardinality))
+                    aux_spaces.append(range(parent.cardinality))
                     amount *= parent.cardinality
 
-            headerArray.append(header + f" (x {amount})")
-            logger.debug(f"auxSpaces {auxSpaces}")
-            functionDomain: list[list[int]] = [
-                list(auxTuple) for auxTuple in itertools.product(*auxSpaces)
+            header_array.append(header + f" (x {amount})")
+            logger.debug(f"auxSpaces {aux_spaces}")
+            function_domain: list[list[int]] = [
+                list(aux_tuple) for aux_tuple in itertools.product(*aux_spaces)
             ]
-            logger.debug(f"functionDomain {functionDomain}")
+            logger.debug(f"functionDomain {function_domain}")
 
-            imageValues: list[int] = range(endogenous_node.cardinality)
+            image_values: list[int] = range(endogenous_node.cardinality)
 
-            varResult = [
-                [domainCase + [c] for c in imageValues] for domainCase in functionDomain
+            var_result = [
+                [domain_case + [c] for c in image_values] for domain_case in function_domain
             ]
             logger.debug(f"For variable {endogenous_node.label}:")
-            logger.debug(f"Function domain: {functionDomain}")
-            logger.debug(f"VarResult: {varResult}")
+            logger.debug(f"Function domain: {function_domain}")
+            logger.debug(f"VarResult: {var_result}")
 
-            for domainCase in functionDomain:
+            for domain_case in function_domain:
                 current_key = []
-                for index, el in enumerate(domainCase):
+                for index, el in enumerate(domain_case):
                     current_key.append(f"{ordered_parents[index].label}={el}")
                 key: str = ""
                 for e in sorted(current_key):
                     key += f"{e},"
-                dictKeys.append(key[:-1])
+                dict_keys.append(key[:-1])
 
-            allCasesList = allCasesList + varResult
+            all_cases_list = all_cases_list + var_result
 
-        logger.debug(headerArray)
+        logger.debug(header_array)
         logger.debug(
-            f"List all possible mechanism, placing in the same array those that determine the same function:\n{allCasesList}"
+            f"List all possible mechanism, placing in the same array those that determine the same function:\n{all_cases_list}"
         )
         logger.debug(
-            f"List the keys of the dictionary (all combinations of the domains of the functions): {dictKeys}"
+            f"List the keys of the dictionary (all combinations of the domains of the functions): {dict_keys}"
         )
 
-        allPossibleMechanisms = list(itertools.product(*allCasesList))
-        mechanismDicts: list[dict[str, int]] = []
-        for index, mechanism in enumerate(allPossibleMechanisms):
+        all_possible_mechanisms = list(itertools.product(*all_cases_list))
+        mechanism_dicts: list[dict[str, int]] = []
+        for index, mechanism in enumerate(all_possible_mechanisms):
             logger.debug(f"{index}) {mechanism}")
-            currDict: dict[str, int] = {}
-            for domainIndex, nodeFunction in enumerate(mechanism):
-                logger.debug(f"The node function = {nodeFunction}")
-                currDict[dictKeys[domainIndex]] = nodeFunction[-1]
+            curr_dict: dict[str, int] = {}
+            for domain_index, node_function in enumerate(mechanism):
+                logger.debug(f"The node function = {node_function}")
+                curr_dict[dict_keys[domain_index]] = node_function[-1]
 
-            mechanismDicts.append(currDict)
+            mechanism_dicts.append(curr_dict)
 
         logger.debug("Check if the mechanism dictionary is working as expected:")
-        for mechanismDict in mechanismDicts:
-            for key in mechanismDict:
-                logger.debug(f"key: {key} & val: {mechanismDict[key]} ")
+        for mechanism_dict in mechanism_dicts:
+            for key in mechanism_dict:
+                logger.debug(f"key: {key} & val: {mechanism_dict[key]} ")
             logger.debug("------------")
 
         """
-        mechanismDicts: list[dict[str, int]]
+        mechanism_dicts: list[dict[str, int]]
         --- Has all the mechanisms for ONE latent variable. Each element of the list is a set of mechanisms, which specify
             the value of any c-component endogenous node given the values of its endogenous parents.
 
@@ -114,4 +114,4 @@ class MechanismGenerator:
 
         --- There is an specific order for the parents: it is the same as in graph.graphNodes.
         """
-        return allPossibleMechanisms, dictKeys, mechanismDicts
+        return all_possible_mechanisms, dict_keys, mechanism_dicts
