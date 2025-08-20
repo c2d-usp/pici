@@ -59,3 +59,7 @@ class GurobiParameters(Enum):
     OUTPUT_SUPRESSED = 0
     OUTPUT_VERBOSE = 1
     DefaultObjectiveCoefficients = 1
+
+class ColumnGenerationParameters(Enum):
+    BIG_M = 1e4
+    MAX_ITERACTIONS_ALLOWED = 2000

@@ -1,19 +1,14 @@
+import os
+import sys
 import logging
 
 import gurobipy as gp
 from gurobipy import GRB
 
 logger = logging.getLogger(__name__)
-
-
-import os
-import sys
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-BIG_M = 1e4
-DBG = False
-MAX_ITERACTIONS_ALLOWED = 2000
+from pici.utils._enum import ColumnGenerationParameters
 
 
 class MasterProblem:
@@ -39,7 +34,7 @@ class MasterProblem:
         for minimization. Gurobi output is suppressed for iterative procedures.
         """
         num_columns_base = len(columns_base)
-        self.vars = self.model.addVars(num_columns_base, obj=BIG_M, name="BaseColumns")
+        self.vars = self.model.addVars(num_columns_base, obj=ColumnGenerationParameters.BIG_M.value, name="BaseColumns")
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
