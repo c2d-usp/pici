@@ -31,7 +31,7 @@ class Parser:
         )
 
         self.unobservables = [
-            self.graph.graphNodes[unobservable_label]
+            self.graph.graph_nodes[unobservable_label]
             for unobservable_label in unobservables_labels
         ]
 
@@ -131,7 +131,7 @@ def convert_tuple_into_node(
     if not graph.is_node_in_graph(label):
         raise Exception(f"Node '{label}' not present in the defined graph.")
     graph.set_node_intervened_value(label, value)
-    return graph.graphNodes[label]
+    return graph.graph_nodes[label]
 
 
 def _parse_tuples_str_int_list(state):
@@ -201,8 +201,8 @@ def _define_graph(
             new_node = Node(
                 children=[],
                 parents=[],
-                latentParent=None,
-                isLatent=True,
+                latent_parent=None,
+                is_latent=True,
                 label=node_label,
                 cardinality=node_cardinalities[node_label],
             )
@@ -219,8 +219,8 @@ def _define_graph(
             new_node = Node(
                 children=[],
                 parents=[],
-                latentParent=None,
-                isLatent=False,
+                latent_parent=None,
+                is_latent=False,
                 label=node_label,
                 cardinality=node_cardinalities[node_label],
             )
@@ -235,11 +235,11 @@ def _define_graph(
 
     for i, node_label in enumerate(node_labels_set):
         node = graphNodes[node_label]
-        if node.isLatent:
+        if node.is_latent:
             exogenous.append(node)
             node.children = _get_node_list(graphNodes, children_labels[node.label])
         else:
-            node.latentParent = graphNodes[parent_latent_labels[node_label]]
+            node.latent_parent = graphNodes[parent_latent_labels[node_label]]
             endogenous.append(node)
             node.children = _get_node_list(graphNodes, children_labels[node.label])
             node.parents = _get_node_list(graphNodes, parents_labels[node.label])
@@ -253,14 +253,14 @@ def _define_graph(
         numberOfNodes=number_of_nodes,
         exogenous=exogenous,
         endogenous=endogenous,
-        topologicalOrder=topological_order_nodes,
+        topological_order=topological_order_nodes,
         DAG=dag,
-        graphNodes=graphNodes,
+        graph_nodes=graphNodes,
         node_set=node_set,
-        topologicalOrderIndexes=topologicalOrderIndexes,
-        currNodes=[],
-        dagComponents=[],
-        cComponentToUnob={},
+        topological_order_indexes=topologicalOrderIndexes,
+        current_nodes=[],
+        dag_components=[],
+        c_component_to_unob={},
     )
 
 

@@ -33,20 +33,20 @@ def build_linear_problem(
         intervention=intervention,
         target=target,
     )
-    objFG.find_linear_good_set()
     mechanisms = objFG.get_mechanisms_pruned()
 
-    interventionLatentParent = objFG.intervention.latentParent
+    interventionLatentParent = objFG.intervention.latent_parent
     cComponentEndogenous = interventionLatentParent.children
     consideredEndogenousNodes = list(
-        (set(cComponentEndogenous) & set(objFG.debugOrder)) | {objFG.intervention}
+        (set(cComponentEndogenous) & set(objFG.consideredGraphNodes))
+        | {objFG.intervention}
     )
 
     probs, decision_matrix = generate_constraints(
         data=df,
         dag=objFG.graph,
         unob=interventionLatentParent,
-        consideredCcomp=consideredEndogenousNodes,
+        considered_c_comp=consideredEndogenousNodes,
         mechanisms=mechanisms,
     )
 

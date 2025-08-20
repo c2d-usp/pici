@@ -283,16 +283,16 @@ class TestTupleIntoNode(unittest.TestCase):
         self.nodeA = Node(
             children=[],  # no children yet
             parents=[],  # no parents yet
-            latentParent=None,  # no latent parent
-            isLatent=False,  # not a latent node
+            latent_parent=None,  # no latent parent
+            is_latent=False,  # not a latent node
             label="A",  # string label "A"
             cardinality=2,  # arbitrary cardinality
         )
         self.nodeB = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="B",
             cardinality=2,
         )
@@ -341,16 +341,16 @@ class TestTupleIntoNode(unittest.TestCase):
         # Finally, construct the Graph object itself:
         self.graph = Graph(
             numberOfNodes=numberOfNodes,
-            currNodes=currNodes,
-            dagComponents=dagComponents,
+            current_nodes=currNodes,
+            dag_components=dagComponents,
             exogenous=exogenous,
             endogenous=endogenous,
-            topologicalOrder=topologicalOrder,
+            topological_order=topologicalOrder,
             DAG=self.DAG,
-            cComponentToUnob=cComponentToUnob,
-            graphNodes=graphNodes,
+            c_component_to_unob=cComponentToUnob,
+            graph_nodes=graphNodes,
             node_set=node_set,
-            topologicalOrderIndexes=topologicalOrderIndexes,
+            topological_order_indexes=topologicalOrderIndexes,
         )
 
     def test_tuple_none_returns_none(self):
@@ -359,17 +359,17 @@ class TestTupleIntoNode(unittest.TestCase):
 
     def test_tuple_valid_label_sets_value_and_returns_node(self):
         # Before: node "A" exists with value None
-        self.assertIsNone(self.graph.graphNodes["A"].intervened_value)
+        self.assertIsNone(self.graph.graph_nodes["A"].intervened_value)
 
         node = convert_tuple_into_node(("A", 42), self.graph)
         # It should return the same DummyNode instance
-        self.assertIs(node, self.graph.graphNodes["A"])
+        self.assertIs(node, self.graph.graph_nodes["A"])
         # And the node’s value should now be updated
         self.assertEqual(node.intervened_value, 42)
 
         # Also test a second label
         node_b = convert_tuple_into_node(("B", -7), self.graph)
-        self.assertIs(node_b, self.graph.graphNodes["B"])
+        self.assertIs(node_b, self.graph.graph_nodes["B"])
         self.assertEqual(node_b.intervened_value, -7)
 
     def test_tuple_invalid_label_raises_exception(self):
@@ -389,24 +389,24 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         self.nodeA = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="A",
             cardinality=2,
         )
         self.nodeB = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="B",
             cardinality=2,
         )
         self.nodeC = Node(
             children=[],
             parents=[],
-            latentParent=None,
-            isLatent=False,
+            latent_parent=None,
+            is_latent=False,
             label="C",
             cardinality=2,
         )
@@ -454,16 +454,16 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         # Construct the Graph
         self.graph = Graph(
             numberOfNodes=numberOfNodes,
-            currNodes=currNodes,
-            dagComponents=dagComponents,
+            current_nodes=currNodes,
+            dag_components=dagComponents,
             exogenous=exogenous,
             endogenous=endogenous,
-            topologicalOrder=topologicalOrder,
+            topological_order=topologicalOrder,
             DAG=self.DAG,
-            cComponentToUnob=cComponentToUnob,
-            graphNodes=graphNodes,
+            c_component_to_unob=cComponentToUnob,
+            graph_nodes=graphNodes,
             node_set=node_set,
-            topologicalOrderIndexes=topologicalOrderIndexes,
+            topological_order_indexes=topologicalOrderIndexes,
         )
 
     def test_list_none_returns_none(self):
@@ -476,7 +476,7 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
         result = convert_tuples_list_into_nodes_list([("A", 10)], self.graph)
         self.assertEqual(len(result), 1)
         node = result[0]
-        self.assertIs(node, self.graph.graphNodes["A"])
+        self.assertIs(node, self.graph.graph_nodes["A"])
         self.assertEqual(node.intervened_value, 10)
 
     def test_list_multiple_valid_tuples(self):
@@ -485,12 +485,12 @@ class TestListTuplesIntoListNodes(unittest.TestCase):
 
         self.assertEqual(len(result), 2)
         node_a, node_c = result
-        self.assertIs(node_a, self.graph.graphNodes["A"])
+        self.assertIs(node_a, self.graph.graph_nodes["A"])
         self.assertEqual(node_a.intervened_value, 1)
-        self.assertIs(node_c, self.graph.graphNodes["C"])
+        self.assertIs(node_c, self.graph.graph_nodes["C"])
         self.assertEqual(node_c.intervened_value, 3)
 
-        self.assertIsNone(self.graph.graphNodes["B"].intervened_value)
+        self.assertIsNone(self.graph.graph_nodes["B"].intervened_value)
 
     def test_list_contains_invalid_label_raises(self):
         bad_list = [("A", 5), ("X", 7)]
