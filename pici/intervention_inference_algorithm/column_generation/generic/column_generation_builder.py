@@ -1,8 +1,14 @@
+
+import os
+import sys
 import copy
 import logging
 
 import gurobipy as gp
 from gurobipy import GRB
+
+logger = logging.getLogger(__name__)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from pici.graph.graph import Graph
 from pici.graph.node import Node
@@ -24,14 +30,6 @@ from pici.intervention_inference_algorithm.linear_programming.obj_function_gener
 )
 from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 
-logger = logging.getLogger(__name__)
-
-
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
 from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
@@ -52,12 +50,13 @@ class ColumnGenerationProblemBuilder:
         dag: Graph,
         intervention: Node,
         target: Node,
-        minimum: bool,
+        minimizes_objective_function: bool,
     ):
 
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
+        self.minimizes_objective_function = minimizes_objective_function
 
         objective_function = ObjFunctionGenerator(
             graph=dag,
@@ -91,12 +90,11 @@ class ColumnGenerationProblemBuilder:
             )
         )
 
-        self.amountNonTrivialRestrictions = len(W)
+        self.number_of_restrictions = len(W)
 
-        auxDict = {}
-        for i in range(self.amountNonTrivialRestrictions):
-            auxDict[i] = BIG_M
-        self.duals = auxDict.copy()
+        self.duals = {}
+        for i in range(self.number_of_restrictions):
+            self.duals[i] = BIG_M
 
         self.symbolic_objective_function_probabilites: list[tuple] = (
             objective_function.generate_symbolic_objective_function_probabilities()
@@ -119,6 +117,7 @@ class ColumnGenerationProblemBuilder:
         )
 
         self.columns_base = None
+        self.master = MasterProblem()
 
         # vvvvvv Bloco antigo vvvvvvvvvv
         N = 1
@@ -131,31 +130,24 @@ class ColumnGenerationProblemBuilder:
         self.betaVarsBitsX0 = betaVarsBitsX0
         self.betaVarsBitsX1 = betaVarsBitsX1
         self.betaVarsCost = betaVarsCost
-        self.minimum = minimum
 
         self.solution = {}
-        self.master = MasterProblem()
         self.subproblem = SubProblem(N=N, M=M)
 
-    def _initialize_column_base(self):
-        # Initialize big-M problem with the identity block of size
-        # equal to the amount of restrictions.
-        columns_base: list[list[int]] = []
-        for index in range(self.amountNonTrivialRestrictions + 1):
-            new_column = [0] * (self.amountNonTrivialRestrictions + 1)
-            new_column[index] = 1
-            columns_base.append(new_column)
-        self.columns_base = columns_base
+    def setup(self, method=1):
+        # Define gurobi running method
+        self.master.model.params.Method = method
+        self.subproblem.model.params.Method = method
 
-    def _generate_patterns(self):
         self._initialize_column_base()
         self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
+
         #### We're here
         self.subproblem.setup(
             amountBitsPerCluster=self.amountBitsPerCluster,
             amountBetaVarsPerX=self.amountBetaVarsPerX,
             duals=self.duals,
-            amountNonTrivialRestrictions=self.amountNonTrivialRestrictions,
+            amountNonTrivialRestrictions=self.number_of_restrictions,
             betaVarsCost=self.betaVarsCost,
             parametric_column=self.parametric_columns,
             betaVarsBitsX0=self.betaVarsBitsX0,
@@ -163,9 +155,20 @@ class ColumnGenerationProblemBuilder:
             N=self.N,
             M=self.M,
             interventionValue=self.intervention.value,
-            minimum=self.minimum,
+            minimizes_objective_function=self.minimizes_objective_function,
         )
 
+    def _initialize_column_base(self):
+        # Initialize big-M problem with the identity block of size
+        # equal to the amount of restrictions.
+        columns_base: list[list[int]] = []
+        for index in range(self.number_of_restrictions + 1):
+            new_column = [0] * (self.number_of_restrictions + 1)
+            new_column[index] = 1
+            columns_base.append(new_column)
+        self.columns_base = columns_base
+
+    def exec(self):
         counter = 0
         while True:
             self.master.model.optimize()
@@ -231,7 +234,7 @@ class ColumnGenerationProblemBuilder:
                 new_column=newColumn,
                 index=len(self.columns_base),
                 obj_coeff=objCoeff,
-                minimun=self.minimum,
+                minimizes_objective_function=self.minimizes_objective_function,
             )
             self.columns_base.append(newColumn)
             counter += 1
@@ -242,46 +245,31 @@ class ColumnGenerationProblemBuilder:
             logger.info(f"Iteration Number = {counter}")
 
         return counter
-
-    def solve(self, method=1, presolve=-1, numeric_focus=-1, opt_tol=-1, fea_tol=-1):
-        """
-        Gurobi does not support branch-and-price, as this requires to add columns
-        at local nodes of the search tree. A heuristic is used instead, where the
-        integrality constraints for the variables of the final root LP relaxation
-        are installed and the resulting MIP is solved. Note that the optimal
-        solution could be overlooked, as additional columns are not generated at
-        the local nodes of the search tree.
-        """
-        self.master.model.params.Method = method
-        self.subproblem.model.params.Method = method
-
-        if presolve != -1:
-            self.master.model.Params.Presolve = presolve
-            self.subproblem.model.Params.Presolve = presolve
-        if numeric_focus != -1:
-            self.master.model.Params.NumericFocus = numeric_focus
-            self.subproblem.model.Params.NumericFocus = numeric_focus
-
-        if opt_tol != -1:
-            self.master.model.Params.OptimalityTol = opt_tol
-            self.subproblem.model.Params.OptimalityTol = opt_tol
-
-        if fea_tol != -1:
-            self.master.model.Params.FeasibilityTol = fea_tol
-            self.subproblem.model.Params.FeasibilityTol = fea_tol
-
-        numberIterations = self._generate_patterns()
+    
+    def optimize_master(self):
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
         self.master.model.write("model.lp")
         self.master.model.write("model.mps")
-        bound = self.master.model.ObjVal
-        itBound = numberIterations
-        return bound, itBound
+        return self.master.model.ObjVal
+
+def solve(problem: ColumnGenerationProblemBuilder, method=1) -> tuple[int, float]:
+    """
+    Gurobi does not support branch-and-price, as this requires to add columns
+    at local nodes of the search tree. A heuristic is used instead, where the
+    integrality constraints for the variables of the final root LP relaxation
+    are installed and the resulting MIP is solved. Note that the optimal
+    solution could be overlooked, as additional columns are not generated at
+    the local nodes of the search tree.
+    """
+    problem.setup(method)
+    numberIterations = problem.exec()
+    bound = problem.optimize_master()
+    return bound, numberIterations
 
 
 def buildScalarProblem(
-    M: int, N: int, interventionValue: int, targetValue: int, df, minimum: bool
+    M: int, N: int, interventionValue: int, targetValue: int, df, minimizes_objective_function: bool
 ):
     # Calculate the empirical probs (RHS of the restrictions, so b in Ax=b)
     empiricalProbabilities: list[float] = InitScalable.calculateEmpiricals(
@@ -318,7 +306,7 @@ def buildScalarProblem(
         betaVarsBitsX0=betaVarsBitsX0,
         betaVarsBitsX1=betaVarsBitsX1,
         interventionValue=interventionValue,
-        minimum=minimum,
+        minimizes_objective_function=minimizes_objective_function,
     )
 
 
@@ -335,9 +323,9 @@ def exemplo_de_execucao():
         interventionValue=interventionValue,
         targetValue=targetValue,
         df=scalable_df,
-        minimum=True,
+        minimizes_objective_function=True,
     )
-    lower, itLower = scalarProblem.solve()
+    lower, itLower = solve(scalarProblem)
 
     scalarProblem = buildScalarProblem(
         M=M,
@@ -345,9 +333,9 @@ def exemplo_de_execucao():
         interventionValue=interventionValue,
         targetValue=targetValue,
         df=scalable_df,
-        minimum=False,
+        minimizes_objective_function=False,
     )
-    upper, itUpper = scalarProblem.solve()
+    upper, itUpper = solve(scalarProblem)
     upper = -upper
     logger.info(f"{lower} =< P(Y = {targetValue}|X = {interventionValue}) <= {upper}")
     logger.info(f"{itLower} iteracoes para lower e {itUpper} para upper")
