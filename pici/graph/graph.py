@@ -9,35 +9,35 @@ class Graph:
     def __init__(
         self,
         numberOfNodes: int,
-        currNodes: list[Node],
-        dagComponents: list[list[Node]],
+        current_nodes: list[Node],
+        dag_components: list[list[Node]],
         exogenous: list[Node],
         endogenous: list[Node],
-        topologicalOrder: list[Node],
+        topological_order: list[Node],
         DAG: nx.DiGraph,
-        cComponentToUnob: dict[int, Node],
-        graphNodes: dict[str, Node],
+        c_component_to_unob: dict[int, Node],
+        graph_nodes: dict[str, Node],
         node_set: set[Node],
-        topologicalOrderIndexes: dict[Node, int],
+        topological_order_indexes: dict[Node, int],
     ):
-        self.numberOfNodes = numberOfNodes
-        self.graphNodes = graphNodes
-        self.currNodes = currNodes
-        self.dagComponents = dagComponents
+        self.number_of_nodes = numberOfNodes
+        self.graph_nodes = graph_nodes
+        self.curr_nodes = current_nodes
+        self.dag_components = dag_components
         self.endogenous = endogenous
         self.exogenous = exogenous
-        self.topologicalOrder = topologicalOrder
+        self.topological_order = topological_order
         self.DAG = DAG
-        self.cComponentToUnob = cComponentToUnob
+        self.c_component_to_unob = c_component_to_unob
         self.node_set = node_set
-        self.topologicalOrderIndexes = topologicalOrderIndexes
+        self.topological_order_indexes = topological_order_indexes
 
     def find_ancestors(self, target_node: Node) -> list[Node]:
-        self.currNodes.clear()
+        self.curr_nodes.clear()
         self._clear_visited()
         self._dfs_ancestor(target_node)
         ancestors: list[Node] = []
-        for node in self.graphNodes.values():
+        for node in self.graph_nodes.values():
             if node.visited:
                 ancestors.append(node)
         return ancestors
@@ -52,21 +52,21 @@ class Graph:
     def is_node_in_graph(self, node_label: str) -> bool:
         if not isinstance(node_label, str):
             raise Exception(f"Node label '{node_label}' is not of type {str}.")
-        return node_label in self.graphNodes
+        return node_label in self.graph_nodes
 
     def set_node_intervened_value(self, node_label: str, node_value: int) -> Node:
         if not isinstance(node_value, int):
             raise Exception(f"Node value '{node_value}' is not of type int.")
-        self.graphNodes[node_label].intervened_value = node_value
-        return self.graphNodes[node_label]
+        self.graph_nodes[node_label].intervened_value = node_value
+        return self.graph_nodes[node_label]
 
     def get_closest_node_from_leaf_in_the_topological_order(
         self, nodes: list[Node]
     ) -> Node:
-        n = len(self.topologicalOrder) - 1
+        n = len(self.topological_order) - 1
         for j in range(n, -1, -1):
-            if self.topologicalOrder[j] in nodes:
-                return self.topologicalOrder[j]
+            if self.topological_order[j] in nodes:
+                return self.topological_order[j]
         raise Exception("Node not found")
 
     def _clear_visited(self):

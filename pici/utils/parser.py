@@ -31,7 +31,7 @@ class Parser:
         )
 
         self.unobservables = [
-            self.graph.graphNodes[unobservable_label]
+            self.graph.graph_nodes[unobservable_label]
             for unobservable_label in unobservables_labels
         ]
 
@@ -131,7 +131,7 @@ def convert_tuple_into_node(
     if not graph.is_node_in_graph(label):
         raise Exception(f"Node '{label}' not present in the defined graph.")
     graph.set_node_intervened_value(label, value)
-    return graph.graphNodes[label]
+    return graph.graph_nodes[label]
 
 
 def _parse_tuples_str_int_list(state):
@@ -253,14 +253,14 @@ def _define_graph(
         numberOfNodes=number_of_nodes,
         exogenous=exogenous,
         endogenous=endogenous,
-        topologicalOrder=topological_order_nodes,
+        topological_order=topological_order_nodes,
         DAG=dag,
-        graphNodes=graphNodes,
+        graph_nodes=graphNodes,
         node_set=node_set,
-        topologicalOrderIndexes=topologicalOrderIndexes,
-        currNodes=[],
-        dagComponents=[],
-        cComponentToUnob={},
+        topological_order_indexes=topologicalOrderIndexes,
+        current_nodes=[],
+        dag_components=[],
+        c_component_to_unob={},
     )
 
 

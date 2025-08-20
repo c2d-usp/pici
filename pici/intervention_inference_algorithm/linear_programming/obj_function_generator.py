@@ -1,4 +1,5 @@
 import copy
+import itertools
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,140 +43,17 @@ class ObjFunctionGenerator:
         self.target = target
         self.dataFrame = dataFrame
 
-        self.empiricalProbabilitiesVariables = []
-        self.mechanismVariables = []
-        self.conditionalProbabilities = []
-        self.debugOrder = []
+        self.empiricalProbabilitiesVariables: list[Node] = []
+        self.mechanismVariables: list[Node] = []
+        self.conditionalProbabilities: dict[Node, list[Node]] = {}
+        self.consideredGraphNodes: list[Node] = []
 
-    def get_mechanisms_pruned(self) -> MechanismType:
-        """
-        Remove c-component variables that do not appear in the objective function
-        """
-        interventionLatentParent = self.intervention.latentParent
-        cComponentEndogenous = interventionLatentParent.children
+        self.setup()
 
-        endogenousNodes = (set(cComponentEndogenous) & set(self.debugOrder)) | {
-            self.intervention
-        }
+    def setup(self):
+        self._find_linear_good_set()
 
-        _, _, mechanisms = MechanismGenerator.mechanisms_generator(
-            latentNode=interventionLatentParent,
-            endogenousNodes=endogenousNodes,
-        )
-        return mechanisms
-
-    def build_objective_function(self, mechanisms: MechanismType) -> list[float]:
-        """
-        Intermediate step: remove useless endogenous variables in the mechanisms creation?
-        Must be called after generate restrictions. Returns the objective function with the following encoding
-
-        For each mechanism, find the coefficient in the objective function.
-            Open a sum on this.debugOrder variables <=> consider all cases (cartesian product).
-            Only the intervention has a fixed value.
-        """
-
-        # (3) Generate all the cases: cartesian product!
-        debug_variables_label = [node.label for node in self.debugOrder]
-        logger.debug(f"Debug variables: {debug_variables_label}")
-        if self.intervention in self.debugOrder:
-            self.debugOrder.remove(self.intervention)
-
-        summandNodes = list(
-            set(self.debugOrder)
-            - {
-                self.intervention,
-                self.intervention.latentParent,
-                self.target,
-            }
-        )
-
-        spaces: list[list[int]] = MechanismGenerator.helper_generate_spaces(
-            nodes=summandNodes
-        )
-        summandNodes.append(self.target)
-        spaces.append([self.target.intervened_value])
-        inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
-            listSpaces=spaces
-        )
-
-        obj_function_coefficients: list[float] = []
-        logger.debug("Debug input cases:")
-        logger.debug(f"Size of #inputs: {len(inputCases)}")
-        logger.debug("first component:")
-        logger.debug(inputCases[0])
-
-        logger.debug("Debug summand nodes")
-        for node in summandNodes:
-            logger.debug(f"Node={node.label}")
-
-        logger.debug("--- DEBUG OBJ FUNCTION GENERATION ---")
-        for mechanism in mechanisms:
-            logger.debug("-- START MECHANISM --")
-            mechanismCoefficient: int = 0
-            for inputCase in inputCases:
-                logger.debug("---- START INPUT CASE ----")
-                partialCoefficient = 1
-
-                for index, variableValue in enumerate(inputCase):
-                    logger.debug(f"{summandNodes[index].label} = {variableValue}")
-                    summandNodes[index].value = variableValue
-
-                for variable in summandNodes:
-                    logger.debug(f"\nCurrent variable: {variable.label}")
-                    if (
-                        variable in self.empiricalProbabilitiesVariables
-                    ):  # Case 1: coff *= P(V=value)
-                        logger.debug("Case 1")
-                        variableProbability = find_probability(
-                            dataFrame=self.dataFrame,
-                            variables=[variable],
-                        )
-                        partialCoefficient *= variableProbability
-                    elif (
-                        variable in self.mechanismVariables
-                    ):  # Case 2: terminate with coeff 0 if the decision function is 0.
-                        # Do nothing otherwise
-                        logger.debug("Case 2")
-                        current_mechanism_key = []
-                        mechanismKey: str = ""
-                        for _key, node_item in self.graph.graphNodes.items():
-                            if not node_item.isLatent and (
-                                variable in node_item.children
-                            ):
-                                current_mechanism_key.append(
-                                    f"{node_item.label}={node_item.value}"
-                                )
-                        for e in sorted(current_mechanism_key):
-                            mechanismKey += f"{e},"
-                        logger.debug(f"key: {mechanismKey[:-1]}")
-                        expectedValue = mechanism[mechanismKey[:-1]]
-
-                        if expectedValue != variable.value:
-                            partialCoefficient = 0
-                            logger.debug("End process")
-                    else:  # Case 3: coeff *= P(V|some endo parents)
-                        logger.debug("Case 3")
-                        conditionalProbability = find_conditional_probability(
-                            dataFrame=self.dataFrame,
-                            targetRealization=[variable],
-                            conditionRealization=self.conditionalProbabilities[
-                                variable
-                            ],
-                        )
-                        partialCoefficient *= conditionalProbability
-
-                    logger.debug(f"current partial coefficient: {partialCoefficient}")
-                    if partialCoefficient == 0:
-                        break
-
-                mechanismCoefficient += partialCoefficient
-                logger.debug(f"current coef = {mechanismCoefficient}")
-
-            obj_function_coefficients.append(mechanismCoefficient)
-
-        return obj_function_coefficients
-
-    def find_linear_good_set(self):
+    def _find_linear_good_set(self):
         """
         Runs each step of the algorithm.
         Finds a set of variables/restrictions that linearizes the problem.
@@ -184,16 +62,15 @@ class ObjFunctionGenerator:
         current_targets: list[Node] = [self.target]
         interventionLatent: Node = intervention.latentParent
 
-        empiricalProbabilitiesVariables = (
-            []
-        )  # If V in this array then it implies P(v) in the objective function
+        empiricalProbabilitiesVariables: list[Node] = []
+        # If V in this array then it implies P(v) in the objective function
         # If V in this array then it implies a decision function: 1(Pa(v) => v=
         # some value)
-        mechanismVariables = []
+        mechanismVariables: list[Node] = []
         # If V|A,B,C in this array then it implies P(V|A,B,C) in the objective
         # function
         conditionalProbabilities: dict[Node, list[Node]] = {}
-        debugOrder: list[Node] = []
+        consideredGraphNodes: list[Node] = []
         while len(current_targets) > 0:
             logger.debug("---- Current targets array:")
             for tg in current_targets:
@@ -206,7 +83,7 @@ class ObjFunctionGenerator:
             )
             logger.debug(f"__>>{current_target.label}<<__")
             current_targets.remove(current_target)
-            debugOrder.append(current_target)
+            consideredGraphNodes.append(current_target)
             logger.debug(f"Current target: {current_target.label}")
 
             if not self.graph.is_descendant(
@@ -236,7 +113,7 @@ class ObjFunctionGenerator:
         self.empiricalProbabilitiesVariables = empiricalProbabilitiesVariables
         self.mechanismVariables = mechanismVariables
         self.conditionalProbabilities = conditionalProbabilities
-        self.debugOrder = debugOrder
+        self.consideredGraphNodes = consideredGraphNodes
         logger.debug("Test completed")
 
     def _find_d_separator_set(
@@ -332,3 +209,173 @@ class ObjFunctionGenerator:
             if (no_of_possibilities >> i) % 2 == 1:
                 current_conditionable_ancestors.append(conditionable_ancestors[i])
         return current_conditionable_ancestors
+
+    def generate_symbolic_objective_function_probabilities(self) -> list[tuple]:
+        """
+        Constructs a symbolic representation of the objective function for the linear program.
+
+        Returns:
+            list[tuple]: A list of tuples, where each tuple represents a term in the objective function.
+                - For empirical probability variables, the tuple is (node, None). Example: P(A)
+                - For conditional probabilities, the tuple is (node, conditioned_nodes),
+                where conditioned_nodes is a list of nodes the probability is conditioned on.
+                Example: P(A|B)
+        """
+        objective_function_probabilities: list[tuple] = []
+        for node in self.empiricalProbabilitiesVariables:
+            if node.isLatent:
+                continue
+            objective_function_probabilities.append((node.label, None))
+        for node, conditioned_node in self.conditionalProbabilities.items():
+            objective_function_probabilities.append((node.label, conditioned_node))
+        return objective_function_probabilities
+
+    def generate_symbolic_decision_function(self) -> dict[tuple, int]:
+        """
+        Generates a symbolic decision function for mechanism variables.
+
+        For each mechanism variable, this function creates all possible realizations
+        (combinations of its non-latent parents' values) and maps each to an initial value of -1.
+        The keys are tuples of the form (node_label, (parent1_label, value1), ...).
+
+        Returns:
+            dict[tuple, int]: A dictionary mapping each mechanism variable realization to -1.
+        """
+        decision_function = {}
+        for node in self.mechanismVariables:
+            non_latent_parents = [p for p in node.parents if not p.isLatent]
+            parent_labels = [p.label for p in non_latent_parents]
+            parent_cardinalities = [p.cardinality for p in non_latent_parents]
+            for values in itertools.product(*[range(c) for c in parent_cardinalities]):
+                # Não é melhor string? "A,B=,C=..."
+                key = (node.label,) + tuple(zip(parent_labels, values))
+                decision_function[key] = -1
+        return decision_function
+
+    def get_mechanisms_pruned(self) -> MechanismType:
+        """
+        Remove c-component variables that do not appear in the objective function
+        """
+        interventionLatentParent = self.intervention.latentParent
+        cComponentEndogenous = interventionLatentParent.children
+
+        endogenousNodes = (
+            set(cComponentEndogenous) & set(self.consideredGraphNodes)
+        ) | {self.intervention}
+
+        _, _, mechanisms = MechanismGenerator.mechanisms_generator(
+            latentNode=interventionLatentParent,
+            endogenousNodes=endogenousNodes,
+        )
+        return mechanisms
+
+    def build_objective_function(self, mechanisms: MechanismType) -> list[float]:
+        """
+        Intermediate step: remove useless endogenous variables in the mechanisms creation?
+        Must be called after generate restrictions. Returns the objective function with the following encoding
+
+        For each mechanism, find the coefficient in the objective function.
+            Open a sum on this.consideredGraphNodes variables <=> consider all cases (cartesian product).
+            Only the intervention has a fixed value.
+        """
+
+        # (3) Generate all the cases: cartesian product!
+        debug_variables_label = [node.label for node in self.consideredGraphNodes]
+        logger.debug(f"Debug variables: {debug_variables_label}")
+        if self.intervention in self.consideredGraphNodes:
+            self.consideredGraphNodes.remove(self.intervention)
+
+        summandNodes = list(
+            set(self.consideredGraphNodes)
+            - {
+                self.intervention,
+                self.intervention.latentParent,
+                self.target,
+            }
+        )
+
+        spaces: list[list[int]] = MechanismGenerator.helper_generate_spaces(
+            nodes=summandNodes
+        )
+        summandNodes.append(self.target)
+        spaces.append([self.target.intervened_value])
+        inputCases: list[list[int]] = MechanismGenerator.generate_cross_products(
+            listSpaces=spaces
+        )
+
+        obj_function_coefficients: list[float] = []
+        logger.debug("Debug input cases:")
+        logger.debug(f"Size of #inputs: {len(inputCases)}")
+        logger.debug("first component:")
+        logger.debug(inputCases[0])
+
+        logger.debug("Debug summand nodes")
+        for node in summandNodes:
+            logger.debug(f"Node={node.label}")
+
+        logger.debug("--- DEBUG OBJ FUNCTION GENERATION ---")
+        for mechanism in mechanisms:
+            logger.debug("-- START MECHANISM --")
+            mechanismCoefficient: int = 0
+            for inputCase in inputCases:
+                logger.debug("---- START INPUT CASE ----")
+                partialCoefficient = 1
+
+                for index, variableValue in enumerate(inputCase):
+                    logger.debug(f"{summandNodes[index].label} = {variableValue}")
+                    summandNodes[index].value = variableValue
+
+                for variable in summandNodes:
+                    logger.debug(f"\nCurrent variable: {variable.label}")
+                    if (
+                        variable in self.empiricalProbabilitiesVariables
+                    ):  # Case 1: coff *= P(V=value)
+                        logger.debug("Case 1")
+                        variableProbability = find_probability(
+                            dataFrame=self.dataFrame,
+                            variables=[variable],
+                        )
+                        partialCoefficient *= variableProbability
+                    elif (
+                        variable in self.mechanismVariables
+                    ):  # Case 2: terminate with coeff 0 if the decision function is 0.
+                        # Do nothing otherwise
+                        logger.debug("Case 2")
+                        current_mechanism_key = []
+                        mechanismKey: str = ""
+                        for _key, node_item in self.graph.graph_nodes.items():
+                            if not node_item.isLatent and (
+                                variable in node_item.children
+                            ):
+                                current_mechanism_key.append(
+                                    f"{node_item.label}={node_item.value}"
+                                )
+                        for e in sorted(current_mechanism_key):
+                            mechanismKey += f"{e},"
+                        logger.debug(f"key: {mechanismKey[:-1]}")
+                        expectedValue = mechanism[mechanismKey[:-1]]
+
+                        if expectedValue != variable.value:
+                            partialCoefficient = 0
+                            logger.debug("End process")
+                    else:  # Case 3: coeff *= P(V|some endo parents)
+                        logger.debug("Case 3")
+                        conditionalProbability = find_conditional_probability(
+                            dataFrame=self.dataFrame,
+                            targetRealization=[variable],
+                            conditionRealization=self.conditionalProbabilities[
+                                variable
+                            ],
+                        )
+                        partialCoefficient *= conditionalProbability
+
+                    logger.debug(f"current partial coefficient: {partialCoefficient}")
+                    if partialCoefficient == 0:
+                        break
+
+                mechanismCoefficient += partialCoefficient
+                logger.debug(f"current coef = {mechanismCoefficient}")
+
+            obj_function_coefficients.append(mechanismCoefficient)
+
+        return obj_function_coefficients
