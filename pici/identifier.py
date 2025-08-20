@@ -22,6 +22,9 @@ class Identifier:
         )
 
     def find_backdoor(self):
+        """
+        Find a backdoor adjustment set for the causal model.
+        """
         backdoors = self.infer.get_all_backdoor_adjustment_sets(X=self.X, Y=self.Y)
         obs_bds = self._filter_observed_sets(backdoors)
         if obs_bds:
@@ -31,6 +34,9 @@ class Identifier:
         return None
 
     def find_frontdoor(self):
+        """
+        Find a frontdoor adjustment set for the causal model.
+        """
         frontdoors = self.infer.get_all_frontdoor_adjustment_sets(X=self.X, Y=self.Y)
         obs_fds = self._filter_observed_sets(frontdoors)
         if obs_fds:
@@ -43,6 +49,9 @@ class Identifier:
         raise NotImplementedError
 
     def check_unobservable_confounding(self) -> bool:
+        """
+        Check for an unobservable confounder in the causal model.
+        """
         for U in self.causal_model.unobservables or []:
             if nx.has_path(self.G, U.label, self.X) and nx.has_path(
                 self.G, U.label, self.Y
@@ -52,6 +61,9 @@ class Identifier:
         return False
 
     def graphical_identification(self):
+        """
+        Check if X and Y are d-separated after removing X's incoming edges.
+        """
         G_do = self.G.copy()
         G_do.remove_edges_from(list(G_do.in_edges(self.X)))
         if nx.is_d_separator(G_do, {self.X}, {self.Y}, set()):
@@ -60,6 +72,9 @@ class Identifier:
         return False
 
     def id_algorithm_identification(self):
+        """
+        Identify the causal effect using the ID algorithm.
+        """
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             dowhy_model = DowhyCausalModel(

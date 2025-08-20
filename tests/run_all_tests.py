@@ -5,6 +5,9 @@ import unittest
 
 
 def main():
+    """
+    Run every test in the tests/ directory.
+    """
     parser = argparse.ArgumentParser(
         description="Run unittest suite from inside tests/"
     )

@@ -19,6 +19,9 @@ from pici.utils._enum import DataExamplesPaths
 
 class TestInferenceAlgorithm(unittest.TestCase):
     def test_binary_balke_pearl(self):
+        """
+        Test d-separation check and the intervention query using the example presented in Balke & Pearl, 1994
+        """
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
@@ -57,6 +60,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
     def test_discrete_iv_random(self):
+        """
+        Test the intervention query using a simple graph with an IV and discrete variables
+        """
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 4, "X": 3, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
@@ -88,6 +94,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
     def test_binary_copilot_example(self):
+        """
+        Test d-separation check and the intervention query using the Copilot example
+        """
         edges = (
             "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X,"
             " U2 -> D, U3 -> E, U1 -> F"
@@ -139,6 +148,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
     def test_simple_counfoundness(self):
+        """
+        Test d-separation check using a simple graph with a latent confounder
+        """
         edges = "U1 -> X, U1 -> Y"
         unobs = ["U1"]
         df = pd.read_csv(
@@ -157,6 +169,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
         )
 
     def test_incident_scenario(self):
+        """
+        Test d-separation check using a complex graph with multiple nodes
+        """
         edges_list = [
             ("DB_Change", "DB_Latency"),
             ("DB_Latency", "MS-B_Latency"),
@@ -201,6 +216,9 @@ class TestInferenceAlgorithm(unittest.TestCase):
 
 class WeakPnAndWeakPsInferences(unittest.TestCase):
     def test_weak_pn_and_ps_binary_balke_pearl(self):
+        """
+        Test weak PN and weak PS inferences using the example presented in Balke & Pearl, 1994
+        """
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
@@ -258,6 +276,9 @@ class WeakPnAndWeakPsInferences(unittest.TestCase):
         )
 
     def test_weak_pn_and_ps_binary_copilot_example(self):
+        """
+        Test weak PN and weak PS inferences using the Copilot example
+        """
         edges = (
             "X -> Y, X -> D, D -> Y, E -> D, U1 -> Y, U1 -> X,"
             " U2 -> D, U3 -> E, U1 -> F"

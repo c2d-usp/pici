@@ -59,6 +59,16 @@ class CausalModel:
         interventions: list[tuple[str, int]] = None,
         target: tuple[str, int] = None,
     ) -> str | tuple[str, str]:
+        """
+        Return the intervention query, for identifiable and partially identifiable cases.
+
+        Args:
+            interventions: A list of tuples representing the interventions.
+            target: A tuple representing the target variable.
+
+        Returns:
+            The intervention query, as either a point or a set of bounds.
+        """
         is_identifiable, _, _ = self.is_identifiable_intervention(
             interventions=interventions, target=target
         )
@@ -77,6 +87,14 @@ class CausalModel:
     ) -> tuple[bool, str | None, Any | None]:
         """
         Check if the intervention is identifiable.
+
+        Args:
+            interventions: A list of tuples representing the interventions.
+            target: A tuple representing the target variable.
+
+        Returns:
+            A tuple containing a boolean indicating if the intervention is identifiable,
+            the identification method used (if any), and the result of the identification, such as an adjustment set (if applicable).
         """
 
         if not self.interventions_validator(interventions):
@@ -106,6 +124,16 @@ class CausalModel:
         interventions: list[tuple[str, int]] = None,
         target: tuple[str, int] = None,
     ) -> str:
+        """
+        Calculate the intervention query for completely identifiable cases.
+
+        Args:
+            interventions: A list of tuples representing the interventions.
+            target: A tuple representing the target variable.
+
+        Returns:
+            The point value result for the identifiable intervention query as a string.
+        """
         if not self.interventions_validator(interventions):
             raise ValueError("Invalid interventions")
         if not self.target_validator(target):
@@ -138,7 +166,16 @@ class CausalModel:
         interventions: list[tuple[str, int]] = None,
         target: tuple[str, int] = None,
     ) -> tuple[str, str]:
+        """
+        Calculate the intervention query for partially identifiable cases.
 
+        Args:
+            interventions: A list of tuples representing the interventions.
+            target: A tuple representing the target variable.
+
+        Returns:
+            The bounds of the partially identifiable intervention query as a tuple of strings.
+        """
         if not self.interventions_validator(interventions):
             raise ValueError("Invalid interventions")
         if not self.target_validator(target):
@@ -152,6 +189,9 @@ class CausalModel:
         raise Exception("None interventions found. Expect at least one intervention.")
 
     def single_intervention_query(self) -> tuple[str, str]:
+        """
+        Calculate the intervention query for a single intervention partially identifiable case.
+        """
         return build_linear_problem(
             graph=self.graph,
             df=self.data,
@@ -215,8 +255,17 @@ class CausalModel:
         self, intervention_label: str, target_label: str
     ) -> str | tuple[str, str]:
         """
+        Calculate the weak PN intervention query.
+
         PN = P(Y_{X=0} = 0 | X = 1, Y = 1)
         WEAK_PN = P(Y_{X=0} = 0)
+
+        Args:
+            intervention_label: The label of the intervention variable.
+            target_label: The label of the target variable.
+
+        Returns:
+            The weak PN intervention query point value result as a string, if identifiable, or bounds as a tuple of strings, if partially identifiable.
         """
         return self.intervention_query(
             interventions=[(intervention_label, 0)], target=(target_label, 0)
@@ -226,8 +275,17 @@ class CausalModel:
         self, intervention_label: str, target_label: str
     ) -> str | tuple[str, str]:
         """
+        Calculate the weak PS intervention query.
+
         PS = P(Y_{X=1} = 1 | X = 0, Y = 0)
         WEAK_PS = P(Y_{X=1} = 1)
+
+        Args:
+            intervention_label: The label of the intervention variable.
+            target_label: The label of the target variable.
+
+        Returns:
+            The weak PS intervention query point value result as a string, if identifiable, or bounds as a tuple of strings, if partially identifiable.
         """
         return self.intervention_query(
             interventions=[(intervention_label, 1)], target=(target_label, 1)
@@ -240,6 +298,19 @@ class CausalModel:
         set_nodes_Z: list[str],
         G: nx.DiGraph = None,
     ) -> bool:
+        """
+        Check if set of nodes X is d-separated from set of nodes Y through set of nodes Z in the intervened graph.
+
+        Args:
+            set_nodes_X: The set of nodes X.
+            set_nodes_Y: The set of nodes Y.
+            set_nodes_Z: The set of nodes Z.
+            G: The graph to check d-separation in.
+
+        Returns:
+            True if X is d-separated from Y given Z in the intervened graph, False otherwise.
+
+        """
         if G is None:
             G = self.graph.DAG
 
@@ -269,10 +340,16 @@ class CausalModel:
         G: nx.DiGraph = None,
     ) -> bool:
         """
-        Is set of nodes X d-separated from set of nodes Y through set of nodes Z?
+        Check if set of nodes X is d-separated from set of nodes Y through set of nodes Z in the complete graph.
 
-        Given two sets of nodes (nodes1 and nodes2), the function returns true if every node in nodes1
-        is independent of every node in nodes2, given that the nodes in conditionedNodes are conditioned.
+        Args:
+            set_nodes_X: The set of nodes X.
+            set_nodes_Y: The set of nodes Y.
+            set_nodes_Z: The set of nodes Z.
+            G: The graph to check d-separation in.
+
+        Returns:
+            True if X is d-separated from Y given Z in the complete graph, False otherwise.
         """
         if G is None:
             G = self.graph.DAG
@@ -281,11 +358,23 @@ class CausalModel:
         )
 
     def set_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        """
+        Set the interventions for the causal model.
+
+        Args:
+            interventions: A list of tuples representing the interventions.
+        """
         self.interventions = convert_tuples_list_into_nodes_list(
             interventions, self.graph
         )
 
     def add_interventions(self, interventions: list[tuple[str, int]]) -> None:
+        """
+        Add interventions to the causal model.
+
+        Args:
+            interventions: A list of tuples representing the interventions.
+        """
         more_interventions = convert_tuples_list_into_nodes_list(
             interventions, self.graph
         )
@@ -296,11 +385,20 @@ class CausalModel:
                 self.interventions.append(intervention)
 
     def set_target(self, target: tuple[str, int]) -> None:
+        """
+        Set the target for the causal model.
+
+        Args:
+            target: A tuple representing the target.
+        """
         self.target = convert_tuple_into_node(target, self.graph)
 
     def generate_graph_image(self, output_path="graph.png"):
         """
-        Draw the graph using networkx.
+        Generate and save an image of the graph, using networkx.
+
+        Args:
+            output_path: The path to save the graph image.
         """
         plot_graph_image(
             graph=self.graph.DAG,
