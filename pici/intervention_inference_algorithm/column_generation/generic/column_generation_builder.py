@@ -45,7 +45,6 @@ class ColumnGenerationProblemBuilder:
     def __init__(
         self,
         dataFrame,
-        empiricalProbabilities: list[float],
         parametric_columns: dict[str, tuple[list[int]]],
         betaVarsCost: list[float],
         betaVarsBitsX0: list[tuple[str]],
@@ -67,28 +66,28 @@ class ColumnGenerationProblemBuilder:
             target=target,
         )
 
-        interventionLatentParent = objective_function.intervention.latentParent
-        cComponentEndogenous = interventionLatentParent.children
-        consideredCcomp = list(
-            (set(cComponentEndogenous) & set(objective_function.consideredGraphNodes))
+        intervention_latent_parent = objective_function.intervention.latentParent
+        c_component_endogenous_nodes = intervention_latent_parent.children
+        considered_c_comp = list(
+            (set(c_component_endogenous_nodes) & set(objective_function.consideredGraphNodes))
             | {objective_function.intervention}
         )
 
-        topoOrder: list[Node] = dag.topologicalOrder
+        topological_order: list[Node] = dag.topologicalOrder
 
-        cCompOrder = get_c_component_in_reverse_topological_order(
-            topoOrder=topoOrder,
+        c_comp_order = get_c_component_in_reverse_topological_order(
+            topo_order=topological_order,
             unob=intervention.latentParent,
-            consideredCcomp=consideredCcomp,
+            considered_c_comp=considered_c_comp,
         )
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
-            intervention.latentParent, cCompOrder
+            intervention.latentParent, c_comp_order
         )
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
-                cCompOrder=cCompOrder,
+                c_comp_order=c_comp_order,
                 c_component_and_tail=c_component_and_tail,
-                topoOrder=topoOrder,
+                topo_order=topological_order,
             )
         )
 
