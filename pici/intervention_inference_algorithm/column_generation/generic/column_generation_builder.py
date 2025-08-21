@@ -71,17 +71,18 @@ class ColumnGenerationProblemBuilder:
 
         topological_order: list[Node] = dag.topological_order
 
-        c_comp_order = get_c_component_in_reverse_topological_order(
+        self.considered_c_comp_reversed_ordered = get_c_component_in_reverse_topological_order(
             topo_order=topological_order,
             unob=intervention.latent_parent,
             considered_c_comp=considered_c_comp,
         )
+
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
-            intervention.latent_parent, c_comp_order
+            intervention.latent_parent, self.considered_c_comp_reversed_ordered
         )
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
-                c_comp_order=c_comp_order,
+                c_comp_order=self.considered_c_comp_reversed_ordered,
                 c_component_and_tail=c_component_and_tail,
                 topo_order=topological_order,
             )
@@ -150,6 +151,7 @@ class ColumnGenerationProblemBuilder:
 
         #### We're here
         self.subproblem.setup(
+            considered_c_comp_reversed_ordered=self.considered_c_comp_reversed_ordered,
             amountBitsPerCluster=self.amountBitsPerCluster,
             amountBetaVarsPerX=self.amountBetaVarsPerX,
             duals=self.duals,
