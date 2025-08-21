@@ -32,10 +32,27 @@ def calculate_latent_bit_length(latent: Node) -> int:
     """
     latent_bit_length = 0
     for child in latent.children:
-        child_bit_length = 1
-        for parent in child.parents:
-            if parent.is_latent:
-                continue
-            child_bit_length *= parent.cardinality
-        latent_bit_length += child_bit_length
+        latent_bit_length += count_endogenous_parent_configurations(child)
     return latent_bit_length
+
+
+def count_endogenous_parent_configurations(node: Node):
+    """
+    Calculates the number of unique configurations for a node's endogenous (non-latent) parents.
+
+    For the given node, this function multiplies the cardinalities of all its non-latent parents,
+    representing the number of possible value combinations those parents can take.
+
+    Args:
+        node (Node): The node whose endogenous parent configurations are counted.
+
+    Returns:
+        int: The total number of unique configurations for the node's endogenous parents.
+    """
+    node_bit_length = 1
+    for parent in node.parents:
+        if parent.is_latent:
+            continue
+        node_bit_length *= parent.cardinality    
+    return node_bit_length
+
