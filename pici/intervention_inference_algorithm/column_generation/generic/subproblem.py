@@ -1,7 +1,10 @@
 import logging
 
 import gurobipy as gp
-from gurobipy import GRB
+from gurobipy import GRB, Var, tupledict
+
+from pici.graph.node import Node
+from pici.intervention_inference_algorithm.column_generation.generic.bits import count_endogenous_parent_configurations
 
 
 logger = logging.getLogger(__name__)
@@ -19,19 +22,21 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self, N: int, M: int):
+    def __init__(self):
         self.model = gp.Model("subproblem")
+        self.cluster_bits: list[tupledict[int, Var]] = []        
+        ### VVVV
         self.bit0 = {}  # X mechanism
-        self.clusterBits = [
-            {} for _ in range(N + 1)
-        ]  # Bits for the mechanisms of A1,A2,..,An
         self.beta_varsX0 = {}
         self.beta_varsX1 = {}
+        N = 0
+        M = 0
         self.bitsParametric = [{} for _ in range((1 << (N + M + 1)))]
         self.constr = None
-
+    
     def setup(
         self,
+        considered_c_comp_reversed_ordered: list[Node],
         amountBitsPerCluster: int,
         amountBetaVarsPerX: int,
         duals: dict[int, float],
@@ -45,19 +50,12 @@ class SubProblem:
         interventionValue: int,
         minimizes_objective_function: bool,
     ):
+        self._create_cluster_bits(considered_c_comp_reversed_ordered)
+
+        ### VVVVVVVVVVVVVVVVVV
 
         # Bit that determines the value of X.
         self.bit0 = self.model.addVars(1, obj=0, vtype=GRB.BINARY, name=["bit0"])
-
-        # N bit clusters, one for each A_i (i = 1,2..,N)
-        for clusterIndex in range(1, N + 1):
-            clusterBitsNames: list[str] = []
-            for i in range(amountBitsPerCluster):
-                clusterBitsNames.append(f"cluster_{clusterIndex}_bit_{i}")
-
-            self.clusterBits[clusterIndex] = self.model.addVars(
-                amountBitsPerCluster, obj=0, vtype=GRB.BINARY, name=clusterBitsNames
-            )
 
         # Beta Var when X=0:
         betaVarX0Names: list[str] = []
@@ -124,7 +122,7 @@ class SubProblem:
                 bitIndex = int(parts[1])
                 self.model.addConstr(
                     self.beta_varsX0[betaVarX0Index]
-                    <= self.clusterBits[clusterBitIndex][bitIndex],
+                    <= self.cluster_bits[clusterBitIndex][bitIndex],
                     name=f"BetaX0_{betaVarX0Index}_BitPlus_{bitPlus}",
                 )
 
@@ -134,21 +132,21 @@ class SubProblem:
                 bitIndex = int(parts[1])
                 self.model.addConstr(
                     self.beta_varsX0[betaVarX0Index]
-                    <= 1 - self.clusterBits[clusterBitIndex][bitIndex],
+                    <= 1 - self.cluster_bits[clusterBitIndex][bitIndex],
                     name=f"BetaX0_{betaVarX0Index}_BitMinus_{bitMinus}",
                 )
 
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
-                    self.clusterBits[int(bitPlus.split("_")[0][1:])][
+                    self.cluster_bits[int(bitPlus.split("_")[0][1:])][
                         int(bitPlus.split("_")[1])
                     ]
                     for bitPlus in betaVarsBitsX0[indexBetaVarX0][0]
                 )
                 + gp.quicksum(
                     1
-                    - self.clusterBits[int(bitMinus.split("_")[0][1:])][
+                    - self.cluster_bits[int(bitMinus.split("_")[0][1:])][
                         int(bitMinus.split("_")[1])
                     ]
                     for bitMinus in betaVarsBitsX0[indexBetaVarX0][1]
@@ -179,7 +177,7 @@ class SubProblem:
                 bitIndex = int(parts[1])
                 self.model.addConstr(
                     self.beta_varsX1[betaVarX1Index]
-                    <= self.clusterBits[clusterBitIndex][bitIndex],
+                    <= self.cluster_bits[clusterBitIndex][bitIndex],
                     name=f"BetaX1_{betaVarX1Index}_BitPlus_{bitPlus}",
                 )
 
@@ -189,21 +187,21 @@ class SubProblem:
                 bitIndex = int(parts[1])
                 self.model.addConstr(
                     self.beta_varsX1[betaVarX1Index]
-                    <= 1 - self.clusterBits[clusterBitIndex][bitIndex],
+                    <= 1 - self.cluster_bits[clusterBitIndex][bitIndex],
                     name=f"BetaX1_{betaVarX1Index}_BitMinus_{bitMinus}",
                 )
 
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
-                    self.clusterBits[int(bitPlus.split("_")[0][1:])][
+                    self.cluster_bits[int(bitPlus.split("_")[0][1:])][
                         int(bitPlus.split("_")[1])
                     ]
                     for bitPlus in betaVarsBitsX1[indexBetaVarX1][0]
                 )
                 + gp.quicksum(
                     1
-                    - self.clusterBits[int(bitMinus.split("_")[0][1:])][
+                    - self.cluster_bits[int(bitMinus.split("_")[0][1:])][
                         int(bitMinus.split("_")[1])
                     ]
                     for bitMinus in betaVarsBitsX1[indexBetaVarX1][1]
@@ -336,6 +334,26 @@ class SubProblem:
         # the entering column.
         self.model.params.bestBdStop = 1
         self.model.update()
+
+    def _create_cluster_bits(self, considered_c_comp: list[Node]):
+        """
+        Each node in the considered c-component has a series of bits that represents each realization.
+        Example:
+            A = b0b1b2
+            B = b0
+            C = b0b1
+            We've three clusters. Cluster A with 3 bits, Cluster B with one bit, and Cluster C with two bits.
+
+        """
+        for cluster_index, node in enumerate(considered_c_comp):
+            node_cluster_size = count_endogenous_parent_configurations(node)
+            variable_bits_name: list[str] = []
+            for i in range(node_cluster_size):
+                variable_bits_name.append(f"cluster_{cluster_index}_bit_{i}_node_{node.label}")
+
+            self.cluster_bits[cluster_index] = self.model.addVars(
+                node_cluster_size, obj=0, vtype=GRB.BINARY, name=variable_bits_name
+            )
 
     def update(self, duals):
         """
