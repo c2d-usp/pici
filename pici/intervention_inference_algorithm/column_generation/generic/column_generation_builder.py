@@ -6,6 +6,7 @@ import logging
 
 import gurobipy as gp
 from gurobipy import GRB
+from pandas import DataFrame
 
 logger = logging.getLogger(__name__)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -39,15 +40,16 @@ from pici.utils._enum import ColumnGenerationParameters
 class ColumnGenerationProblemBuilder:
     def __init__(
         self,
-        dataFrame,
-        parametric_columns: dict[str, tuple[list[int]]],
-        betaVarsCost: list[float],
-        betaVarsBitsX0: list[tuple[str]],
-        betaVarsBitsX1: list[tuple[str]],
+        dataFrame: DataFrame,
         dag: Graph,
         intervention: Node,
         target: Node,
         minimizes_objective_function: bool,
+        
+        parametric_columns: dict[str, tuple[list[int]]],
+        betaVarsCost: list[float],
+        betaVarsBitsX0: list[tuple[str]],
+        betaVarsBitsX1: list[tuple[str]],
     ):
 
         self.intervention = intervention
