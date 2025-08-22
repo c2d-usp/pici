@@ -46,9 +46,9 @@ class MasterProblem:
             ),
             name="EmpiricalRestrictions",
         )
-        self.model.modelSense = GRB.MINIMIZE
-        self.model.params.outputFlag = 0
-        self.model.setParam('FeasibilityTol', 1e-9)
+        self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
+        self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
+        self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.update()
 
     def update(
