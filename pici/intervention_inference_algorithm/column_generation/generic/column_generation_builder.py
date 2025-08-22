@@ -139,14 +139,16 @@ class ColumnGenerationProblemBuilder:
         Configures the Gurobi solving method, initializes the base columns, sets up the master problem with
         empirical probability constraints, and initializes the subproblem with all required parameters.
 
+        Gurobi's methods (https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#method)
+
         Args:
-            method (int, optional): The Gurobi solving method to use. Defaults to 1.
+            method (int, optional): The Gurobi solving method to use. Defaults to 1 (barrier and dual simplex).
         """
         # Define gurobi running method
-        self.master.model.params.Method = method
-        self.subproblem.model.params.Method = method
+        self.master.model.setParam(GRB.Param.Method, method)
+        self.subproblem.model.setParam(GRB.Param.Method, method)
 
-        self._initialize_column_base()
+        self.columns_base = self._generate_initial_column_base()
         self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
 
         #### We're here
@@ -166,20 +168,23 @@ class ColumnGenerationProblemBuilder:
             minimizes_objective_function=self.minimizes_objective_function,
         )
 
-    def _initialize_column_base(self):
+    def _generate_initial_column_base(self) -> list[list[int]]:
         """
-        Initializes the base columns for the master problem as an identity matrix.
+        Generate an initial base columns for the master problem as an identity matrix.
 
         This method creates an identity matrix of size (number_of_restrictions + 1) x (number_of_restrictions + 1),
         where each column corresponds to a basic feasible solution for the initial master problem.
-        The resulting matrix is stored in self.columns_base.
+        The resulting matrix is returned.
+
+        Returns:
+            list[list[int]]: The identity matrix.
         """
         columns_base: list[list[int]] = []
         for index in range(self.number_of_restrictions + 1):
             new_column = [0] * (self.number_of_restrictions + 1)
             new_column[index] = 1
             columns_base.append(new_column)
-        self.columns_base = columns_base
+        return columns_base
 
     def exec(self) -> int:
         """
