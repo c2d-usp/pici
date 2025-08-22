@@ -4,7 +4,7 @@ import gurobipy as gp
 from gurobipy import GRB, Var, tupledict
 
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic.bits import count_endogenous_parent_configurations
+from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
 
 
 logger = logging.getLogger(__name__)
@@ -72,3 +72,46 @@ class SubProblem:
             "obj", self.bitsParametric, [-duals[dualKey] for dualKey in duals]
         )
         self.model.update()
+
+
+    def linearize(self, W_realizations: list[list[int]], considered_c_component: list[Node]) -> dict:
+        map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
+
+        for wi_realization in W_realizations:
+            coef = get_coef_from_objective_function()
+            bit_product = BitProduct()
+            for node in considered_c_component:
+                # Ordenar Pa(node) para ver a ordem dos bits na W_realizations
+                bit_gurobi_var = get_bit_var_given_parents_rlz_and_current_node()
+
+                sign = 1
+                if wi_realization[node] == 0:
+                    sign = -1
+                new_bit = Bit(bit_gurobi_var, sign)
+
+                bit_product.add_bit(new_bit)
+            
+            # TODO: Add variable name
+            map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(obj=coef, vtype=GRB.BINARY)
+        return map_bit_product_to_linearized_variable
+
+
+    def add_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
+        for bit_product, variable in map_bit_product_to_linearized_variable.items():
+            # TODO: Add constraint name
+            self.model.addConstr(variable >= 0, name=f"BOOOO")
+            # TODO: Add constraints name
+            self.model.addConstr(variable <= 1)
+
+            sum_bits = 0
+            for bit in bit_product.bit_list:
+                one_or_zero = 0
+                if bit.sign == -1:
+                    one_or_zero = 1
+            
+                # TODO: Add constraint name
+                self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var, name=f"_______")
+                sum_bits += one_or_zero + bit.sign*bit.gurobi_var
+
+            n = len(bit_product.bit_list)
+            self.model.addConstr(variable >= 1 - n + sum_bits)
