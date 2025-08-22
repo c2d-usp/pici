@@ -93,6 +93,14 @@ class SubProblem:
             
             # TODO: Add variable name
             map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(obj=coef, vtype=GRB.BINARY)
+        
+        '''
+        TODO: Pode ser que o gurobi sabe linearizar o produtório.
+        Basicamente teriamos uma lista de produtórios ao inveés de um dicionário mapeando uma nova variável.
+        Para cada produtório:
+            addConstr(0 <= produtorio <= 1)
+        '''
+
         return map_bit_product_to_linearized_variable
 
 
