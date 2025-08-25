@@ -1,0 +1,18 @@
+<!-- bounds-centered.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none" stroke="currentColor">
+  <!-- Brackets -->
+  <g stroke-width="8" stroke-linecap="round">
+    <!-- Left [ -->
+    <line x1="32" y1="28" x2="32" y2="100"/>
+    <line x1="32" y1="28" x2="48" y2="28"/>
+    <line x1="32" y1="100" x2="48" y2="100"/>
+    <!-- Right ] -->
+    <line x1="96" y1="28" x2="96" y2="100"/>
+    <line x1="80" y1="28" x2="96" y2="28"/>
+    <line x1="80" y1="100" x2="96" y2="100"/>
+  </g>
+  <!-- Interval -->
+  <line x1="48" y1="64" x2="80" y2="64" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="48" cy="64" r="6" fill="currentColor"/>
+  <circle cx="80" cy="64" r="6" fill="currentColor"/>
+</svg>
