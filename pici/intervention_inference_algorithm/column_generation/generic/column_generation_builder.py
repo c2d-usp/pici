@@ -37,7 +37,7 @@ from pici.intervention_inference_algorithm.column_generation.scalable_problem_in
 from pici.utils._enum import ColumnGenerationParameters
 
 
-class ColumnGenerationProblemBuilder:
+class ColumnGenerationProblemOrchestrator:
     def __init__(
         self,
         dataFrame: DataFrame,
@@ -295,7 +295,7 @@ class ColumnGenerationProblemBuilder:
         self.master.model.write("model.mps")
         return self.master.model.ObjVal
 
-def solve(problem: ColumnGenerationProblemBuilder, method=1) -> tuple[int, float]:
+def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, float]:
     """
     Solves the column generation problem using the BIG_M approach.
 
@@ -340,7 +340,7 @@ def buildScalarProblem(
     parametric_columns: list[tuple[list[str]]] = InitScalable.defineParametricColumn(
         M=M, N=N
     )
-    return ColumnGenerationProblemBuilder(
+    return ColumnGenerationProblemOrchestrator(
         dataFrame=df,
         empiricalProbabilities=empiricalProbabilities,
         parametric_columns=parametric_columns,
