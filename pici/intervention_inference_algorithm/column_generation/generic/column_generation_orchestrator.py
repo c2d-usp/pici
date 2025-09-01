@@ -1,4 +1,5 @@
 
+from itertools import product
 import os
 import sys
 import copy
@@ -90,6 +91,8 @@ class ColumnGenerationProblemOrchestrator:
             )
         )
 
+        self.W_realizations = self._get_w_realizations(W)
+
         self.number_of_restrictions = len(W)
 
         self.duals = {}
@@ -134,6 +137,16 @@ class ColumnGenerationProblemOrchestrator:
         self.solution = {}
         self.subproblem = SubProblem(N=N, M=M)
 
+    def _get_w_realizations(self, W: list[Node]) -> list[list]:
+        ranges = [range(node.cardinality) for node in W]
+        cartesian = product(*ranges)
+        matrix = [[node.label for node in W]]
+        matrix += [list(combo) for combo in cartesian]
+        # idx_A = matrix[0].index(node.label)
+        return matrix
+
+
+
     def setup(self, method=1):
         """
         Sets up the master and subproblem models for column generation.
@@ -156,6 +169,7 @@ class ColumnGenerationProblemOrchestrator:
         #### We're here
         self.subproblem.setup(
             considered_c_comp_reversed_ordered=self.considered_c_comp_reversed_ordered,
+            W_realizations=self.W_realizations,
             amountBitsPerCluster=self.amountBitsPerCluster,
             amountBetaVarsPerX=self.amountBetaVarsPerX,
             duals=self.duals,
