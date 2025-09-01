@@ -30,6 +30,7 @@ class SubProblem:
     def setup(
         self,
         considered_c_comp_reversed_ordered: list[Node],
+        W_realizations: list[list],
         duals: dict[int, float],
         minimizes_objective_function: bool,
     ):
@@ -39,7 +40,7 @@ class SubProblem:
         self.model.setParam(GRB.Param.BestBdStop, 1)
 
         self._create_cluster_bits(considered_c_comp_reversed_ordered)
-        
+        self.W_realizations = W_realizations
         ###
 
         self.model.update()
@@ -74,18 +75,27 @@ class SubProblem:
         self.model.update()
 
 
-    def linearize(self, W_realizations: list[list[int]], considered_c_component: list[Node]) -> dict:
+    def linearize(self, W_realizations: list[list], considered_c_component: list[Node]) -> dict:
         map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
+        header = W_realizations[0]
+        cartesian_products = W_realizations[1:]
 
-        for wi_realization in W_realizations:
+        for realization in cartesian_products:
             coef = get_coef_from_objective_function()
             bit_product = BitProduct()
+            # Aqui eu não vou passar várias vezes pelo mesmo "conjunto"
+            # W         = A,B,C,D,F
+            # CONS_COMP = A,B,C
+            # LOGO, Vou passar por A=0,B=0,C=0 4 vezes... é isso?
             for node in considered_c_component:
+                considered_c_component_realization = self._get_considered_c_component_realization(header, realization, considered_c_component)
                 # Ordenar Pa(node) para ver a ordem dos bits na W_realizations
-                bit_gurobi_var = get_bit_var_given_parents_rlz_and_current_node()
+                # O bit depende do valor do current node? Não seria só dos pais?
+                bit_gurobi_var = self._get_bit_var_given_parents_rlz_and_current_node(considered_c_component, considered_c_component_realization)
 
+                node_idx = header.index(node.label)
                 sign = 1
-                if wi_realization[node] == 0:
+                if realization[node_idx] == 0:
                     sign = -1
                 new_bit = Bit(bit_gurobi_var, sign)
 
@@ -103,6 +113,16 @@ class SubProblem:
 
         return map_bit_product_to_linearized_variable
 
+    def _get_considered_c_component_realization(self, header: list, realization: list, considered_c_component: list[Node]) -> list[int]:
+        indices = [header.index(node.label) for node in considered_c_component]
+        return [realization[i] for i in indices]
+
+
+    def _get_bit_var_given_parents_rlz_and_current_node(self, current_node: Node, considered_c_component: list[Node], considered_c_component_realization: list[int]):
+        '''
+        A=0,B=0,C=0 --> cluster bits of current node --> apontador para objeto gurobi
+        '''
+        pass
 
     def add_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
