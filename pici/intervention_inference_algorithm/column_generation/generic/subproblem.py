@@ -55,13 +55,13 @@ class SubProblem:
             We've three clusters. Cluster A with 3 bits, Cluster B with one bit, and Cluster C with two bits.
 
         """
-        for cluster_index, node in enumerate(   ):
+        for node in considered_c_comp:
             node_cluster_size = count_endogenous_parent_configurations(node)
             variable_bits_name: list[str] = []
             for i in range(node_cluster_size):
-                variable_bits_name.append(f"cluster_{cluster_index}_bit_{i}_node_{node.label}")
+                variable_bits_name.append(f"cluster_of_node_{node.label}_bit_{i}")
 
-            self.cluster_bits[cluster_index] = self.model.addVars(
+            self.cluster_bits[node.label] = self.model.addVars(
                 node_cluster_size, obj=0, vtype=GRB.BINARY, name=variable_bits_name
             )
 
