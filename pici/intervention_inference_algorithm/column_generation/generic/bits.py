@@ -66,7 +66,7 @@ def calculate_latent_bit_length(latent: Node) -> int:
     return latent_bit_length
 
 
-def count_endogenous_parent_configurations(node: Node):
+def count_endogenous_parent_configurations(node: Node) -> int:
     """
     Calculates the number of unique configurations for a node's endogenous (non-latent) parents.
 
