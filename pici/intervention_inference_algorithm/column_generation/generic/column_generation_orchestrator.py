@@ -8,6 +8,7 @@ import logging
 import gurobipy as gp
 from gurobipy import GRB
 from pandas import DataFrame
+import networkx as nx
 
 logger = logging.getLogger(__name__)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -58,6 +59,8 @@ class ColumnGenerationProblemOrchestrator:
         self.dataFrame = dataFrame
         self.minimizes_objective_function = minimizes_objective_function
 
+        self.topological_order: list[Node] = dag.topological_order
+
         objective_function = ObjFunctionGenerator(
             graph=dag,
             dataFrame=dataFrame,
@@ -72,28 +75,34 @@ class ColumnGenerationProblemOrchestrator:
             | {objective_function.intervention}
         )
 
-        topological_order: list[Node] = dag.topological_order
-
-        self.considered_c_comp_reversed_ordered = get_c_component_in_reverse_topological_order(
-            topo_order=topological_order,
+        self.reversed_ordered_considered_c_comp = get_c_component_in_reverse_topological_order(
+            topo_order=self.topological_order,
             unob=intervention.latent_parent,
             considered_c_comp=considered_c_comp,
         )
 
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
-            intervention.latent_parent, self.considered_c_comp_reversed_ordered
+            intervention.latent_parent, self.reversed_ordered_considered_c_comp
         )
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
-                c_comp_order=self.considered_c_comp_reversed_ordered,
+                c_comp_order=self.reversed_ordered_considered_c_comp,
                 c_component_and_tail=c_component_and_tail,
-                topo_order=topological_order,
+                topo_order=self.topological_order,
             )
         )
+        # Seguinte loop é desnecessário?
+        W_ordered = []
+        for i, node in enumerate(dag.topological_order):
+            if node in W:
+                W_ordered.append(node)
+        W_ordered.reverse()
 
-        self.W_realizations = self._get_w_realizations(W)
+        self.reversed_ordered_W_realizations = self._get_w_realizations(W_ordered)
 
         self.number_of_restrictions = len(W)
+
+        self.update_parents_to_reversed_topological_order(W_ordered)
 
         self.duals = {}
         for i in range(self.number_of_restrictions):
@@ -137,15 +146,13 @@ class ColumnGenerationProblemOrchestrator:
         self.solution = {}
         self.subproblem = SubProblem(N=N, M=M)
 
-    def _get_w_realizations(self, W: list[Node]) -> list[list]:
-        ranges = [range(node.cardinality) for node in W]
-        cartesian = product(*ranges)
-        matrix = [[node.label for node in W]]
-        matrix += [list(combo) for combo in cartesian]
-        # idx_A = matrix[0].index(node.label)
-        return matrix
-
-
+    def update_parents_to_reversed_topological_order(self, node: Node) -> None:
+        ordered_parents = []
+        for node in self.topological_order:
+            if node in node.parents:
+                ordered_parents.append(node)
+        ordered_parents.reverse()
+        node.parents = ordered_parents
 
     def setup(self, method=1):
         """
@@ -168,8 +175,8 @@ class ColumnGenerationProblemOrchestrator:
 
         #### We're here
         self.subproblem.setup(
-            considered_c_comp_reversed_ordered=self.considered_c_comp_reversed_ordered,
-            W_realizations=self.W_realizations,
+            reversed_ordered_considered_c_comp=self.reversed_ordered_considered_c_comp,
+            reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             amountBitsPerCluster=self.amountBitsPerCluster,
             amountBetaVarsPerX=self.amountBetaVarsPerX,
             duals=self.duals,
@@ -324,6 +331,14 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
     number_of_iterations = problem.exec()
     bound = problem.optimize_master()
     return bound, number_of_iterations
+
+def get_node_list_realizations(node_list: list[Node]) -> list[list]:
+    ranges = [range(node.cardinality) for node in node_list]
+    cartesian = product(*ranges)
+    matrix = [[node.label for node in node_list]]
+    matrix += [list(combo) for combo in cartesian]
+    # idx_A = matrix[0].index(node.label)
+    return matrix
 
 
 def buildScalarProblem(
