@@ -5,6 +5,7 @@ from gurobipy import GRB, Var, tupledict
 
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
+from pici.intervention_inference_algorithm.column_generation.generic.column_generation_orchestrator import get_node_list_realizations
 
 
 logger = logging.getLogger(__name__)
@@ -24,13 +25,13 @@ MAX_ITERACTIONS_ALLOWED = 2000
 class SubProblem:
     def __init__(self):
         self.model = gp.Model("subproblem")
-        self.cluster_bits: dict[str, tupledict[int, Var]] = {}        
+        self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
         self.constr = None
     
     def setup(
         self,
-        considered_c_comp_reversed_ordered: list[Node],
-        W_realizations: list[list],
+        reversed_ordered_considered_c_comp: list[Node],
+        reversed_ordered_W_realizations: list[list],
         duals: dict[int, float],
         minimizes_objective_function: bool,
     ):
@@ -39,13 +40,15 @@ class SubProblem:
         self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.setParam(GRB.Param.BestBdStop, 1)
 
-        self._create_cluster_bits(considered_c_comp_reversed_ordered)
-        self.W_realizations = W_realizations
+        self.reversed_ordered_W_realizations = reversed_ordered_W_realizations
+
+        self._create_cluster_bits(reversed_ordered_considered_c_comp, reversed_ordered_W_realizations)
         ###
 
         self.model.update()
 
-    def _create_cluster_bits(self, considered_c_comp: list[Node]):
+
+    def _create_cluster_bits(self, reversed_ordered_considered_c_comp: list[Node], reversed_ordered_W_realizations: list[list]):
         """
         Each node in the considered c-component has a series of bits that represents each realization.
         Example:
@@ -55,15 +58,25 @@ class SubProblem:
             We've three clusters. Cluster A with 3 bits, Cluster B with one bit, and Cluster C with two bits.
 
         """
-        for node in considered_c_comp:
-            node_cluster_size = count_endogenous_parent_configurations(node)
-            variable_bits_name: list[str] = []
-            for i in range(node_cluster_size):
-                variable_bits_name.append(f"cluster_of_node_{node.label}_bit_{i}")
+        for node in reversed_ordered_considered_c_comp:
+            reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(node.parents)
+            header = reversed_ordered_node_parents_realizations[0]
+            reversed_ordered_node_parents_realizations = reversed_ordered_node_parents_realizations[1:]
+            
+            self.cluster_bits[node.label] = {}
+            for i, realization in enumerate(reversed_ordered_node_parents_realizations):
+                realization_key: str = self.get_realization_key(header, realization)
+                self.cluster_bits[node.label][realization_key] = self.model.addVar(
+                    obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}_of_node_{node.label}"
+                )
 
-            self.cluster_bits[node.label] = self.model.addVars(
-                node_cluster_size, obj=0, vtype=GRB.BINARY, name=variable_bits_name
-            )
+    def get_realization_key(self, header: list[str], realization: list[int]) -> str:
+        if len(header) != len(realization):
+            raise ValueError('Lists with different sizes. Header and Realization should have the same size.')
+        realization_key = ""
+        for i in range(len(header)):
+            realization_key += f"{header[i]}={realization[i]},"
+        return realization_key[:len(realization_key)-1]
 
     def update(self, duals):
         """
@@ -83,15 +96,12 @@ class SubProblem:
         for realization in cartesian_products:
             coef = get_coef_from_objective_function()
             bit_product = BitProduct()
-            # Aqui eu não vou passar várias vezes pelo mesmo "conjunto"
-            # W         = A,B,C,D,F
-            # CONS_COMP = A,B,C
-            # LOGO, Vou passar por A=0,B=0,C=0 4 vezes... é isso?
             for node in considered_c_component_in_topological_order:
-                # Já está! Ordenar Pa(node) para ver a ordem dos bits na cartesian_products
-                considered_c_component_realization = self._get_considered_c_component_realization(header, realization, considered_c_component_in_topological_order)
-                # O bit depende do valor do current node? Não seria só dos pais?
-                bit_gurobi_var = self._get_bit_var_given_parents_rlz_and_current_node(considered_c_component_in_topological_order, considered_c_component_realization)
+                
+                parents_label = [parent.label for parent in node.parents]
+                parents_realization = [realization[header.index(parent_label)] for parent_label in parents_label]
+                realization_key: str = self.get_realization_key(parents_label, parents_realization)
+                bit_gurobi_var = self.cluster_bits[node.label][realization_key]
 
                 node_idx = header.index(node.label)
                 sign = 1
@@ -113,21 +123,12 @@ class SubProblem:
 
         return map_bit_product_to_linearized_variable
 
-    def _get_considered_c_component_realization(self, header: list, realization: list, considered_c_component: list[Node]) -> list[int]:
-        indices = [header.index(node.label) for node in considered_c_component]
-        return [realization[i] for i in indices]
+    def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
+        parents_label = [parent.label for parent in node.parents]
+        parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_label]
+        realization_key: str = self.get_realization_key(parents_label, parents_realization)
+        return self.cluster_bits[node.label][realization_key]
 
-
-    def _get_bit_var_given_parents_rlz_and_current_node(self, current_node: Node, considered_c_component: list[Node], considered_c_component_realization: list[int]):
-        '''
-        A=0,B=0,C=0 --> cluster bits of current node --> apontador para objeto gurobi
-        A=0,B=0,C=1
-        '''
-
-        node_bit = self.cluster_bits[current_node.label][considered_c_component_realization]
-
-
-        pass
 
     def add_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
