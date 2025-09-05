@@ -26,10 +26,10 @@ class Graph:
         self.dag_components = dag_components
         self.endogenous = endogenous
         self.exogenous = exogenous
-        self.topological_order = topological_order
         self.DAG = DAG
         self.c_component_to_unob = c_component_to_unob
         self.node_set = node_set
+        self.topological_order = topological_order
         self.topological_order_indexes = topological_order_indexes
 
     def find_ancestors(self, target_node: Node) -> list[Node]:
