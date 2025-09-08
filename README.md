@@ -215,3 +215,6 @@ We thank the ICTi, Instituto de Ciência e Tecnologia Itaú, for providing key f
 for this work through C2D - Centro de Ciência de Dados at Universidade de São Paulo.
 
 Any opinions, findings, conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of Itaú Unibanco and Instituto de Ciência e Tecnologia Itaú. All data used in this study comply with the Brazilian General Data Protection Law.
+
+The authors of this work would also like to thank the Center for Artificial Intelligence ([C4AI-USP](https://c4ai.inova.usp.br/))
+and the support from the São Paulo Research Foundation (FAPESP grant #2019/07665-4) and from the IBM Corporation.
