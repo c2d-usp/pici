@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>pici — Probabilistic & Causal Inference for Python</title>
-  <meta name="description" content="pici is a lightweight toolkit for probabilistic & causal inference in Python. Install with: pip install pici." />
+  <meta name="description"
+    content="pici is a lightweight toolkit for probabilistic & causal inference in Python. Install with: pip install pici." />
   <link rel="canonical" href="https://c2d-usp.github.io/pici/" />
 
   <!-- Open Graph / Twitter for nice previews -->
@@ -39,10 +41,18 @@
 
   <style>
     /* System font stack for speed */
-    :root { color-scheme: light dark; }
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    :root {
+      color-scheme: light dark;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
     /* Make code blocks scroll nicely on mobile */
-    pre { overflow:auto; }
+    pre {
+      overflow: auto;
+    }
   </style>
 
   <!-- Minimal structured data with citation -->
@@ -81,24 +91,26 @@
   }
   </script>
 </head>
+
 <body class="bg-white text-gray-800 dark:bg-gray-950 dark:text-gray-100">
   <!-- Header -->
-  <header class="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-950/70 border-b border-gray-200 dark:border-gray-800">
+  <header
+    class="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-950/70 border-b border-gray-200 dark:border-gray-800">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <a href="#" class="flex items-center gap-2 font-semibold">
         <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-brand-600 text-white">
           <svg class="h-5 w-5" viewBox="0 0 128 128" fill="none" stroke="currentColor" aria-hidden="true">
             <g stroke-width="8" stroke-linecap="round">
-              <line x1="32" y1="28" x2="32" y2="100"/>
-              <line x1="32" y1="28" x2="48" y2="28"/>
-              <line x1="32" y1="100" x2="48" y2="100"/>
-              <line x1="96" y1="28" x2="96" y2="100"/>
-              <line x1="80" y1="28" x2="96" y2="28"/>
-              <line x1="80" y1="100" x2="96" y2="100"/>
+              <line x1="32" y1="28" x2="32" y2="100" />
+              <line x1="32" y1="28" x2="48" y2="28" />
+              <line x1="32" y1="100" x2="48" y2="100" />
+              <line x1="96" y1="28" x2="96" y2="100" />
+              <line x1="80" y1="28" x2="96" y2="28" />
+              <line x1="80" y1="100" x2="96" y2="100" />
             </g>
-            <line x1="48" y1="64" x2="80" y2="64" stroke-width="10" stroke-linecap="round"/>
-            <circle cx="48" cy="64" r="6" fill="currentColor"/>
-            <circle cx="80" cy="64" r="6" fill="currentColor"/>
+            <line x1="48" y1="64" x2="80" y2="64" stroke-width="10" stroke-linecap="round" />
+            <circle cx="48" cy="64" r="6" fill="currentColor" />
+            <circle cx="80" cy="64" r="6" fill="currentColor" />
           </svg>
         </span>
         <span>pici</span>
@@ -117,7 +129,8 @@
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
           <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">pici</h1>
-          <p class="mt-3 text-xl text-gray-600 dark:text-gray-300">Tools for <span class="font-semibold">totally</span> & <span class="font-semibold">partially</span> identifiable causal inference in Python.</p>
+          <p class="mt-3 text-xl text-gray-600 dark:text-gray-300">Tools for <span class="font-semibold">totally</span>
+            & <span class="font-semibold">partially</span> identifiable causal inference in Python.</p>
 
           <div class="mt-6 flex flex-wrap items-center gap-2">
             <a href="https://pypi.org/project/pici/" target="_blank" rel="noopener">
@@ -132,7 +145,9 @@
           </div>
 
           <div class="mt-8 flex flex-wrap gap-3">
-            <a href="https://github.com/c2d-usp/pici" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white shadow hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400">View on GitHub</a>
+            <a href="https://github.com/c2d-usp/pici" target="_blank" rel="noopener"
+              class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white shadow hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400">View
+              on GitHub</a>
           </div>
         </div>
         <div class="md:pl-8">
@@ -144,7 +159,9 @@ pip install pici
 import pici
 print(pici.__version__)
 </code></pre>
-            <button id="copyInstall" class="mt-3 inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-900">Copy install</button>
+            <button id="copyInstall"
+              class="mt-3 inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-900">Copy
+              install</button>
           </div>
         </div>
       </div>
@@ -156,19 +173,23 @@ print(pici.__version__)
       <ul class="mt-4 grid sm:grid-cols-2 gap-4">
         <li class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
           <h3 class="font-semibold">Efficient</h3>
-          <p class="text-gray-600 dark:text-gray-300">State-of-the-art algorithms that provide the best possible computing time for partial identifiability.</p>
+          <p class="text-gray-600 dark:text-gray-300">State-of-the-art algorithms that provide the best possible
+            computing time for partial identifiability.</p>
         </li>
         <li class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
           <h3 class="font-semibold">Lightweight</h3>
-          <p class="text-gray-600 dark:text-gray-300">Pure Python and small footprint for easy installation and usage.</p>
+          <p class="text-gray-600 dark:text-gray-300">Pure Python and small footprint for easy installation and usage.
+          </p>
         </li>
         <li class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
           <h3 class="font-semibold">Practical</h3>
-          <p class="text-gray-600 dark:text-gray-300">Helpers for common inference patterns; integrates into existing analysis stacks.</p>
+          <p class="text-gray-600 dark:text-gray-300">Helpers for common inference patterns; integrates into existing
+            analysis stacks.</p>
         </li>
         <li class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
           <h3 class="font-semibold">Open</h3>
-          <p class="text-gray-600 dark:text-gray-300">Apache-2.0 licensed on GitHub — transparent development and community contributions.</p>
+          <p class="text-gray-600 dark:text-gray-300">Apache-2.0 licensed on GitHub — transparent development and
+            community contributions.</p>
         </li>
       </ul>
     </section>
@@ -188,27 +209,33 @@ print(pici.__version__)
     <section id="links" class="py-8">
       <h2 class="text-2xl font-bold">Useful links</h2>
       <div class="mt-4 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://github.com/c2d-usp/pici" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://github.com/c2d-usp/pici" target="_blank" rel="noopener">
           <div class="font-semibold">Source Code →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">github.com/c2d-usp/pici</div>
         </a>
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://pypi.org/project/pici/" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://pypi.org/project/pici/" target="_blank" rel="noopener">
           <div class="font-semibold">Package on PyPI →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">pypi.org/project/pici</div>
         </a>
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://github.com/c2d-usp/pici/issues" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://github.com/c2d-usp/pici/issues" target="_blank" rel="noopener">
           <div class="font-semibold">Issue Tracker →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">bugs, roadmap, help wanted</div>
         </a>
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://github.com/c2d-usp/pici/releases" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://github.com/c2d-usp/pici/releases" target="_blank" rel="noopener">
           <div class="font-semibold">Releases →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">version history</div>
         </a>
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://github.com/c2d-usp/pici/tree/main/examples" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://github.com/c2d-usp/pici/tree/main/examples" target="_blank" rel="noopener">
           <div class="font-semibold">Use case examples →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">jupyter notebooks</div>
         </a>
-        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900" href="https://github.com/c2d-usp/pici/blob/main/README.md" target="_blank" rel="noopener">
+        <a class="group rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900"
+          href="https://github.com/c2d-usp/pici/blob/main/README.md" target="_blank" rel="noopener">
           <div class="font-semibold">README →</div>
           <div class="text-sm text-gray-600 dark:text-gray-400">quick overview</div>
         </a>
@@ -216,24 +243,26 @@ print(pici.__version__)
     </section>
 
     <!-- How to cite (with paper) -->
-  <section class="py-8">
-    <h2 class="text-2xl font-bold">Theoretical Background</h2>
-    <p>The partial identifiable causal inference algorithm used in <strong>pici</strong> is based on the following work: </p>
-    <blockquote class="mt-3 border-l-4 border-brand-600 pl-3 text-sm">
-      J. P. Arroyo, D. Mauá, J. G. B. Rodrigues, D. A. E. Lawand, J. Lee, R. Marinescu, A. G. Gray, E. R. Laurentino, and F. Cozman,
-      “Multilinear and Linear Programs for Partially Identifiable Queries in Quasi-Markovian Structural Causal Models,” <em>CAR @ UAI 2025 Workshop</em>, 2025.
-    </blockquote>
-    <a href="https://openreview.net/forum?id=aUPT1kEiwP"
-      target="_blank" rel="noopener"
-      class="mt-4 inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white shadow hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400">
-      📄 View on OpenReview
-    </a>
-    <div class="mt-4 border p-4 rounded-2xl">
-      <div class="flex items-center justify-between">
-        <div class="font-semibold">BibTeX</div>
-        <button id="copyBibtex" class="inline-flex items-center border px-3 py-1.5 rounded-lg text-sm">Copy</button>
-      </div>
-      <pre class="mt-2 text-sm"><code>@inproceedings{arroyo2025multilinear,
+    <section class="py-8">
+      <h2 class="text-2xl font-bold">Theoretical Background</h2>
+      <p>The partial identifiable causal inference algorithm used in <strong>pici</strong> is based on the following
+        work: </p>
+      <blockquote class="mt-3 border-l-4 border-brand-600 pl-3 text-sm">
+        J. P. Arroyo, D. Mauá, J. G. B. Rodrigues, D. A. E. Lawand, J. Lee, R. Marinescu, A. G. Gray, E. R. Laurentino,
+        and F. Cozman,
+        “Multilinear and Linear Programs for Partially Identifiable Queries in Quasi-Markovian Structural Causal
+        Models,” <em>CAR @ UAI 2025 Workshop</em>, 2025.
+      </blockquote>
+      <a href="https://openreview.net/forum?id=aUPT1kEiwP" target="_blank" rel="noopener"
+        class="mt-4 inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white shadow hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400">
+        📄 View on OpenReview
+      </a>
+      <div class="mt-4 border p-4 rounded-2xl">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">BibTeX</div>
+          <button id="copyBibtex" class="inline-flex items-center border px-3 py-1.5 rounded-lg text-sm">Copy</button>
+        </div>
+        <pre class="mt-2 text-sm"><code>@inproceedings{arroyo2025multilinear,
   title     = {Multilinear and Linear Programs for Partially Identifiable Queries in Quasi-Markovian Structural Causal Models},
   author    = {Arroyo, João Pedro and Mauá, Denis and Rodrigues, João Gabriel Barreto and Lawand, Daniel A. E. and Lee, Junkyu and Marinescu, Radu and Gray, Alexander G. and Laurentino, Eduardo Rocha and Cozman, Fabio},
   booktitle = {CAR @ UAI 2025 Workshop},
@@ -245,23 +274,55 @@ print(pici.__version__)
     </section>
 
 
-<section class="py-8" aria-labelledby="ack">
-  <h2 id="ack" class="text-2xl font-bold">Acknowledgments</h2>
-  <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 space-y-4">
-    <p><span class="font-semibold text-brand-600">Funding: </span> Supported by the 
-      <a href="https://www.linkedin.com/company/instituto-de-ci%C3%AAncia-e-tecnologia-ita%C3%BA-icti" target="_blank" rel="noopener" class="border-b-2 border-brand-600 hover:text-brand-600">Instituto de Ciência e Tecnologia Itaú (ICTI)</a> 
-      through the <a href="https://c2d.poli.usp.br/" target="_blank" rel="noopener" class="border-b-2 border-brand-600 hover:text-brand-600">C2D – Centro de Ciência de Dados</a> at the University of São Paulo.
-    </p>
-    <p><span class="font-semibold text-brand-600">Disclaimer: </span> The opinions, findings, and conclusions are those of the authors and do not necessarily represent the views of ICTI or Itaú Unibanco.</p>
-    <p><span class="font-semibold text-brand-600">Data &amp; ethics: </span> All data were handled in compliance with Brazil’s General Data Protection Law (Lei nº 13.709/2018 – LGPD).</p>
-  </div>
-</section>
+    <section class="py-8" aria-labelledby="ack">
+      <h2 id="ack" class="text-2xl font-bold">Acknowledgments</h2>
+
+      <div class="mt-4 grid gap-6 md:grid-cols-2">
+        <!-- Block 1: ICTI, C2D, Disclaimer, Data & Ethics -->
+        <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 space-y-4">
+          <p>
+            <span class="font-semibold text-brand-600">ICTI &amp; C2D: </span>
+            We thank the
+            <a href="https://www.linkedin.com/company/instituto-de-ci%C3%AAncia-e-tecnologia-ita%C3%BA-icti"
+              target="_blank" rel="noopener" class="border-b-2 border-brand-600 hover:text-brand-600">
+              Instituto de Ciência e Tecnologia Itaú (ICTI)
+            </a>
+            for providing key funding for this work through the
+            <a href="https://c2d.poli.usp.br/" target="_blank" rel="noopener"
+              class="border-b-2 border-brand-600 hover:text-brand-600">
+              C2D – Centro de Ciência de Dados
+            </a>
+            at the University of São Paulo.
+          </p>
+          <p>
+            <span class="font-semibold text-brand-600">Disclaimer: </span>
+            Any opinions, findings, conclusions, or recommendations expressed in this material are those of the authors
+            and do not necessarily reflect the views of Itaú Unibanco and the Instituto de Ciência e Tecnologia Itaú.
+          </p>
+          <p>
+            <span class="font-semibold text-brand-600">Data &amp; Ethics: </span>
+            All data used in this study comply with Brazil’s General Data Protection Law (Lei nº 13.709/2018 – LGPD).
+          </p>
+        </div>
+
+        <!-- Block 2: C4AI, FAPESP, IBM -->
+        <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 space-y-4">
+          <p>
+            <span class="font-semibold text-brand-600">C4AI, FAPESP &amp; IBM: </span>
+            The authors also thank the Center for Artificial Intelligence (C4AI-USP) and acknowledge the support from
+            the São Paulo Research Foundation
+            (FAPESP grant #2019/07665-4) and from the IBM Corporation.
+          </p>
+        </div>
+      </div>
+    </section>
 
 
-</main>
+  </main>
 
   <footer class="mt-16 border-t border-gray-200 dark:border-gray-800">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-gray-600 dark:text-gray-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div
+      class="mx-auto max-w-6xl px-4 sm:px-6 py-8 text-sm text-gray-600 dark:text-gray-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>© <span id="year"></span> pici — Apache License 2.0</div>
       <div class="space-x-4">
         <a class="hover:text-brand-600" href="https://github.com/c2d-usp/pici" target="_blank" rel="noopener">GitHub</a>
@@ -288,7 +349,7 @@ print(pici.__version__)
     // Copy BibTeX button
     const copyBibtexBtn = document.getElementById('copyBibtex');
     if (copyBibtexBtn) {
-const bibtex = `@inproceedings{arroyo2025multilinear,
+      const bibtex = `@inproceedings{arroyo2025multilinear,
 title = {Multilinear and Linear Programs for Partially Identifiable Queries in Quasi-Markovian Structural Causal Models},
 author = {Arroyo, João Pedro and Mauá, Denis and Rodrigues, João Gabriel Barreto and Lawand, Daniel A. E. and Lee, Junkyu and Marinescu, Radu and Gray, Alexander G. and Laurentino, Eduardo Rocha and Cozman, Fabio},
 booktitle = {CAR @ UAI 2025 Workshop},
@@ -305,5 +366,5 @@ note = {Poster}
     }
   </script>
 </body>
-</html>
 
+</html>
