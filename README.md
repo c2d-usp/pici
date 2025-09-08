@@ -21,7 +21,7 @@ PICI -- Partially Identifiable Causal Inference
 
 ## About
 
-PICI stands for Partially Identifiable Causal Inference.
+[PICI](https://c2d-usp.github.io/pici/) stands for Partially Identifiable Causal Inference.
 It is a causal inference package that can handle discrete Partially Identifiable Queries in Quasi-Markovian Structural Causal Models.
 
 This project was based on the work of João Pedro Arroyo and João Gabriel Rodrigues on [GitHub](https://github.com/Causal-Inference-Group-C4AI/Linear-Programming-For-Interventional-Queries).
