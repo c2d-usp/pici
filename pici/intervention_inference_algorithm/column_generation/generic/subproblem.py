@@ -89,11 +89,13 @@ class SubProblem:
 
 
     def linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
+        # TODO: Edge cases: intervention and target, apenas desprezat na realization
         map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
         header = W_realizations[0]
         cartesian_products = W_realizations[1:]
 
         for realization in cartesian_products:
+            # quais são as condições para essa função?
             coef = get_coef_from_objective_function()
             bit_product = BitProduct()
             for node in considered_c_component_in_topological_order:
