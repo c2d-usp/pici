@@ -87,6 +87,34 @@ class SubProblem:
         )
         self.model.update()
 
+    def get_coef_from_objective_function(w_realization, W, P: list[tuple]):
+        # se tem nó em algum lado de alguma tupla de P, essa tupla vai pra lista Pq
+
+        # todos os nós na tupla são de W.
+
+        # Q é o conjunto de variáveis da FO que não estão em W
+
+        Pq, Pw, Q = separa_listas(P)
+
+        # q = lista de realizações de Q
+        q = espaco_de_realizacoes(Q)
+
+        coefw = 1
+        for par in Pw:
+            coefw *= P(par[0].get_realizacao() | par[1].get_realizacao())
+        
+        coefq = 0
+        for q_especifico in q:
+            coef_parcial = 1
+            for par in Pq:
+                # q_especifico vai ser usado pela funcao get_realizacao 
+                coef_parcial *= P(par[0].get_realizacao() | par[1].get_realizacao())
+            coefq += coef_parcial
+        
+        return coefq * coefw
+
+
+
 
     def linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
         # TODO: Edge cases: intervention and target, apenas desprezat na realization
