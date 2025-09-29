@@ -225,9 +225,9 @@ class ObjFunctionGenerator:
         for node in self.empirical_probabilities_variables:
             if node.is_latent:
                 continue
-            objective_function_probabilities.append((node.label, None))
+            objective_function_probabilities.append((node, None))
         for node, conditioned_node in self.conditional_probabilities.items():
-            objective_function_probabilities.append((node.label, conditioned_node))
+            objective_function_probabilities.append((node, conditioned_node))
         return objective_function_probabilities
 
     def generate_symbolic_decision_function(self) -> dict[tuple, int]:
