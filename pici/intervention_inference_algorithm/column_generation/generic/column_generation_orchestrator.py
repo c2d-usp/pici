@@ -96,13 +96,12 @@ class ColumnGenerationProblemOrchestrator:
         for i, node in enumerate(dag.topological_order):
             if node in W:
                 W_ordered.append(node)
-        W_ordered.reverse()
-
-        self.reversed_ordered_W_realizations = self._get_w_realizations(W_ordered)
+        self.reversed_ordered_W = W_ordered.reverse()
+        self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
 
         self.number_of_restrictions = len(W)
 
-        self.update_parents_to_reversed_topological_order(W_ordered)
+        self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
         self.duals = {}
         for i in range(self.number_of_restrictions):
@@ -144,7 +143,7 @@ class ColumnGenerationProblemOrchestrator:
         self.betaVarsCost = betaVarsCost
 
         self.solution = {}
-        self.subproblem = SubProblem(N=N, M=M)
+        self.subproblem = SubProblem(df=dataFrame)
 
     def update_parents_to_reversed_topological_order(self, node: Node) -> None:
         ordered_parents = []
@@ -173,21 +172,12 @@ class ColumnGenerationProblemOrchestrator:
         self.columns_base = self._generate_initial_column_base()
         self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
 
-        #### We're here
         self.subproblem.setup(
             reversed_ordered_considered_c_comp=self.reversed_ordered_considered_c_comp,
             reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
-            amountBitsPerCluster=self.amountBitsPerCluster,
-            amountBetaVarsPerX=self.amountBetaVarsPerX,
+            reversed_ordered_W=self.reversed_ordered_W,
+            symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
             duals=self.duals,
-            amountNonTrivialRestrictions=self.number_of_restrictions,
-            betaVarsCost=self.betaVarsCost,
-            parametric_column=self.parametric_columns,
-            betaVarsBitsX0=self.betaVarsBitsX0,
-            betaVarsBitsX1=self.betaVarsBitsX1,
-            N=self.N,
-            M=self.M,
-            interventionValue=self.intervention.value,
             minimizes_objective_function=self.minimizes_objective_function,
         )
 
@@ -259,7 +249,9 @@ class ColumnGenerationProblemOrchestrator:
             logger.debug(f"Reduced Cost: {reduced_cost}")
             if reduced_cost >= 0:
                 break
-
+            
+            # TODO: WHAT TO DO
+#########################
             newColumn: list[int] = []
             for index in range(len(self.subproblem.bitsParametric)):
                 newColumn.append(self.subproblem.bitsParametric[index].X)
@@ -268,7 +260,6 @@ class ColumnGenerationProblemOrchestrator:
                 1
             )  # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
             logger.debug(f"New Column: {newColumn}")
-
             objCoeff: float = 0.0
             for betaIndex in range(self.amountBetaVarsPerX):
                 if self.intervention.value == 0:
@@ -281,7 +272,7 @@ class ColumnGenerationProblemOrchestrator:
                         self.betaVarsCost[betaIndex]
                         * self.subproblem.beta_varsX1[betaIndex].X
                     )
-
+#####################
             self.master.update(
                 new_column=newColumn,
                 index=len(self.columns_base),

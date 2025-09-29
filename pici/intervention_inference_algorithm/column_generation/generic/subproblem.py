@@ -2,10 +2,12 @@ import logging
 
 import gurobipy as gp
 from gurobipy import GRB, Var, tupledict
+from pandas import DataFrame
 
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
 from pici.intervention_inference_algorithm.column_generation.generic.column_generation_orchestrator import get_node_list_realizations
+from pici.utils.probabilities_helper import find_conditional_probability
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +25,8 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self):
+    def __init__(self, df: DataFrame = None):
+        self.df = df
         self.model = gp.Model("subproblem")
         self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
         self.constr = None
@@ -32,6 +35,8 @@ class SubProblem:
         self,
         reversed_ordered_considered_c_comp: list[Node],
         reversed_ordered_W_realizations: list[list],
+        reversed_ordered_W: list[Node],
+        symbolic_objective_function_probabilites: list[tuple],
         duals: dict[int, float],
         minimizes_objective_function: bool,
     ):
@@ -40,15 +45,46 @@ class SubProblem:
         self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.setParam(GRB.Param.BestBdStop, 1)
 
+        self.reversed_ordered_W = reversed_ordered_W
+
         self.reversed_ordered_W_realizations = reversed_ordered_W_realizations
 
-        self._create_cluster_bits(reversed_ordered_considered_c_comp, reversed_ordered_W_realizations)
-        ###
+        self._create_cluster_bits(reversed_ordered_considered_c_comp)
+        self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
+        self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
+
+        self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
         self.model.update()
 
+    def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
+        objective_function_vars_not_in_W = set()
+        for conditional_probability in symbolic_objective_function_probabilites:
+            probability_target, conditioned_nodes = conditional_probability
+            if probability_target not in W:
+                objective_function_vars_not_in_W.add(probability_target)
+            for node in conditioned_nodes:
+                if node not in W:
+                    objective_function_vars_not_in_W.add(node)
+        return [node for node in objective_function_vars_not_in_W]
+    
+    def separate_objective_function_probabilities(self, symbolic_objective_function_probabilites, W) -> tuple[list[tuple], list[tuple]]:
+        probabilities_of_objective_function_vars_not_in_W = []
+        P_W = []
+        for conditional_probability in symbolic_objective_function_probabilites:
+            probability_target, conditioned_nodes = conditional_probability
+            if probability_target not in W:
+                P_W.append(conditional_probability)
+                continue
+            if any(node in W for node in conditioned_nodes):
+                P_W.append(conditional_probability)
+                continue
+            probabilities_of_objective_function_vars_not_in_W.append(conditional_probability)
 
-    def _create_cluster_bits(self, reversed_ordered_considered_c_comp: list[Node], reversed_ordered_W_realizations: list[list]):
+
+        return (P_W, probabilities_of_objective_function_vars_not_in_W)
+
+    def _create_cluster_bits(self, reversed_ordered_considered_c_comp: list[Node]):
         """
         Each node in the considered c-component has a series of bits that represents each realization.
         Example:
@@ -87,33 +123,45 @@ class SubProblem:
         )
         self.model.update()
 
-    def get_coef_from_objective_function(w_realization, W, P: list[tuple]):
-        # se tem nó em algum lado de alguma tupla de P, essa tupla vai pra lista Pq
 
-        # todos os nós na tupla são de W.
 
-        # Q é o conjunto de variáveis da FO que não estão em W
-
-        Pq, Pw, Q = separa_listas(P)
-
-        # q = lista de realizações de Q
-        q = espaco_de_realizacoes(Q)
-
+    def get_coef_from_objective_function(self, w_header: list, w_realization: list):
         coefw = 1
-        for par in Pw:
-            coefw *= P(par[0].get_realizacao() | par[1].get_realizacao())
-        
+        for w_conditional_probability in self.Pw:
+            w_target, w_conditioned = w_conditional_probability
+
+            w_target.value = w_realization[w_header.index(w_target.label)]
+            for node in w_conditioned:
+                node.value = w_realization[w_header.index(node.label)]
+
+            coefw *= find_conditional_probability(dataFrame=self.df, target_realization=[w_target], condition_realization=w_conditioned)
+            
+
+        if len(self.objective_function_vars_not_in_W) <= 0:
+            return coefw
+
         coefq = 0
-        for q_especifico in q:
+        q_header = self.realization_objective_function_vars_not_in_W[0]
+        q_realizations = self.realization_objective_function_vars_not_in_W[1:]
+
+        for q_realization in q_realizations:
             coef_parcial = 1
-            for par in Pq:
-                # q_especifico vai ser usado pela funcao get_realizacao 
-                coef_parcial *= P(par[0].get_realizacao() | par[1].get_realizacao())
+            for q_conditional_probability in self.Pq:
+                q_target, q_conditioned = q_conditional_probability
+                
+                if q_target in self.reversed_ordered_W:
+                    q_target.value = w_realization[w_header.index(q_target.label)]
+                else:
+                    q_target.value = q_realization[q_header.index(q_target.label)]
+                
+                for node in q_conditioned:
+                    if node in self.reversed_ordered_W:
+                        node.value = w_realization[w_header.index(node.label)]
+                    else:
+                        node.value = q_realization[q_header.index(node.label)]
+                coef_parcial *= find_conditional_probability(dataFrame=self.df, target_realization=[q_target],condition_realization=q_conditioned)
             coefq += coef_parcial
-        
         return coefq * coefw
-
-
 
 
     def linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
@@ -124,7 +172,7 @@ class SubProblem:
 
         for realization in cartesian_products:
             # quais são as condições para essa função?
-            coef = get_coef_from_objective_function()
+            coef = self.get_coef_from_objective_function(header, realization)
             bit_product = BitProduct()
             for node in considered_c_component_in_topological_order:
                 
@@ -163,7 +211,7 @@ class SubProblem:
     def add_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
             # TODO: Add constraint name
-            self.model.addConstr(variable >= 0, name=f"BOOOO")
+            self.model.addConstr(variable >= 0)
             # TODO: Add constraints name
             self.model.addConstr(variable <= 1)
 
@@ -174,7 +222,7 @@ class SubProblem:
                     one_or_zero = 1
             
                 # TODO: Add constraint name
-                self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var, name=f"_______")
+                self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var)
                 sum_bits += one_or_zero + bit.sign*bit.gurobi_var
 
             n = len(bit_product.bit_list)
