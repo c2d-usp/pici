@@ -174,6 +174,7 @@ class SubProblem:
             # quais são as condições para essa função?
             coef = self.get_coef_from_objective_function(header, realization)
             bit_product = BitProduct()
+            # TODO: Devo desprezar a intervention e a target aqui?
             for node in considered_c_component_in_topological_order:
                 
                 parents_label = [parent.label for parent in node.parents]
