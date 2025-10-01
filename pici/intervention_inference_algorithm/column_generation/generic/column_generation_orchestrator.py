@@ -4,11 +4,18 @@ import os
 import sys
 import copy
 import logging
-
+import pandas as pd
 import gurobipy as gp
 from gurobipy import GRB
 from pandas import DataFrame
 import networkx as nx
+
+from pici.causal_model import CausalModel
+# THIS_DIR = os.getcwd()
+# PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
+# import sys
+# if PROJECT_ROOT not in sys.path:
+#     sys.path.insert(0, PROJECT_ROOT)
 
 logger = logging.getLogger(__name__)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -20,7 +27,7 @@ from pici.intervention_inference_algorithm.column_generation.generic.master_prob
     MasterProblem,
 )
 from pici.intervention_inference_algorithm.column_generation.generic.subproblem import (
-    SubProblem,
+    SubProblem, get_node_list_realizations
 )
 from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
     calculate_constraints_empirical_probabilities,
@@ -36,7 +43,7 @@ from pici.utils.scalable_graphs_helper import get_scalable_dataframe
 from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
 )
-from pici.utils._enum import ColumnGenerationParameters
+from pici.utils._enum import ColumnGenerationParameters, DataExamplesPaths
 
 
 class ColumnGenerationProblemOrchestrator:
@@ -46,12 +53,7 @@ class ColumnGenerationProblemOrchestrator:
         dag: Graph,
         intervention: Node,
         target: Node,
-        minimizes_objective_function: bool,
-        
-        parametric_columns: dict[str, tuple[list[int]]],
-        betaVarsCost: list[float],
-        betaVarsBitsX0: list[tuple[str]],
-        betaVarsBitsX1: list[tuple[str]],
+        minimizes_objective_function: bool
     ):
 
         self.intervention = intervention
@@ -129,20 +131,6 @@ class ColumnGenerationProblemOrchestrator:
 
         self.columns_base = None
         self.master = MasterProblem()
-
-        # vvvvvv Bloco antigo vvvvvvvvvv
-        N = 1
-        M = 1
-        self.amountBitsPerCluster = 1 << (M + 1)
-        self.amountBetaVarsPerX = 1 << (M + N)
-
-        # Order parametric_columns (XA1A2..AnB1...Bm)
-        self.parametric_columns: dict[str, tuple[list[int]]] = parametric_columns
-        self.betaVarsBitsX0 = betaVarsBitsX0
-        self.betaVarsBitsX1 = betaVarsBitsX1
-        self.betaVarsCost = betaVarsCost
-
-        self.solution = {}
         self.subproblem = SubProblem(df=dataFrame)
 
     def update_parents_to_reversed_topological_order(self, node: Node) -> None:
@@ -177,8 +165,6 @@ class ColumnGenerationProblemOrchestrator:
             reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
-            duals=self.duals,
-            minimizes_objective_function=self.minimizes_objective_function,
         )
 
     def _generate_initial_column_base(self) -> list[list[int]]:
@@ -250,33 +236,23 @@ class ColumnGenerationProblemOrchestrator:
             if reduced_cost >= 0:
                 break
             
-            # TODO: WHAT TO DO
-#########################
             newColumn: list[int] = []
-            for index in range(len(self.subproblem.bitsParametric)):
-                newColumn.append(self.subproblem.bitsParametric[index].X)
+            for index in range(len(self.subproblem.coluna_parametrizada)):
+                newColumn.append(self.subproblem.coluna_parametrizada[index].X)
 
             newColumn.append(
                 1
             )  # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
             logger.debug(f"New Column: {newColumn}")
-            objCoeff: float = 0.0
-            for betaIndex in range(self.amountBetaVarsPerX):
-                if self.intervention.value == 0:
-                    objCoeff += (
-                        self.betaVarsCost[betaIndex]
-                        * self.subproblem.beta_varsX0[betaIndex].X
-                    )
-                else:
-                    objCoeff += (
-                        self.betaVarsCost[betaIndex]
-                        * self.subproblem.beta_varsX1[betaIndex].X
-                    )
-#####################
+
+            gamma_coef: float = 0.0
+            for var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable:
+                gamma_coef += var_gurobi.coef * var_gurobi.X
+
             self.master.update(
                 new_column=newColumn,
                 index=len(self.columns_base),
-                obj_coeff=objCoeff,
+                obj_coeff=gamma_coef,
                 minimizes_objective_function=self.minimizes_objective_function,
             )
             self.columns_base.append(newColumn)
@@ -323,87 +299,38 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
     bound = problem.optimize_master()
     return bound, number_of_iterations
 
-def get_node_list_realizations(node_list: list[Node]) -> list[list]:
-    ranges = [range(node.cardinality) for node in node_list]
-    cartesian = product(*ranges)
-    matrix = [[node.label for node in node_list]]
-    matrix += [list(combo) for combo in cartesian]
-    # idx_A = matrix[0].index(node.label)
-    return matrix
-
-
-def buildScalarProblem(
-    M: int, N: int, interventionValue: int, targetValue: int, df, minimizes_objective_function: bool
-):
-    # Calculate the empirical probs (RHS of the restrictions, so b in Ax=b)
-    empiricalProbabilities: list[float] = InitScalable.calculateEmpiricals(
-        N=N, M=M, df=df
-    )
-    # Auxiliary Gamma U variables (beta): calculate the obj coeff in the subproblem and the relation to the bit variables that compose them
-    betaVarsCoeffObjSubproblem: list[float] = []
-    betaVarsBitsX0, betaVarsCoeffObjSubproblemX0 = (
-        InitScalable.defineGammaUAuxiliaryVariables(
-            M=M, N=N, df=df, targetValue=targetValue, XValue=0,
-        )
-    )
-    betaVarsBitsX1, betaVarsCoeffObjSubproblemX1 = (
-        InitScalable.defineGammaUAuxiliaryVariables(
-            M=M, N=N, df=df, targetValue=targetValue, XValue=1,
-        )
-    )
-    if interventionValue == 1:
-        betaVarsCoeffObjSubproblem = copy.deepcopy(betaVarsCoeffObjSubproblemX1)
-    else:
-        betaVarsCoeffObjSubproblem = copy.deepcopy(betaVarsCoeffObjSubproblemX0)
-
-    # Parametric_columns:
-    parametric_columns: list[tuple[list[str]]] = InitScalable.defineParametricColumn(
-        M=M, N=N
-    )
-    return ColumnGenerationProblemOrchestrator(
-        dataFrame=df,
-        empiricalProbabilities=empiricalProbabilities,
-        parametric_columns=parametric_columns,
-        N=N,
-        M=M,
-        betaVarsCost=betaVarsCoeffObjSubproblem,
-        betaVarsBitsX0=betaVarsBitsX0,
-        betaVarsBitsX1=betaVarsBitsX1,
-        interventionValue=interventionValue,
-        minimizes_objective_function=minimizes_objective_function,
-    )
-
-
 def exemplo_de_execucao():
-    N = 1
-    M = 2
-    scalable_df = get_scalable_dataframe(M=M, N=N)
-    interventionValue = 1
-    targetValue = 1
+    balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+    balke_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+    balke_unobs = ["U1", "U2"]
+    balke_target = "Y"
+    balke_target_value = 1
+    balke_intervention = "X"
+    balke_intervention_value = 1
+    balke_csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
+    balke_df = pd.read_csv(balke_csv_path)
 
-    scalarProblem = buildScalarProblem(
-        M=M,
-        N=N,
-        interventionValue=interventionValue,
-        targetValue=targetValue,
-        df=scalable_df,
-        minimizes_objective_function=True,
+    balke_model = CausalModel(
+        data=balke_df,
+        edges=balke_input,
+        custom_cardinalities=balke_cardinalities,
+        unobservables_labels=balke_unobs,
+        interventions=(balke_intervention, balke_intervention_value),
+        target=(balke_target, balke_target_value),
     )
-    lower, itLower = solve(scalarProblem)
+    dataFrame = 1
+    dag = balke_model.graph
+    intervention = balke_model.interventions[0]
+    target = balke_model.target
+    minimizes_objective_function = 1
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function)
+    solve(problem)
 
-    scalarProblem = buildScalarProblem(
-        M=M,
-        N=N,
-        interventionValue=interventionValue,
-        targetValue=targetValue,
-        df=scalable_df,
-        minimizes_objective_function=False,
-    )
-    upper, itUpper = solve(scalarProblem)
-    upper = -upper
-    logger.info(f"{lower} =< P(Y = {targetValue}|X = {interventionValue}) <= {upper}")
-    logger.info(f"{itLower} iteracoes para lower e {itUpper} para upper")
+if __name__ == '__main__': 
+    exemplo_de_execucao()
 
-
-def main():
-    return exemplo_de_execucao()
