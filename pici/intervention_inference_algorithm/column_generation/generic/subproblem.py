@@ -1,3 +1,4 @@
+from itertools import product
 import logging
 
 import gurobipy as gp
@@ -6,7 +7,6 @@ from pandas import DataFrame
 
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
-from pici.intervention_inference_algorithm.column_generation.generic.column_generation_orchestrator import get_node_list_realizations
 from pici.utils.probabilities_helper import find_conditional_probability
 
 
@@ -25,7 +25,9 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self, df: DataFrame = None):
+    def __init__(self, intervention: Node, target: Node, df: DataFrame = None):
+        self.intervention = intervention
+        self.target = target
         self.df = df
         self.model = gp.Model("subproblem")
         self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
@@ -37,8 +39,6 @@ class SubProblem:
         reversed_ordered_W_realizations: list[list],
         reversed_ordered_W: list[Node],
         symbolic_objective_function_probabilites: list[tuple],
-        duals: dict[int, float],
-        minimizes_objective_function: bool,
     ):
         self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
         self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
@@ -54,6 +54,14 @@ class SubProblem:
         self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
 
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
+
+        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(self.reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
+        self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
+
+        self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
+        self.coluna_parametrizada: list[Var] = []
+        self.get_A_u_parametriza_colunas_matriz_restricoes()
+        self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable)
 
         self.model.update()
 
@@ -119,10 +127,53 @@ class SubProblem:
         Change the objective functions coefficients.
         """
         self.model.setAttr(
-            "obj", self.bitsParametric, [-duals[dualKey] for dualKey in duals]
+            "obj", self.coluna_parametrizada, [-duals[dualKey] for dualKey in duals]
         )
         self.model.update()
 
+
+    def gamma_linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
+        '''
+        Gera o Yu (Gamma U): gamma_u_map_bit_product_to_linearized_variable
+        Mapeia o produtório de bits e seu coef a uma linearização
+        '''
+        gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
+        header = W_realizations[0]
+        cartesian_products = W_realizations[1:]
+
+        for realization in cartesian_products:
+            if realization[header.index(self.target.label)] != self.target.intervened_value or realization[header.index(self.intervention.label)] != self.intervention.intervened_value:
+                continue
+
+            coef = self.get_coef_from_objective_function(header, realization)
+            bit_product = BitProduct()
+            bit_product.set_coef(coef)
+
+            for node in considered_c_component_in_topological_order:
+                parents_label = [parent.label for parent in node.parents]
+                parents_realization = [realization[header.index(parent_label)] for parent_label in parents_label]
+                realization_key: str = self.get_realization_key(parents_label, parents_realization)
+                bit_gurobi_var = self.cluster_bits[node.label][realization_key]
+
+                node_idx = header.index(node.label)
+                sign = 1
+                if realization[node_idx] == 0:
+                    sign = -1
+                new_bit = Bit(bit_gurobi_var, sign)
+
+                bit_product.add_bit(new_bit)
+            
+            # TODO: Add variable name
+            gamma_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(obj=coef, vtype=GRB.BINARY)
+        
+        '''
+        TODO: Pode ser que o gurobi sabe linearizar o produtório.
+        Basicamente teriamos uma lista de produtórios ao inveés de um dicionário mapeando uma nova variável.
+        Para cada produtório:
+            addConstr(0 <= produtorio <= 1)
+        '''
+
+        return gamma_u_map_bit_product_to_linearized_variable
 
 
     def get_coef_from_objective_function(self, w_header: list, w_realization: list):
@@ -164,67 +215,57 @@ class SubProblem:
         return coefq * coefw
 
 
-    def linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
-        # TODO: Edge cases: intervention and target, apenas desprezat na realization
-        map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
-        header = W_realizations[0]
-        cartesian_products = W_realizations[1:]
-
-        for realization in cartesian_products:
-            # quais são as condições para essa função?
-            coef = self.get_coef_from_objective_function(header, realization)
-            bit_product = BitProduct()
-            # TODO: Devo desprezar a intervention e a target aqui?
-            for node in considered_c_component_in_topological_order:
-                
-                parents_label = [parent.label for parent in node.parents]
-                parents_realization = [realization[header.index(parent_label)] for parent_label in parents_label]
-                realization_key: str = self.get_realization_key(parents_label, parents_realization)
-                bit_gurobi_var = self.cluster_bits[node.label][realization_key]
-
-                node_idx = header.index(node.label)
-                sign = 1
-                if realization[node_idx] == 0:
-                    sign = -1
-                new_bit = Bit(bit_gurobi_var, sign)
-
-                bit_product.add_bit(new_bit)
-            
-            # TODO: Add variable name
-            map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(obj=coef, vtype=GRB.BINARY)
-        
-        '''
-        TODO: Pode ser que o gurobi sabe linearizar o produtório.
-        Basicamente teriamos uma lista de produtórios ao inveés de um dicionário mapeando uma nova variável.
-        Para cada produtório:
-            addConstr(0 <= produtorio <= 1)
-        '''
-
-        return map_bit_product_to_linearized_variable
-
     def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
         parents_label = [parent.label for parent in node.parents]
         parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_label]
         realization_key: str = self.get_realization_key(parents_label, parents_realization)
         return self.cluster_bits[node.label][realization_key]
 
+    def get_A_u_parametriza_colunas_matriz_restricoes(self, total_w_realization, considered_c_component_in_topological_order):
+        header = total_w_realization[0]
+        total_w_realization = total_w_realization[1:]
+        for realization in total_w_realization:
+            bit_product = BitProduct()
+            for node in considered_c_component_in_topological_order:
+                bit_gurobi_var = self.cluster_bits[node.label][realization]
+                node_realization = realization[header.index(node.label)]
+                sign = 1
+                if node_realization == 0:
+                    sign = -1
+                new_bit = Bit(bit_gurobi_var, sign)
+                bit_product.add_bit(new_bit)
+            self.w_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(vtype=GRB.BINARY)
+            self.coluna_parametrizada.append(self.w_u_map_bit_product_to_linearized_variable[bit_product])
 
-    def add_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
+    def generate_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
+            self.add_linearized_bit_products_constraints(variable, bit_product.bit_list)
+
+    def add_linearized_bit_products_constraints(self, variable: Var, bit_list: list[Bit]) -> None:
+        # TODO: Add constraint name
+        self.model.addConstr(variable >= 0)
+        # TODO: Add constraints name
+        self.model.addConstr(variable <= 1)
+
+        sum_bits = 0
+        for bit in bit_list:
+            one_or_zero = 0
+            if bit.sign == -1:
+                one_or_zero = 1
+        
             # TODO: Add constraint name
-            self.model.addConstr(variable >= 0)
-            # TODO: Add constraints name
-            self.model.addConstr(variable <= 1)
+            self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var)
+            sum_bits += one_or_zero + bit.sign*bit.gurobi_var
 
-            sum_bits = 0
-            for bit in bit_product.bit_list:
-                one_or_zero = 0
-                if bit.sign == -1:
-                    one_or_zero = 1
-            
-                # TODO: Add constraint name
-                self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var)
-                sum_bits += one_or_zero + bit.sign*bit.gurobi_var
+        n = len(bit_list)
+        self.model.addConstr(variable >= 1 - n + sum_bits)
 
-            n = len(bit_product.bit_list)
-            self.model.addConstr(variable >= 1 - n + sum_bits)
+def get_node_list_realizations(node_list: list[Node]) -> list[list]:
+    for node in node_list:
+        print(f"{node.label} -- {node.cardinality}")
+    ranges = [range(node.cardinality) for node in node_list]
+    cartesian = product(*ranges)
+    matrix = [[node.label for node in node_list]]
+    matrix += [list(combo) for combo in cartesian]
+    # idx_A = matrix[0].index(node.label)
+    return matrix
