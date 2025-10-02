@@ -225,7 +225,7 @@ def calculate_constraints_empirical_probabilities(
     probs: list[float] = [1.0]
     spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
     cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
-        listSpaces=spaces
+        list_spaces=spaces
     )
     for realization in cartesian_product:
         prob = 1.0
