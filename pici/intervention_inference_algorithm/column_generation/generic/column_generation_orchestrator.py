@@ -100,10 +100,9 @@ class ColumnGenerationProblemOrchestrator:
         #     str_r += f"{node.label}, "
         # print(f"    C-Comp + Tail: {str_r[:-2]}")
 
-
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
-                c_comp_order=self.reversed_ordered_considered_c_comp,
+                considered_c_comp_in_topo_order=self.reversed_ordered_considered_c_comp,
                 c_component_and_tail=c_component_and_tail,
                 topo_order=self.topological_order,
             )
@@ -412,5 +411,6 @@ def exemplo_n1_m2():
 
 
 if __name__ == '__main__': 
-    exemplo_n1_m2()
+    exemplo_balke()
+    # exemplo_n1_m2()
 
