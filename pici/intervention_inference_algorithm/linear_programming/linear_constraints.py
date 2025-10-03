@@ -127,7 +127,7 @@ def find_c_component_and_tail_set(unob: Node, c_comp_order: list[Node]) -> list[
 
 
 def get_symbolical_constraints_probabilities_and_wc(
-    c_comp_order: list[Node], c_component_and_tail: list[Node], topo_order: list[Node]
+    considered_c_comp_in_topo_order: list[Node], c_component_and_tail: list[Node], topo_order: list[Node]
 ) -> tuple[list[dict[Node, list[Node]]], list[Node]]:
     """
     Determines the symbolic constraints for probabilities and the set Wc of variables present in constraints.
@@ -146,6 +146,7 @@ def get_symbolical_constraints_probabilities_and_wc(
     cond_vars: list[Node] = []
     symbolical_constraints_probabilities: list[dict[Node, list[Node]]] = []
     Wc: list[Node] = []
+    c_comp_order = considered_c_comp_in_topo_order.copy()
     Wc = c_comp_order.copy()
     while bool(c_comp_order):
         node = c_comp_order.pop(0)
