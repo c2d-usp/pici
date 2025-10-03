@@ -34,6 +34,13 @@ class MasterProblem:
         for minimization. Gurobi output is suppressed for iterative procedures.
         """
         num_columns_base = len(columns_base)
+
+        print("11-----------------------")
+        print(f"column_base: {num_columns_base}")
+        print(f"constraints: {len(constraints_empirical_probabilities)}")
+        print("-----------------------")
+
+
         self.vars = self.model.addVars(num_columns_base, obj=ColumnGenerationParameters.BIG_M.value, name="BaseColumns")
         self.constrs = self.model.addConstrs(
             (

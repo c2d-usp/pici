@@ -94,19 +94,28 @@ class ColumnGenerationProblemOrchestrator:
             )
         )
         # Seguinte loop é desnecessário?
+        if W is None:
+            raise Exception("W is None")
+        
+        if dag.topological_order is None or len(dag.topological_order) == 0:
+            raise Exception("dag.topological_order is None")
+        
         W_ordered = []
         for i, node in enumerate(dag.topological_order):
             if node in W:
                 W_ordered.append(node)
-        self.reversed_ordered_W = W_ordered.reverse()
-        self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
-
-        self.number_of_restrictions = len(W)
+        W_ordered.reverse()
+        self.reversed_ordered_W = W_ordered 
+        if self.reversed_ordered_W is not None:
+            self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
+        else:
+            raise Exception("reversed is None")
+        self.number_of_constraints = len(W)
 
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
         self.duals = {}
-        for i in range(self.number_of_restrictions):
+        for i in range(self.number_of_constraints):
             self.duals[i] = ColumnGenerationParameters.BIG_M.value
 
         self.symbolic_objective_function_probabilites: list[tuple] = (
@@ -128,10 +137,12 @@ class ColumnGenerationProblemOrchestrator:
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,
             )
         )
-
+        print("-----------------------")
+        print(len(self.constraints_empirical_probabilities))
+        print("-----------------------")
         self.columns_base = None
         self.master = MasterProblem()
-        self.subproblem = SubProblem(df=dataFrame)
+        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
 
     def update_parents_to_reversed_topological_order(self, node: Node) -> None:
         ordered_parents = []
@@ -171,7 +182,7 @@ class ColumnGenerationProblemOrchestrator:
         """
         Generate an initial base columns for the master problem as an identity matrix.
 
-        This method creates an identity matrix of size (number_of_restrictions + 1) x (number_of_restrictions + 1),
+        This method creates an identity matrix of size (number_of_constraints + 1) x (number_of_constraints + 1),
         where each column corresponds to a basic feasible solution for the initial master problem.
         The resulting matrix is returned.
 
@@ -179,8 +190,8 @@ class ColumnGenerationProblemOrchestrator:
             list[list[int]]: The identity matrix.
         """
         columns_base: list[list[int]] = []
-        for index in range(self.number_of_restrictions + 1):
-            new_column = [0] * (self.number_of_restrictions + 1)
+        for index in range(self.number_of_constraints + 1):
+            new_column = [0] * (self.number_of_constraints + 1)
             new_column[index] = 1
             columns_base.append(new_column)
         return columns_base
@@ -318,7 +329,7 @@ def exemplo_de_execucao():
         interventions=(balke_intervention, balke_intervention_value),
         target=(balke_target, balke_target_value),
     )
-    dataFrame = 1
+    dataFrame = balke_df
     dag = balke_model.graph
     intervention = balke_model.interventions[0]
     target = balke_model.target

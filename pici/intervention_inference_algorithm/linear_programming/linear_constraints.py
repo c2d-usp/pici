@@ -246,4 +246,9 @@ def calculate_constraints_empirical_probabilities(
             target_realization_nodes.clear()
             condition_realization_nodes.clear()
         probs.append(prob)
+    print("***************************************")
+    print("***************************************")
+    print(probs)
+    print("***************************************")
+    print("***************************************")
     return probs
