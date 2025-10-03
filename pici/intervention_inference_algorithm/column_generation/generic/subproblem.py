@@ -60,7 +60,8 @@ class SubProblem:
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
         self.coluna_parametrizada: list[Var] = []
-        self.get_A_u_parametriza_colunas_matriz_restricoes()
+
+        self.get_A_u_parametriza_colunas_matriz_restricoes(reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
         self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable)
 
         self.model.update()
@@ -77,19 +78,18 @@ class SubProblem:
         return [node for node in objective_function_vars_not_in_W]
     
     def separate_objective_function_probabilities(self, symbolic_objective_function_probabilites, W) -> tuple[list[tuple], list[tuple]]:
+        """
+            Pw todo mundo está em W
+            Pq: P - Pw
+        """
         probabilities_of_objective_function_vars_not_in_W = []
         P_W = []
         for conditional_probability in symbolic_objective_function_probabilites:
             probability_target, conditioned_nodes = conditional_probability
-            if probability_target not in W:
-                P_W.append(conditional_probability)
-                continue
-            if any(node in W for node in conditioned_nodes):
+            if probability_target in W and all(node in W for node in conditioned_nodes):
                 P_W.append(conditional_probability)
                 continue
             probabilities_of_objective_function_vars_not_in_W.append(conditional_probability)
-
-
         return (P_W, probabilities_of_objective_function_vars_not_in_W)
 
     def _create_cluster_bits(self, reversed_ordered_considered_c_comp: list[Node]):
@@ -151,7 +151,7 @@ class SubProblem:
 
             for node in considered_c_component_in_topological_order:
                 parents_label = [parent.label for parent in node.parents]
-                parents_realization = [realization[header.index(parent_label)] for parent_label in parents_label]
+                parents_realization = self._get_node_bit_variable_given_parents_realization(node, realization, header)
                 realization_key: str = self.get_realization_key(parents_label, parents_realization)
                 bit_gurobi_var = self.cluster_bits[node.label][realization_key]
 
@@ -216,9 +216,9 @@ class SubProblem:
 
 
     def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
-        parents_label = [parent.label for parent in node.parents]
-        parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_label]
-        realization_key: str = self.get_realization_key(parents_label, parents_realization)
+        parents_labels = [parent.label for parent in node.parents if not parent.is_latent]
+        parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_labels]
+        realization_key: str = self.get_realization_key(parents_labels, parents_realization)
         return self.cluster_bits[node.label][realization_key]
 
     def get_A_u_parametriza_colunas_matriz_restricoes(self, total_w_realization, considered_c_component_in_topological_order):
@@ -227,7 +227,7 @@ class SubProblem:
         for realization in total_w_realization:
             bit_product = BitProduct()
             for node in considered_c_component_in_topological_order:
-                bit_gurobi_var = self.cluster_bits[node.label][realization]
+                bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
                 node_realization = realization[header.index(node.label)]
                 sign = 1
                 if node_realization == 0:
