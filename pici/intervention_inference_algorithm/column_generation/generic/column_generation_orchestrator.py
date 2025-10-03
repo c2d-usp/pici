@@ -31,6 +31,7 @@ from pici.intervention_inference_algorithm.column_generation.generic.subproblem 
 )
 from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
     calculate_constraints_empirical_probabilities,
+    calculate_number_of_constraints,
     find_c_component_and_tail_set,
     get_c_component_in_reverse_topological_order,
     get_symbolical_constraints_probabilities_and_wc,
@@ -82,10 +83,22 @@ class ColumnGenerationProblemOrchestrator:
             unob=intervention.latent_parent,
             considered_c_comp=considered_c_comp,
         )
+        # print("###################################################################################")
+        # str_r = ""
+        # for node in self.reversed_ordered_considered_c_comp:
+        #     str_r += f"{node.label}, "
+        # print(f"    Considered C-Comp: {str_r[:-2]}")
 
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
             intervention.latent_parent, self.reversed_ordered_considered_c_comp
         )
+
+        # str_r = ""
+        # for node in c_component_and_tail:
+        #     str_r += f"{node.label}, "
+        # print(f"    C-Comp + Tail: {str_r[:-2]}")
+
+
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
                 c_comp_order=self.reversed_ordered_considered_c_comp,
@@ -93,7 +106,6 @@ class ColumnGenerationProblemOrchestrator:
                 topo_order=self.topological_order,
             )
         )
-        # Seguinte loop é desnecessário?
         if W is None:
             raise Exception("W is None")
         
@@ -110,7 +122,7 @@ class ColumnGenerationProblemOrchestrator:
             self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
         else:
             raise Exception("reversed is None")
-        self.number_of_constraints = len(W)
+        self.number_of_constraints = calculate_number_of_constraints(W=W)        
 
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
@@ -129,6 +141,21 @@ class ColumnGenerationProblemOrchestrator:
         self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(
             intervention
         )
+        # print("____________________")
+        # print("Nodes in W:")
+        # for node in W:
+        #     print(f"{node.label}")
+
+        # print("____________________")
+        # print("Empirical constraints:")
+        # for conditional_prob in symbolical_constraints_probabilities:
+        #     for target, conditioned_nodes in conditional_prob.items():
+        #         str_target = target.label
+        #         str_conditioned_nodes = "" 
+        #         for node in conditioned_nodes:
+        #             str_conditioned_nodes += f"{node.label}, "
+        #     print(f"P({str_target}|{str_conditioned_nodes[:len(str_conditioned_nodes)-2]})")
+        # print("____________________")
 
         self.constraints_empirical_probabilities: list[float] = (
             calculate_constraints_empirical_probabilities(
@@ -137,9 +164,6 @@ class ColumnGenerationProblemOrchestrator:
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,
             )
         )
-        print("-----------------------")
-        print(len(self.constraints_empirical_probabilities))
-        print("-----------------------")
         self.columns_base = None
         self.master = MasterProblem()
         self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
@@ -310,7 +334,7 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
     bound = problem.optimize_master()
     return bound, number_of_iterations
 
-def exemplo_de_execucao():
+def exemplo_balke():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
     balke_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
     balke_unobs = ["U1", "U2"]
@@ -342,6 +366,43 @@ def exemplo_de_execucao():
         minimizes_objective_function)
     solve(problem)
 
+def exemplo_n1_m2():
+    n1_m2_input = "X -> A1, X -> B1, X -> B2, B1 -> A1, B2 -> A1, A1 -> Y, U1 -> X, U1 -> A1, U2 -> B1, U2 -> B2, U2 -> Y"
+    n1_m2_cardinalities = {"X": 2, "Y": 2, "B1": 2, "B2": 2, "A1": 2, "U1": 0, "U2": 0}
+
+    # n2m1 n1_m2_input = "X -> A1, A1 -> A2, X -> B1, A2 -> Y, U1 -> X, U1 -> A1, U1 -> A2, U2 -> B1, U2 -> Y"
+    # n2m1 n1_m2_cardinalities = {"X": 2, "Y": 2, "B1": 2, "A2": 2, "A1": 2, "U1": 0, "U2": 0}
+
+    n1_m2_unobs = ["U1", "U2"]
+    n1_m2_target = "Y"
+    n1_m2_target_value = 1
+    n1_m2_intervention = "X"
+    n1_m2_intervention_value = 1
+    n1_m2_csv_path = DataExamplesPaths.CSV_N1M2.value
+    n1_m2_df = pd.read_csv(n1_m2_csv_path)
+
+    n1_m2_model = CausalModel(
+        data=n1_m2_df,
+        edges=n1_m2_input,
+        custom_cardinalities=n1_m2_cardinalities,
+        unobservables_labels=n1_m2_unobs,
+        interventions=(n1_m2_intervention, n1_m2_intervention_value),
+        target=(n1_m2_target, n1_m2_target_value),
+    )
+    dataFrame = n1_m2_df
+    dag = n1_m2_model.graph
+    intervention = n1_m2_model.interventions[0]
+    target = n1_m2_model.target
+    minimizes_objective_function = 1
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function)
+    solve(problem)
+
+
 if __name__ == '__main__': 
-    exemplo_de_execucao()
+    exemplo_n1_m2()
 
