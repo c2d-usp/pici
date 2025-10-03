@@ -227,22 +227,34 @@ def calculate_constraints_empirical_probabilities(
     cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
         list_spaces=spaces
     )
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    print(f"{cartesian_product}")
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     for realization in cartesian_product:
         prob = 1.0
-        for term in symbolical_constraints_probabilities:
+        for conditional_probability in symbolical_constraints_probabilities:
+            
             target_realization_nodes: list[Node] = []
             condition_realization_nodes: list[Node] = []
-            for key_node in term:
-                key_node.value = realization[Wc.index(key_node)]
-                target_realization_nodes.append(key_node)
-                for cVar in term[key_node]:
+            for target, conditioned_nodes in conditional_probability.items():
+                target.value = realization[Wc.index(target)]
+                target_realization_nodes.append(target)
+                for cVar in conditioned_nodes:
                     cVar.value = realization[Wc.index(cVar)]
                     condition_realization_nodes.append(cVar)
-            prob *= find_conditional_probability(
+            # Debug
+            str_target = f"{target.label}={target.value}"
+            str_conditioned_nodes = "" 
+            for node in conditioned_nodes:
+                str_conditioned_nodes += f"{node.label}={node.value}, "
+            # Debug
+            curr_prob = find_conditional_probability(
                 dataFrame=data,
                 target_realization=target_realization_nodes,
                 condition_realization=condition_realization_nodes,
             )
+            print(f"    P({str_target}|{str_conditioned_nodes[:len(str_conditioned_nodes)-2]}) = {curr_prob}")
+            prob *= curr_prob
             target_realization_nodes.clear()
             condition_realization_nodes.clear()
         probs.append(prob)
@@ -252,3 +264,13 @@ def calculate_constraints_empirical_probabilities(
     print("***************************************")
     print("***************************************")
     return probs
+
+def calculate_number_of_constraints(W: list[Node]):
+    """
+    Receive W set
+    """
+    n_constraints = 1
+    for node in W:
+        n_constraints *= node.cardinality
+    return n_constraints
+    
