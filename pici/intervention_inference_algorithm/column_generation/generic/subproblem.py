@@ -70,9 +70,26 @@ class SubProblem:
 
         self.get_A_u_parametriza_colunas_matriz_restricoes(reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
         self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable)
-
         self.model.update()
 
+        # Ver os bits e os sinais de Gamma U e de Au
+        # Mais o coeficiente de Gamma
+        print("________________________________________________________________________________")
+        print("GammaU: ------")
+        for bit_product, _ in self.gamma_u_map_bit_product_to_linearized_variable.items():
+            str_prod_bit = f"{bit_product.coef} * "
+            for b in bit_product.bit_list:
+                str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
+            print(f"{str_prod_bit[:len(str_prod_bit)-3]} +")
+        print("________________________________________________________________________________")
+        print("Au: ------")
+        for bit_product, _ in self.w_u_map_bit_product_to_linearized_variable.items():
+            str_prod_bit = f""
+            for b in bit_product.bit_list:
+                str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
+            
+            print(f"{str_prod_bit[:len(str_prod_bit)-3]} + ")
+        
     def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
         objective_function_vars_not_in_W = set()
         for conditional_probability in symbolic_objective_function_probabilites:
@@ -110,10 +127,10 @@ class SubProblem:
 
         """
         for node in reversed_ordered_considered_c_comp:
-            reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(node.parents)
+            parents_without_latent = [parent for parent in node.parents if not parent.is_latent]
+            reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(parents_without_latent)
             header = reversed_ordered_node_parents_realizations[0]
             reversed_ordered_node_parents_realizations = reversed_ordered_node_parents_realizations[1:]
-            
             self.cluster_bits[node.label] = {}
             for i, realization in enumerate(reversed_ordered_node_parents_realizations):
                 realization_key: str = self.get_realization_key(header, realization)
@@ -159,17 +176,12 @@ class SubProblem:
             bit_product.set_coef(coef)
 
             for node in considered_c_component_in_topological_order:
-                parents_label = [parent.label for parent in node.parents]
-                parents_realization = self._get_node_bit_variable_given_parents_realization(node, realization, header)
-                realization_key: str = self.get_realization_key(parents_label, parents_realization)
-                bit_gurobi_var = self.cluster_bits[node.label][realization_key]
-
+                bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
                 node_idx = header.index(node.label)
                 sign = 1
                 if realization[node_idx] == 0:
                     sign = -1
                 new_bit = Bit(bit_gurobi_var, sign)
-
                 bit_product.add_bit(new_bit)
             
             # TODO: Add variable name
