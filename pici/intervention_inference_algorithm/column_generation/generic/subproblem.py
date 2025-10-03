@@ -39,11 +39,19 @@ class SubProblem:
         reversed_ordered_W_realizations: list[list],
         reversed_ordered_W: list[Node],
         symbolic_objective_function_probabilites: list[tuple],
+        number_of_constraints,
+        duals,
     ):
         self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
         self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
         self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.setParam(GRB.Param.BestBdStop, 1)
+
+        self.coluna_parametrizada = self.model.addVars(
+            number_of_constraints,
+            obj=[-duals[dualKey] for dualKey in duals],
+            vtype=GRB.BINARY,
+        )
 
         self.reversed_ordered_W = reversed_ordered_W
 
@@ -59,7 +67,6 @@ class SubProblem:
         self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
-        self.coluna_parametrizada: list[Var] = []
 
         self.get_A_u_parametriza_colunas_matriz_restricoes(reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
         self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable)
@@ -226,7 +233,7 @@ class SubProblem:
     def get_A_u_parametriza_colunas_matriz_restricoes(self, total_w_realization, considered_c_component_in_topological_order):
         header = total_w_realization[0]
         total_w_realization = total_w_realization[1:]
-        for realization in total_w_realization:
+        for i, realization in enumerate(total_w_realization):
             bit_product = BitProduct()
             for node in considered_c_component_in_topological_order:
                 bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
@@ -237,7 +244,7 @@ class SubProblem:
                 new_bit = Bit(bit_gurobi_var, sign)
                 bit_product.add_bit(new_bit)
             self.w_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(vtype=GRB.BINARY)
-            self.coluna_parametrizada.append(self.w_u_map_bit_product_to_linearized_variable[bit_product])
+            self.coluna_parametrizada[i] = self.w_u_map_bit_product_to_linearized_variable[bit_product]
 
     def generate_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
         for bit_product, variable in map_bit_product_to_linearized_variable.items():

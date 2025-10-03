@@ -46,6 +46,8 @@ from pici.intervention_inference_algorithm.column_generation.scalable_problem_in
 )
 from pici.utils._enum import ColumnGenerationParameters, DataExamplesPaths
 
+BIG_M = 1e4
+
 
 class ColumnGenerationProblemOrchestrator:
     def __init__(
@@ -195,11 +197,17 @@ class ColumnGenerationProblemOrchestrator:
         self.columns_base = self._generate_initial_column_base()
         self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
 
+        self.duals = {}
+        for i in range(self.number_of_constraints):
+            self.duals[i] = BIG_M
+
         self.subproblem.setup(
             reversed_ordered_considered_c_comp=self.reversed_ordered_considered_c_comp,
             reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
+            number_of_constraints=self.number_of_constraints,
+            duals=self.duals,
         )
 
     def _generate_initial_column_base(self) -> list[list[int]]:
@@ -281,8 +289,8 @@ class ColumnGenerationProblemOrchestrator:
             logger.debug(f"New Column: {newColumn}")
 
             gamma_coef: float = 0.0
-            for var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable:
-                gamma_coef += var_gurobi.coef * var_gurobi.X
+            for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
+                gamma_coef += bit_product.coef * var_gurobi.X
 
             self.master.update(
                 new_column=newColumn,
