@@ -142,7 +142,9 @@ class SubProblem:
         cartesian_products = W_realizations[1:]
 
         for realization in cartesian_products:
-            if realization[header.index(self.target.label)] != self.target.intervened_value or realization[header.index(self.intervention.label)] != self.intervention.intervened_value:
+            if self.target.label in header and realization[header.index(self.target.label)] != self.target.intervened_value:
+                continue
+            if realization[header.index(self.intervention.label)] != self.intervention.intervened_value:
                 continue
 
             coef = self.get_coef_from_objective_function(header, realization)
@@ -261,8 +263,6 @@ class SubProblem:
         self.model.addConstr(variable >= 1 - n + sum_bits)
 
 def get_node_list_realizations(node_list: list[Node]) -> list[list]:
-    for node in node_list:
-        print(f"{node.label} -- {node.cardinality}")
     ranges = [range(node.cardinality) for node in node_list]
     cartesian = product(*ranges)
     matrix = [[node.label for node in node_list]]
