@@ -39,6 +39,7 @@ class SubProblem:
         reversed_ordered_W_realizations: list[list],
         reversed_ordered_W: list[Node],
         symbolic_objective_function_probabilites: list[tuple],
+        conjunto_estranho: list[Node],
         number_of_constraints,
         duals,
     ):
@@ -56,13 +57,18 @@ class SubProblem:
         self.reversed_ordered_W = reversed_ordered_W
         self.reversed_ordered_considered_c_comp = reversed_ordered_considered_c_comp
         self.reversed_ordered_W_realizations = reversed_ordered_W_realizations
+
+        realizacao_conjunto_estranho = get_node_list_realizations(conjunto_estranho)
         self._create_cluster_bits(reversed_ordered_considered_c_comp)
+
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
+
         self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
 
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
-        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize()
+        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(        reversed_ordered_considered_c_comp, realizacao_conjunto_estranho)
+
         self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
@@ -89,7 +95,7 @@ class SubProblem:
             for b in bit_product.bit_list:
                 str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
             
-            print(f"{str_prod_bit[:len(str_prod_bit)-3]} + ")
+            print(f"{str_prod_bit[:len(str_prod_bit)-3]}, ")
         
     def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
         objective_function_vars_not_in_W = set()
@@ -117,7 +123,7 @@ class SubProblem:
             probabilities_of_objective_function_vars_not_in_W.append(conditional_probability)
         return (P_W, probabilities_of_objective_function_vars_not_in_W)
 
-    def _create_cluster_bits(self, reversed_ordered_considered_c_comp: list[Node]):
+    def _create_cluster_bits(self, conjunto: list[Node]):
         """
         Each node in the considered c-component has a series of bits that represents each realization.
         Example:
@@ -127,14 +133,19 @@ class SubProblem:
             We've three clusters. Cluster A with 3 bits, Cluster B with one bit, and Cluster C with two bits.
 
         """
-        for node in reversed_ordered_considered_c_comp:
+        j = 0
+        print(f"---->{conjunto}")
+        for node in conjunto:
             parents_without_latent = [parent for parent in node.parents if not parent.is_latent]
             reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(parents_without_latent)
             header = reversed_ordered_node_parents_realizations[0]
+            print(f"{header}")
             reversed_ordered_node_parents_realizations = reversed_ordered_node_parents_realizations[1:]
             self.cluster_bits[node.label] = {}
             for i, realization in enumerate(reversed_ordered_node_parents_realizations):
                 realization_key: str = self.get_realization_key(header, realization)
+                print(f"    {j}th - Node {node.label} Realization key: {realization_key}--{realization}")
+                j+=1
                 self.cluster_bits[node.label][realization_key] = self.model.addVar(
                     obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
@@ -156,22 +167,11 @@ class SubProblem:
         )
         self.model.update()
     
-    def get_conjunto_estranho(self):
-        conjunto_estranho = set()
-        for node in self.reversed_ordered_considered_c_comp:
-            conjunto_estranho.add(node)
-            if node != self.intervention:
-                conjunto_estranho.update([parent for parent in node.parents if not parent.is_latent])
-        return list(conjunto_estranho)
-
-    def gamma_linearize(self) -> dict:
+    def gamma_linearize(self, reversed_ordered_considered_c_comp: list[Node], realizacao_conjunto_estranho: list) -> dict:
         '''
         Gera o Yu (Gamma U): gamma_u_map_bit_product_to_linearized_variable
         Mapeia o produtório de bits e seu coef a uma linearização
         '''
-        conjunto_estranho: list[Node] = self.get_conjunto_estranho()
-        realizacao_conjunto_estranho = get_node_list_realizations(conjunto_estranho)
-
         gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
         header = realizacao_conjunto_estranho[0]
         cartesian_products = realizacao_conjunto_estranho[1:]
@@ -186,7 +186,7 @@ class SubProblem:
             bit_product = BitProduct()
             bit_product.set_coef(coef)
 
-            for node in conjunto_estranho:
+            for node in reversed_ordered_considered_c_comp:
                 if node.label == self.intervention.label:
                     continue
                 bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
@@ -287,7 +287,7 @@ class SubProblem:
             one_or_zero = 0
             if bit.sign == -1:
                 one_or_zero = 1
-        
+
             # TODO: Add constraint name
             self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var)
             sum_bits += one_or_zero + bit.sign*bit.gurobi_var
