@@ -62,4 +62,4 @@ class GurobiParameters(Enum):
 
 class ColumnGenerationParameters(Enum):
     BIG_M = 1e4
-    MAX_ITERACTIONS_ALLOWED = 2
+    MAX_ITERACTIONS_ALLOWED = 5
