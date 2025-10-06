@@ -157,6 +157,10 @@ class ColumnGenerationProblemOrchestrator:
         self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
     
     def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
+        '''
+        Conjunto estranho é o considered_c-comp + os pais de (considered_c-comp - X)
+        
+        '''
         conjunto_estranho = set()
         for node in reversed_ordered_considered_c_comp:
             conjunto_estranho.add(node)
