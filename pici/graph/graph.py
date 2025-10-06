@@ -85,3 +85,11 @@ class Graph:
         for parent in node.parents:
             if not parent.visited:
                 self._dfs_ancestor(parent)
+
+def order_list_in_reversed_topological_order(topological_order: list[Node], nodes_list: list[Node]) -> list[Node]:
+    reversed_list = []
+    for node in topological_order:
+        if node in nodes_list:
+            reversed_list.append(node)
+    reversed_list.reverse()
+    return reversed_list
