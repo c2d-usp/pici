@@ -54,16 +54,15 @@ class SubProblem:
         )
 
         self.reversed_ordered_W = reversed_ordered_W
-
+        self.reversed_ordered_considered_c_comp = reversed_ordered_considered_c_comp
         self.reversed_ordered_W_realizations = reversed_ordered_W_realizations
-
         self._create_cluster_bits(reversed_ordered_considered_c_comp)
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
         self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
 
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
-        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(self.reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
+        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize()
         self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
@@ -76,11 +75,13 @@ class SubProblem:
         # Mais o coeficiente de Gamma
         print("________________________________________________________________________________")
         print("GammaU: ------")
+        i = 0
         for bit_product, _ in self.gamma_u_map_bit_product_to_linearized_variable.items():
             str_prod_bit = f"{bit_product.coef} * "
             for b in bit_product.bit_list:
                 str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
-            print(f"{str_prod_bit[:len(str_prod_bit)-3]} +")
+            print(f"Element {i}th: {str_prod_bit[:len(str_prod_bit)-3]},")
+            i += 1
         print("________________________________________________________________________________")
         print("Au: ------")
         for bit_product, _ in self.w_u_map_bit_product_to_linearized_variable.items():
@@ -135,7 +136,7 @@ class SubProblem:
             for i, realization in enumerate(reversed_ordered_node_parents_realizations):
                 realization_key: str = self.get_realization_key(header, realization)
                 self.cluster_bits[node.label][realization_key] = self.model.addVar(
-                    obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}_of_node_{node.label}"
+                    obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
 
     def get_realization_key(self, header: list[str], realization: list[int]) -> str:
@@ -154,16 +155,26 @@ class SubProblem:
             "obj", self.coluna_parametrizada, [-duals[dualKey] for dualKey in duals]
         )
         self.model.update()
+    
+    def get_conjunto_estranho(self):
+        conjunto_estranho = set()
+        for node in self.reversed_ordered_considered_c_comp:
+            conjunto_estranho.add(node)
+            if node != self.intervention:
+                conjunto_estranho.update([parent for parent in node.parents if not parent.is_latent])
+        return list(conjunto_estranho)
 
-
-    def gamma_linearize(self, W_realizations: list[list], considered_c_component_in_topological_order: list[Node]) -> dict:
+    def gamma_linearize(self) -> dict:
         '''
         Gera o Yu (Gamma U): gamma_u_map_bit_product_to_linearized_variable
         Mapeia o produtório de bits e seu coef a uma linearização
         '''
+        conjunto_estranho: list[Node] = self.get_conjunto_estranho()
+        realizacao_conjunto_estranho = get_node_list_realizations(conjunto_estranho)
+
         gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
-        header = W_realizations[0]
-        cartesian_products = W_realizations[1:]
+        header = realizacao_conjunto_estranho[0]
+        cartesian_products = realizacao_conjunto_estranho[1:]
 
         for realization in cartesian_products:
             if self.target.label in header and realization[header.index(self.target.label)] != self.target.intervened_value:
@@ -175,7 +186,9 @@ class SubProblem:
             bit_product = BitProduct()
             bit_product.set_coef(coef)
 
-            for node in considered_c_component_in_topological_order:
+            for node in conjunto_estranho:
+                if node.label == self.intervention.label:
+                    continue
                 bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
                 node_idx = header.index(node.label)
                 sign = 1
@@ -237,6 +250,7 @@ class SubProblem:
 
 
     def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
+        # Se tiver X tenho que colocar X sendo a intervenca
         parents_labels = [parent.label for parent in node.parents if not parent.is_latent]
         parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_labels]
         realization_key: str = self.get_realization_key(parents_labels, parents_realization)
