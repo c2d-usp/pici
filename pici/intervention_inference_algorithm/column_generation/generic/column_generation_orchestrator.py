@@ -18,9 +18,17 @@ from pici.causal_model import CausalModel
 #     sys.path.insert(0, PROJECT_ROOT)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from pici.graph.graph import Graph
+from pici.graph.graph import Graph, order_list_in_reversed_topological_order
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic import bits
 from pici.intervention_inference_algorithm.column_generation.generic.master_problem import (
@@ -147,6 +155,14 @@ class ColumnGenerationProblemOrchestrator:
         self.columns_base = None
         self.master = MasterProblem()
         self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
+    
+    def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
+        conjunto_estranho = set()
+        for node in reversed_ordered_considered_c_comp:
+            conjunto_estranho.add(node)
+            if node != intervention:
+                conjunto_estranho.update([parent for parent in node.parents if not parent.is_latent])
+        return list(conjunto_estranho)
 
     def update_parents_to_reversed_topological_order(self, node_list: list[Node]) -> None:
         for node in node_list:
@@ -181,11 +197,15 @@ class ColumnGenerationProblemOrchestrator:
         for i in range(self.number_of_constraints):
             self.duals[i] = BIG_M
 
+        conjunto_estranho = self.get_conjunto_estranho(self.reversed_ordered_considered_c_comp, self.intervention)
+        reversed_ordered_conjunto_estranho = order_list_in_reversed_topological_order(self.topological_order, conjunto_estranho)
+
         self.subproblem.setup(
             reversed_ordered_considered_c_comp=self.reversed_ordered_considered_c_comp,
             reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
+            conjunto_estranho=reversed_ordered_conjunto_estranho,
             number_of_constraints=self.number_of_constraints,
             duals=self.duals,
         )
@@ -236,7 +256,7 @@ class ColumnGenerationProblemOrchestrator:
                     f"--------->>  Master solution not found. Gurobi status code: {self.master.model.Status}"
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
-            logger.debug(f"Master Duals: {self.duals}")
+            # logger.debug(f"Master Duals: {self.duals}")
             # self.master.model.write(f"master_{counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
