@@ -85,20 +85,10 @@ class ColumnGenerationProblemOrchestrator:
             unob=intervention.latent_parent,
             considered_c_comp=considered_c_comp,
         )
-        # print("###################################################################################")
-        # str_r = ""
-        # for node in self.reversed_ordered_considered_c_comp:
-        #     str_r += f"{node.label}, "
-        # print(f"    Considered C-Comp: {str_r[:-2]}")
 
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
             intervention.latent_parent, self.reversed_ordered_considered_c_comp
         )
-
-        # str_r = ""
-        # for node in c_component_and_tail:
-        #     str_r += f"{node.label}, "
-        # print(f"    C-Comp + Tail: {str_r[:-2]}")
 
         symbolical_constraints_probabilities, W = (
             get_symbolical_constraints_probabilities_and_wc(
@@ -107,6 +97,7 @@ class ColumnGenerationProblemOrchestrator:
                 topo_order=self.topological_order,
             )
         )
+
         if W is None:
             raise Exception("W is None")
         
@@ -117,12 +108,15 @@ class ColumnGenerationProblemOrchestrator:
         for i, node in enumerate(dag.topological_order):
             if node in W:
                 W_ordered.append(node)
+
         W_ordered.reverse()
-        self.reversed_ordered_W = W_ordered 
+        self.reversed_ordered_W = W_ordered
+
         if self.reversed_ordered_W is not None:
             self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
         else:
             raise Exception("reversed is None")
+
         self.number_of_constraints = calculate_number_of_constraints(W=W)        
 
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
@@ -142,21 +136,6 @@ class ColumnGenerationProblemOrchestrator:
         self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(
             intervention
         )
-        # print("____________________")
-        # print("Nodes in W:")
-        # for node in W:
-        #     print(f"{node.label}")
-
-        # print("____________________")
-        # print("Empirical constraints:")
-        # for conditional_prob in symbolical_constraints_probabilities:
-        #     for target, conditioned_nodes in conditional_prob.items():
-        #         str_target = target.label
-        #         str_conditioned_nodes = "" 
-        #         for node in conditioned_nodes:
-        #             str_conditioned_nodes += f"{node.label}, "
-        #     print(f"P({str_target}|{str_conditioned_nodes[:len(str_conditioned_nodes)-2]})")
-        # print("____________________")
 
         self.constraints_empirical_probabilities: list[float] = (
             calculate_constraints_empirical_probabilities(
@@ -169,13 +148,15 @@ class ColumnGenerationProblemOrchestrator:
         self.master = MasterProblem()
         self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
 
-    def update_parents_to_reversed_topological_order(self, node: Node) -> None:
-        ordered_parents = []
-        for node in self.topological_order:
-            if node in node.parents:
-                ordered_parents.append(node)
-        ordered_parents.reverse()
-        node.parents = ordered_parents
+    def update_parents_to_reversed_topological_order(self, node_list: list[Node]) -> None:
+        for node in node_list:
+            ordered_parents = []
+            for ordered_node in self.topological_order:
+                if ordered_node in node.parents:
+                    ordered_parents.append(ordered_node)
+            ordered_parents.reverse()
+            node.parents = ordered_parents
+        return node_list
 
     def setup(self, method=1):
         """
@@ -413,4 +394,3 @@ def exemplo_n1_m2():
 if __name__ == '__main__': 
     exemplo_balke()
     # exemplo_n1_m2()
-
