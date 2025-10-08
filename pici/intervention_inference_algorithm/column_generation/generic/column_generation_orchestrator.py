@@ -296,11 +296,11 @@ class ColumnGenerationProblemOrchestrator:
             for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
                 str_bit = ""
                 for bit in bit_product.bit_list:
-                    str_bit += f"({bit.sign}*{bit.gurobi_var.VarName}), "
+                    str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
                 gamma_coef += bit_product.coef * var_gurobi.X
             
+            print(f"BitProduct List: {str_bit}")
             print(f"{iterations_counter} gamma_coef: {gamma_coef}")
-            # print(f"BitProduct List: {str_bit}")
             self.master.update(
                 new_column=newColumn,
                 index=len(self.columns_base),
