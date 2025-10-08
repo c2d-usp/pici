@@ -127,6 +127,7 @@ class ColumnGenerationProblemOrchestrator:
 
         self.number_of_constraints = calculate_number_of_constraints(W=W)        
 
+        # TODO: COLOCAR ISSO NA CONSTRUÇÃO DO OBJETO GRAPH
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
         self.duals = {}
@@ -136,7 +137,8 @@ class ColumnGenerationProblemOrchestrator:
         self.symbolic_objective_function_probabilites: list[tuple] = (
             objective_function.generate_symbolic_objective_function_probabilities()
         )
-
+        '''
+        NÃO USADAS. FORAM CRIADAS ANTES DE INICIAR A CONSTRUÇÃO DO CG.
         self.symbolic_decision_function: dict[tuple, int] = (
             objective_function.generate_symbolic_decision_function()
         )
@@ -144,6 +146,7 @@ class ColumnGenerationProblemOrchestrator:
         self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(
             intervention
         )
+        '''
 
         self.constraints_empirical_probabilities: list[float] = (
             calculate_constraints_empirical_probabilities(
@@ -197,10 +200,6 @@ class ColumnGenerationProblemOrchestrator:
         self.columns_base = self._generate_initial_column_base()
         self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
 
-        self.duals = {}
-        for i in range(self.number_of_constraints):
-            self.duals[i] = BIG_M
-
         conjunto_estranho = self.get_conjunto_estranho(self.reversed_ordered_considered_c_comp, self.intervention)
         reversed_ordered_conjunto_estranho = order_list_in_reversed_topological_order(self.topological_order, conjunto_estranho)
 
@@ -232,7 +231,7 @@ class ColumnGenerationProblemOrchestrator:
             columns_base.append(new_column)
         return columns_base
 
-    def exec(self) -> int:
+    def column_generation(self) -> int:
         """
         Executes the column generation algorithm.
 
@@ -287,14 +286,18 @@ class ColumnGenerationProblemOrchestrator:
             for index in range(len(self.subproblem.coluna_parametrizada)):
                 newColumn.append(self.subproblem.coluna_parametrizada[index].X)
 
-            newColumn.append(
-                1
-            )  # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
+            # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
+            newColumn.append(1)
             logger.debug(f"New Column: {newColumn}")
 
             gamma_coef: float = 0.0
             for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
+                str_bit = ""
+                for bit in bit_product.bit_list:
+                    str_bit += f"({bit.sign}*{bit.gurobi_var.VarName}), "
                 gamma_coef += bit_product.coef * var_gurobi.X
+            print(f"gamma_coef: {gamma_coef}")
+            print(f"BitProduct List: {str_bit}")
 
             self.master.update(
                 new_column=newColumn,
@@ -303,6 +306,10 @@ class ColumnGenerationProblemOrchestrator:
                 minimizes_objective_function=self.minimizes_objective_function,
             )
             self.columns_base.append(newColumn)
+
+            print(f"len(columns_base) [Linhas] = {len(self.columns_base)}")
+            print(f"len(columns_base[0]) [Colunas] = {len(self.columns_base[0])}")
+
             iterations_counter += 1
             if iterations_counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
@@ -342,7 +349,7 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
         tuple[int, float]: A tuple containing the final objective bound and the number of iterations performed.
     """
     problem.setup(method)
-    number_of_iterations = problem.exec()
+    number_of_iterations = problem.column_generation()
     bound = problem.optimize_master()
     return bound, number_of_iterations
 
