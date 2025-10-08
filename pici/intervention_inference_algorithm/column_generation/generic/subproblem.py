@@ -67,8 +67,7 @@ class SubProblem:
 
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
-        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(        reversed_ordered_considered_c_comp, realizacao_conjunto_estranho)
-
+        self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(reversed_ordered_considered_c_comp, realizacao_conjunto_estranho)
         self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
@@ -96,32 +95,6 @@ class SubProblem:
                 str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
             
             print(f"{str_prod_bit[:len(str_prod_bit)-3]}, ")
-        
-    def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
-        objective_function_vars_not_in_W = set()
-        for conditional_probability in symbolic_objective_function_probabilites:
-            probability_target, conditioned_nodes = conditional_probability
-            if probability_target not in W:
-                objective_function_vars_not_in_W.add(probability_target)
-            for node in conditioned_nodes:
-                if node not in W:
-                    objective_function_vars_not_in_W.add(node)
-        return [node for node in objective_function_vars_not_in_W]
-    
-    def separate_objective_function_probabilities(self, symbolic_objective_function_probabilites, W) -> tuple[list[tuple], list[tuple]]:
-        """
-            Pw todo mundo está em W
-            Pq: P - Pw
-        """
-        probabilities_of_objective_function_vars_not_in_W = []
-        P_W = []
-        for conditional_probability in symbolic_objective_function_probabilites:
-            probability_target, conditioned_nodes = conditional_probability
-            if probability_target in W and all(node in W for node in conditioned_nodes):
-                P_W.append(conditional_probability)
-                continue
-            probabilities_of_objective_function_vars_not_in_W.append(conditional_probability)
-        return (P_W, probabilities_of_objective_function_vars_not_in_W)
 
     def _create_cluster_bits(self, conjunto: list[Node]):
         """
@@ -149,6 +122,32 @@ class SubProblem:
                 self.cluster_bits[node.label][realization_key] = self.model.addVar(
                     obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
+
+    def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
+        objective_function_vars_not_in_W = set()
+        for conditional_probability in symbolic_objective_function_probabilites:
+            probability_target, conditioned_nodes = conditional_probability
+            if probability_target not in W:
+                objective_function_vars_not_in_W.add(probability_target)
+            for node in conditioned_nodes:
+                if node not in W:
+                    objective_function_vars_not_in_W.add(node)
+        return [node for node in objective_function_vars_not_in_W]
+    
+    def separate_objective_function_probabilities(self, symbolic_objective_function_probabilites, W) -> tuple[list[tuple], list[tuple]]:
+        """
+            Pw todo mundo está em W
+            Pq: P - Pw
+        """
+        P_Q = []
+        P_W = []
+        for conditional_probability in symbolic_objective_function_probabilites:
+            probability_target, conditioned_nodes = conditional_probability
+            if probability_target in W and all(node in W for node in conditioned_nodes):
+                P_W.append(conditional_probability)
+                continue
+            P_Q.append(conditional_probability)
+        return (P_W, P_Q)
 
     def get_realization_key(self, header: list[str], realization: list[int]) -> str:
         if len(header) != len(realization):
@@ -191,6 +190,7 @@ class SubProblem:
                     continue
                 bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
                 node_idx = header.index(node.label)
+                # AQUI SE TRATA APENAS BINÁRIO
                 sign = 1
                 if realization[node_idx] == 0:
                     sign = -1
@@ -250,7 +250,7 @@ class SubProblem:
 
 
     def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
-        # Se tiver X tenho que colocar X sendo a intervenca
+        # Garantir que a ordem da realization_key está em ordem topologica reversa, a fim de acessar o dicionário
         parents_labels = [parent.label for parent in node.parents if not parent.is_latent]
         parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_labels]
         realization_key: str = self.get_realization_key(parents_labels, parents_realization)
