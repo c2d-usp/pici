@@ -48,11 +48,7 @@ class SubProblem:
         self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.setParam(GRB.Param.BestBdStop, 1)
 
-        self.coluna_parametrizada = self.model.addVars(
-            number_of_constraints,
-            obj=[-duals[dualKey] for dualKey in duals],
-            vtype=GRB.BINARY,
-        )
+        self.coluna_parametrizada = {}
 
         self.reversed_ordered_W = reversed_ordered_W
         self.reversed_ordered_considered_c_comp = reversed_ordered_considered_c_comp
