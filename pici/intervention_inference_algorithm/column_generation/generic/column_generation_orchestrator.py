@@ -261,6 +261,9 @@ class ColumnGenerationProblemOrchestrator:
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             # logger.debug(f"Master Duals: {self.duals}")
             # self.master.model.write(f"master_{counter}.lp")
+            # print(f"1 Subproblem FO: {self.subproblem.model.getObjective()}")
+            # print(f"1 len(duals): {len(self.duals)}")
+
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -281,7 +284,6 @@ class ColumnGenerationProblemOrchestrator:
             logger.debug(f"Reduced Cost: {reduced_cost}")
             if reduced_cost >= 0:
                 break
-            
             newColumn: list[int] = []
             for index in range(len(self.subproblem.coluna_parametrizada)):
                 newColumn.append(self.subproblem.coluna_parametrizada[index].X)
@@ -296,9 +298,9 @@ class ColumnGenerationProblemOrchestrator:
                 for bit in bit_product.bit_list:
                     str_bit += f"({bit.sign}*{bit.gurobi_var.VarName}), "
                 gamma_coef += bit_product.coef * var_gurobi.X
-            print(f"gamma_coef: {gamma_coef}")
-            print(f"BitProduct List: {str_bit}")
-
+            
+            print(f"{iterations_counter} gamma_coef: {gamma_coef}")
+            # print(f"BitProduct List: {str_bit}")
             self.master.update(
                 new_column=newColumn,
                 index=len(self.columns_base),
@@ -306,16 +308,13 @@ class ColumnGenerationProblemOrchestrator:
                 minimizes_objective_function=self.minimizes_objective_function,
             )
             self.columns_base.append(newColumn)
-
-            print(f"len(columns_base) [Linhas] = {len(self.columns_base)}")
-            print(f"len(columns_base[0]) [Colunas] = {len(self.columns_base[0])}")
-
             iterations_counter += 1
             if iterations_counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
                     f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {iterations_counter}")
+            print("_________________________________________________________________")
 
         return iterations_counter
     
