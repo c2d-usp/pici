@@ -52,6 +52,11 @@ class SubProblem:
         self.reversed_ordered_considered_c_comp = reversed_ordered_considered_c_comp
         self.reversed_ordered_W_realizations = reversed_ordered_W_realizations
 
+        print("________________________________________________________________________________")
+        print("FO Symbolic: ------")
+        for element in symbolic_objective_function_probabilites:
+            print(element)
+
         realizacao_conjunto_estranho = get_node_list_realizations(conjunto_estranho)
         self._create_cluster_bits(reversed_ordered_considered_c_comp)
 
@@ -60,7 +65,7 @@ class SubProblem:
         self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
         print("________________________________________________________________________________")
         print("PQ: ------")
-        print(f"{self.Pq}")
+        print(f"{self.Pq}")       
         print("________________________________________________________________________________")
         print("PW: ------")
         print(f"{self.Pw}")
@@ -211,6 +216,11 @@ class SubProblem:
 
     def get_coef_from_objective_function(self, w_header: list, w_realization: list):
         coefw = 1
+        print("##############################################")
+        print("_____________________________________")
+        print("W")
+        print(f"{w_header}")
+        print(f"{w_realization}")
         for w_conditional_probability in self.Pw:
             w_target, w_conditioned = w_conditional_probability
 
@@ -218,7 +228,10 @@ class SubProblem:
             for node in w_conditioned:
                 node.value = w_realization[w_header.index(node.label)]
 
-            coefw *= find_conditional_probability(dataFrame=self.df, target_realization=[w_target], condition_realization=w_conditioned)
+            curr = find_conditional_probability(dataFrame=self.df, target_realization=[w_target], condition_realization=w_conditioned)
+            print(f"P({w_target}|{w_conditioned}) == {curr}")
+
+            coefw *= curr
             
 
         if len(self.objective_function_vars_not_in_W) <= 0:
@@ -227,8 +240,16 @@ class SubProblem:
         coefq = 0
         q_header = self.realization_objective_function_vars_not_in_W[0]
         q_realizations = self.realization_objective_function_vars_not_in_W[1:]
-
+        print("_____________________________________")
+        print("Q")
         for q_realization in q_realizations:
+            if self.intervention.label in q_header and q_realization[q_header.index(self.intervention.label)] != self.intervention.intervened_value:
+                continue
+            if self.target.label in q_header and q_realization[q_header.index(self.target.label)] != self.target.intervened_value:
+                continue
+            print("--------------------")
+            print(f"{q_header}")
+            print(f"{q_realization}")
             coef_parcial = 1
             for q_conditional_probability in self.Pq:
                 q_target, q_conditioned = q_conditional_probability
@@ -243,8 +264,12 @@ class SubProblem:
                         node.value = w_realization[w_header.index(node.label)]
                     else:
                         node.value = q_realization[q_header.index(node.label)]
-                coef_parcial *= find_conditional_probability(dataFrame=self.df, target_realization=[q_target],condition_realization=q_conditioned)
+                curr = find_conditional_probability(dataFrame=self.df, target_realization=[q_target],condition_realization=q_conditioned)
+                coef_parcial *= curr
+                print(f"P({q_target}|{q_conditioned}) == {curr}")
+            print(f"Coef_Parcial: {coef_parcial}")
             coefq += coef_parcial
+            print("----")
         return coefq * coefw
 
 
