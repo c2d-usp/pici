@@ -484,7 +484,7 @@ class ScalarProblem:
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             logger.debug(f"Master Duals: {self.duals}")
-            # self.master.model.write(f"master_{counter}.lp")
+            self.master.model.write(f"sca_master_{counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -499,7 +499,7 @@ class ScalarProblem:
                 logger.error(
                     f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
                 )
-            # self.subproblem.model.write(f"subproblem_{counter}.lp")
+            self.subproblem.model.write(f"sca_subproblem_{counter}.lp")
 
             reduced_cost = self.subproblem.model.objVal
             logger.debug(f"Reduced Cost: {reduced_cost}")
@@ -615,8 +615,8 @@ class ScalarProblem:
         numberIterations = self._generate_patterns()
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
-        self.master.model.write("model.lp")
-        self.master.model.write("model.mps")
+        self.master.model.write("sca_model.lp")
+        self.master.model.write("sca_model.mps")
         bound = self.master.model.ObjVal
         itBound = numberIterations
         return bound, itBound
@@ -635,20 +635,19 @@ def single_exec():
         interventionValue=interventionValue,
         targetValue=targetValue,
         df=scalable_df,
-        minimum=True,
+        minimum=False,
     )
-    lower, itLower = scalarProblem.solve()
-
+    upper, itUpper = scalarProblem.solve()
+    upper = -upper
     scalarProblem = ScalarProblem.buildScalarProblem(
         M=M,
         N=N,
         interventionValue=interventionValue,
         targetValue=targetValue,
         df=scalable_df,
-        minimum=False,
+        minimum=True,
     )
-    upper, itUpper = scalarProblem.solve()
-    upper = -upper
+    lower, itLower = scalarProblem.solve()
     logger.info(f"{lower} =< P(Y = {targetValue}|X = {interventionValue}) <= {upper}")
     logger.info(f"{itLower} iteracoes para lower e {itUpper} para upper")
 

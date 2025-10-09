@@ -131,8 +131,8 @@ class ColumnGenerationProblemOrchestrator:
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
         self.duals = {}
-        for i in range(self.number_of_constraints):
-            self.duals[i] = ColumnGenerationParameters.BIG_M.value
+        # for i in range(self.number_of_constraints):
+        #     self.duals[i] = ColumnGenerationParameters.BIG_M.value
 
         self.symbolic_objective_function_probabilites: list[tuple] = (
             objective_function.generate_symbolic_objective_function_probabilities()
@@ -209,8 +209,6 @@ class ColumnGenerationProblemOrchestrator:
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
             conjunto_estranho=reversed_ordered_conjunto_estranho,
-            number_of_constraints=self.number_of_constraints,
-            duals=self.duals,
         )
 
     def _generate_initial_column_base(self) -> list[list[int]]:
@@ -244,6 +242,7 @@ class ColumnGenerationProblemOrchestrator:
             TimeoutError: If the maximum number of allowed iterations is exceeded.
         """
         iterations_counter = 0
+        counter = 0
         while True:
             self.master.model.optimize()
             if self.master.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -260,7 +259,7 @@ class ColumnGenerationProblemOrchestrator:
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             # logger.debug(f"Master Duals: {self.duals}")
-            # self.master.model.write(f"master_{counter}.lp")
+            self.master.model.write(f"cgo_master_{counter}.lp")
             # print(f"1 Subproblem FO: {self.subproblem.model.getObjective()}")
             # print(f"1 len(duals): {len(self.duals)}")
 
@@ -278,7 +277,8 @@ class ColumnGenerationProblemOrchestrator:
                 logger.error(
                     f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
                 )
-            # self.subproblem.model.write(f"subproblem_{counter}.lp")
+            self.subproblem.model.write(f"cgo_subproblem_{counter}.lp")
+            counter += 1
 
             reduced_cost = self.subproblem.model.objVal
             logger.debug(f"Reduced Cost: {reduced_cost}")
@@ -332,8 +332,8 @@ class ColumnGenerationProblemOrchestrator:
         """
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
-        self.master.model.write("model.lp")
-        self.master.model.write("model.mps")
+        self.master.model.write("cgo_model.lp")
+        self.master.model.write("cgo_model.mps")
         return self.master.model.ObjVal
 
 def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, float]:
@@ -422,5 +422,5 @@ def exemplo_n1_m2():
 
 
 if __name__ == '__main__': 
-    exemplo_balke()
-    # exemplo_n1_m2()
+    # exemplo_balke()
+    exemplo_n1_m2()
