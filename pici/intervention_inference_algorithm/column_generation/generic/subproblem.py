@@ -58,7 +58,12 @@ class SubProblem:
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
 
         self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
-
+        print("________________________________________________________________________________")
+        print("PQ: ------")
+        print(f"{self.Pq}")
+        print("________________________________________________________________________________")
+        print("PW: ------")
+        print(f"{self.Pw}")
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
         self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(reversed_ordered_considered_c_comp, realizacao_conjunto_estranho)
