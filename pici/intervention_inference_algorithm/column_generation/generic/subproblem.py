@@ -233,8 +233,10 @@ class SubProblem:
 
             coefw *= curr
             
-
         if len(self.objective_function_vars_not_in_W) <= 0:
+            print(f"coefW: {coefw}")
+            print(f"NO q: coef: {coefw}")
+            print("----")
             return coefw
 
         coefq = 0
@@ -269,6 +271,9 @@ class SubProblem:
                 print(f"P({q_target}|{q_conditioned}) == {curr}")
             print(f"Coef_Parcial: {coef_parcial}")
             coefq += coef_parcial
+            print(f"coefW: {coefw}")
+            print(f"coefq: {coefq}")
+            print(f"coef: {coefw*coefq}")
             print("----")
         return coefq * coefw
 
