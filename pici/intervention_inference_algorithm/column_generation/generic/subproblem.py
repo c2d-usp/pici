@@ -40,8 +40,6 @@ class SubProblem:
         reversed_ordered_W: list[Node],
         symbolic_objective_function_probabilites: list[tuple],
         conjunto_estranho: list[Node],
-        number_of_constraints,
-        duals,
     ):
         self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
         self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
@@ -92,7 +90,7 @@ class SubProblem:
             
             print(f"{str_prod_bit[:len(str_prod_bit)-3]}, ")
 
-    def _create_cluster_bits(self, conjunto: list[Node]):
+    def _create_cluster_bits(self, considered_c_comp: list[Node]):
         """
         Each node in the considered c-component has a series of bits that represents each realization.
         Example:
@@ -103,8 +101,8 @@ class SubProblem:
 
         """
         j = 0
-        print(f"---->{conjunto}")
-        for node in conjunto:
+        print(f"Cluster Bits of :{considered_c_comp}")
+        for node in considered_c_comp:
             parents_without_latent = [parent for parent in node.parents if not parent.is_latent]
             reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(parents_without_latent)
             header = reversed_ordered_node_parents_realizations[0]
@@ -289,7 +287,7 @@ class SubProblem:
             sum_bits += one_or_zero + bit.sign*bit.gurobi_var
 
         n = len(bit_list)
-        self.model.addConstr(variable >= 1 - n + sum_bits)
+        self.model.addConstr(variable >= 1 - n + sum_bits, name="Linearized_Sum_BitProduct",)
 
 def get_node_list_realizations(node_list: list[Node]) -> list[list]:
     ranges = [range(node.cardinality) for node in node_list]
