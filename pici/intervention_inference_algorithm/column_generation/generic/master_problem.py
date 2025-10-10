@@ -19,26 +19,26 @@ class MasterProblem:
 
     def setup(
         self,
-        columns_base: list[list[int]],
+        transposed_columns_base: list[list[int]],
         constraints_empirical_probabilities: list[float],
     ):
         """
         Initializes the master problem with base columns and empirical probability constraints.
 
         Args:
-            columns_base (list[list[int]]): The base columns is an identity matrix for the initial variables.
+            transposed_columns_base (list[list[int]]): The base columns is an identity matrix for the initial variables.
             constraints_empirical_probabilities (list[float]): The right-hand side values for the empirical probability constraints.
 
         This method creates variables for each base column, sets up the constraints so that the
         linear combination of columns matches the empirical probabilities, and configures the model
         for minimization. Gurobi output is suppressed for iterative procedures.
         """
-        num_columns_base = len(columns_base)
+        num_columns_base = len(transposed_columns_base)
         self.vars = self.model.addVars(num_columns_base, obj=ColumnGenerationParameters.BIG_M.value, name="BaseColumns")
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
-                    columns_base[column_id][realization_id] * self.vars[column_id]
+                    transposed_columns_base[column_id][realization_id] * self.vars[column_id]
                     for column_id in range(num_columns_base)
                 )
                 == constraints_empirical_probabilities[realization_id]
