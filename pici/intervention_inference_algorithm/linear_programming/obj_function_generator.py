@@ -264,8 +264,8 @@ class ObjFunctionGenerator:
         ) | {self.intervention}
 
         _, _, mechanisms = MechanismGenerator.mechanisms_generator(
-            latentNode=intervention_latent_parent,
-            endogenousNodes=endogenous_nodes,
+            latent_node=intervention_latent_parent,
+            endogenous_nodes=endogenous_nodes,
         )
         return mechanisms
 
@@ -300,7 +300,7 @@ class ObjFunctionGenerator:
         summand_nodes.append(self.target)
         spaces.append([self.target.intervened_value])
         input_cases: list[list[int]] = MechanismGenerator.generate_cross_products(
-            listSpaces=spaces
+            list_spaces=spaces
         )
 
         obj_function_coefficients: list[float] = []

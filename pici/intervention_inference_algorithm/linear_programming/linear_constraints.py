@@ -182,7 +182,7 @@ def calculate_decision_matrix(
     decision_matrix: list[list[int]] = [[1 for _ in range(len(mechanisms))]]
     spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
     cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
-        listSpaces=spaces
+        list_spaces=spaces
     )
     for realization in cartesian_product:
         aux: list[int] = []
