@@ -11,6 +11,7 @@ from pandas import DataFrame
 import networkx as nx
 
 from pici.causal_model import CausalModel
+from pici.utils.probabilities_helper import find_conditional_probability
 # THIS_DIR = os.getcwd()
 # PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 # import sys
@@ -155,9 +156,65 @@ class ColumnGenerationProblemOrchestrator:
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,
             )
         )
-        self.columns_base = None
+
+        self.pq = [(dag.graph_nodes['Y'], [dag.graph_nodes['A1']])]
+            
+        y = dag.graph_nodes['Y']
+        x = dag.graph_nodes['X']
+        y.value = 1
+        x.value = 1
+
+        a1 = dag.graph_nodes['A1']
+        b1 = dag.graph_nodes['B1']
+        b2 = dag.graph_nodes['B2']
+        
+        print("________________________________________________________________________________")
+        print("A1 B1 B2")
+        for p in [[0,0,0], [0,0,1], [0,1,0], [0,1,1],[1,0,0], [1,0,1], [1,1,0], [1,1,1]]:
+            a1.value = p[0]
+            b1.value = p[1]
+            b2.value = p[2]
+            print(f"{a1.value} {b1.value} {b2.value}")
+        
+            c1 = find_conditional_probability(
+                dataFrame=dataFrame,
+                target_realization=[y],
+                condition_realization=[a1],
+            )
+
+            print(f"P(Y=1 | A1={a1.value}) = {c1}")
+
+            # c2 = find_conditional_probability(
+            #     dataFrame=dataFrame,
+            #     target_realization=[y],
+            #     condition_realization=[a1, x, b1, b2],
+            # )
+
+            # print(f"P(Y=1 | X=1,A1={a1.value},B1={b1.value},B2={b2.value}) = {c2}")
+
+            c3 = find_conditional_probability(
+                dataFrame=dataFrame,
+                target_realization=[b2],
+                condition_realization=[x, b1],
+            )
+
+            print(f"P(B2={b2.value} | X=1,B1={b1.value}) = {c3}")
+
+            c4 = find_conditional_probability(
+                dataFrame=dataFrame,
+                target_realization=[b1],
+                condition_realization=[x],
+            )
+            print(f"P(B1={b1.value} | X=1) = {c4}")
+
+            print(f"Produto = {c1*c3*c4}")
+            print("--------------------")
+        print("________________________________________________________________________________")
+
+
+        self.transposed_columns_base = None
         self.master = MasterProblem()
-        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
+        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target, pq=self.pq)
     
     def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
         '''
@@ -197,8 +254,8 @@ class ColumnGenerationProblemOrchestrator:
         self.master.model.setParam(GRB.Param.Method, method)
         self.subproblem.model.setParam(GRB.Param.Method, method)
 
-        self.columns_base = self._generate_initial_column_base()
-        self.master.setup(self.columns_base, self.constraints_empirical_probabilities)
+        self.transposed_columns_base = self._generate_initial_column_base()
+        self.master.setup(self.transposed_columns_base, self.constraints_empirical_probabilities)
 
         conjunto_estranho = self.get_conjunto_estranho(self.reversed_ordered_considered_c_comp, self.intervention)
         reversed_ordered_conjunto_estranho = order_list_in_reversed_topological_order(self.topological_order, conjunto_estranho)
@@ -222,12 +279,12 @@ class ColumnGenerationProblemOrchestrator:
         Returns:
             list[list[int]]: The identity matrix.
         """
-        columns_base: list[list[int]] = []
+        transposed_columns_base: list[list[int]] = []
         for index in range(self.number_of_constraints + 1):
             new_column = [0] * (self.number_of_constraints + 1)
             new_column[index] = 1
-            columns_base.append(new_column)
-        return columns_base
+            transposed_columns_base.append(new_column)
+        return transposed_columns_base
 
     def column_generation(self) -> int:
         """
@@ -242,7 +299,6 @@ class ColumnGenerationProblemOrchestrator:
             TimeoutError: If the maximum number of allowed iterations is exceeded.
         """
         iterations_counter = 0
-        counter = 0
         while True:
             self.master.model.optimize()
             if self.master.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -259,10 +315,7 @@ class ColumnGenerationProblemOrchestrator:
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             # logger.debug(f"Master Duals: {self.duals}")
-            self.master.model.write(f"cgo_master_{counter}.lp")
-            # print(f"1 Subproblem FO: {self.subproblem.model.getObjective()}")
-            # print(f"1 len(duals): {len(self.duals)}")
-
+            self.master.model.write(f"bp_cgo_master_{iterations_counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -277,20 +330,19 @@ class ColumnGenerationProblemOrchestrator:
                 logger.error(
                     f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
                 )
-            self.subproblem.model.write(f"cgo_subproblem_{counter}.lp")
-            counter += 1
+            self.subproblem.model.write(f"bp_cgo_subproblem_{iterations_counter}.lp")
 
             reduced_cost = self.subproblem.model.objVal
             logger.debug(f"Reduced Cost: {reduced_cost}")
             if reduced_cost >= 0:
                 break
-            newColumn: list[int] = []
+            new_column: list[int] = []
             for index in range(len(self.subproblem.coluna_parametrizada)):
-                newColumn.append(self.subproblem.coluna_parametrizada[index].X)
+                new_column.append(self.subproblem.coluna_parametrizada[index].X)
 
             # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
-            newColumn.append(1)
-            logger.debug(f"New Column: {newColumn}")
+            new_column.append(1)
+            # logger.debug(f"New Column: {newColumn}")
 
             gamma_coef: float = 0.0
             for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
@@ -299,15 +351,21 @@ class ColumnGenerationProblemOrchestrator:
                     str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
                 gamma_coef += bit_product.coef * var_gurobi.X
             
-            print(f"BitProduct List: {str_bit}")
+            # print(f"BitProduct List: {str_bit}")
             print(f"{iterations_counter} gamma_coef: {gamma_coef}")
+            # print("-------------------------------------------------------------------------------")
+            # for k, v in self.subproblem.cluster_bits.items():
+            #     for kk,vv in v.items():
+            #         print(f"{vv.VarName} value: {vv.X}")
+            # print("-------------------------------------------------------------------------------")
+
             self.master.update(
-                new_column=newColumn,
-                index=len(self.columns_base),
+                new_column=new_column,
+                index=len(self.transposed_columns_base),
                 obj_coeff=gamma_coef,
                 minimizes_objective_function=self.minimizes_objective_function,
             )
-            self.columns_base.append(newColumn)
+            self.transposed_columns_base.append(new_column)
             iterations_counter += 1
             if iterations_counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
@@ -332,8 +390,8 @@ class ColumnGenerationProblemOrchestrator:
         """
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
-        self.master.model.write("cgo_model.lp")
-        self.master.model.write("cgo_model.mps")
+        self.master.model.write("bp_cgo_model.lp")
+        self.master.model.write("bp_cgo_model.mps")
         return self.master.model.ObjVal
 
 def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, float]:
