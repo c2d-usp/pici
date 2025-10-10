@@ -223,7 +223,7 @@ def calculate_constraints_empirical_probabilities(
     Returns:
         list[float]: List of empirical probabilities for each constraint.
     """
-    probs: list[float] = [1.0]
+    probs: list[float] = []
     spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
     cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
         list_spaces=spaces
@@ -249,6 +249,7 @@ def calculate_constraints_empirical_probabilities(
             target_realization_nodes.clear()
             condition_realization_nodes.clear()
         probs.append(prob)
+    probs.append(1)
     return probs
 
 def calculate_number_of_constraints(W: list[Node]):
