@@ -72,12 +72,12 @@ class SubProblem:
         self.realization_objective_function_vars_not_in_W = get_node_list_realizations(self.objective_function_vars_not_in_W)
 
         self.gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = self.gamma_linearize(reversed_ordered_considered_c_comp, realizacao_conjunto_estranho)
-        self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable)
+        self.generate_linearized_bit_products_constraints(self.gamma_u_map_bit_product_to_linearized_variable, name="gamma")
 
         self.w_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
 
         self.get_A_u_parametriza_colunas_matriz_restricoes(reversed_ordered_W_realizations, reversed_ordered_considered_c_comp)
-        self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable)
+        self.generate_linearized_bit_products_constraints(self.w_u_map_bit_product_to_linearized_variable, name="au")
         self.model.update()
 
         # Ver os bits e os sinais de Gamma U e de Au
@@ -301,15 +301,14 @@ class SubProblem:
             self.w_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(vtype=GRB.BINARY)
             self.coluna_parametrizada[i] = self.w_u_map_bit_product_to_linearized_variable[bit_product]
 
-    def generate_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var]) -> None:
+    def generate_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var], name="") -> None:
+        i = 0
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
-            self.add_linearized_bit_products_constraints(variable, bit_product.bit_list)
-
-    def add_linearized_bit_products_constraints(self, variable: Var, bit_list: list[Bit]) -> None:
-        # TODO: Add constraint name
-        self.model.addConstr(variable >= 0)
-        # TODO: Add constraints name
-        self.model.addConstr(variable <= 1)
+            self.add_linearized_bit_products_constraints(variable, bit_product.bit_list, name=name, ith=i)
+            i += 1
+    def add_linearized_bit_products_constraints(self, variable: Var, bit_list: list[Bit], name="", ith=-1) -> None:
+        self.model.addConstr(variable >= 0, name=f"{name}_{ith}th_more_than_zero")
+        self.model.addConstr(variable <= 1, name=f"{name}_{ith}th_less_than_one")
 
         sum_bits = 0
         for bit in bit_list:
@@ -317,12 +316,11 @@ class SubProblem:
             if bit.sign == -1:
                 one_or_zero = 1
 
-            # TODO: Add constraint name
-            self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var)
+            self.model.addConstr(variable <= one_or_zero + bit.sign*bit.gurobi_var, name=f"{name}_{ith}th_less_than_bit_{bit.sign}")
             sum_bits += one_or_zero + bit.sign*bit.gurobi_var
 
         n = len(bit_list)
-        self.model.addConstr(variable >= 1 - n + sum_bits, name="Linearized_Sum_BitProduct",)
+        self.model.addConstr(variable >= 1 - n + sum_bits, name=f"{name}_{ith}th_Linearized_Sum_BitProduct")
 
 def get_node_list_realizations(node_list: list[Node]) -> list[list]:
     ranges = [range(node.cardinality) for node in node_list]
