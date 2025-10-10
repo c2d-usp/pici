@@ -25,14 +25,17 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self, intervention: Node, target: Node, df: DataFrame = None):
+    def __init__(self, intervention: Node, target: Node, df: DataFrame = None, pq = None):
         self.intervention = intervention
         self.target = target
         self.df = df
         self.model = gp.Model("subproblem")
         self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
         self.constr = None
-    
+        self.Pq = pq
+        print("SELF PQ")
+        print(self.Pq)
+
     def setup(
         self,
         reversed_ordered_considered_c_comp: list[Node],
@@ -62,10 +65,12 @@ class SubProblem:
 
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
 
-        self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
+        self.Pw, _ = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
         print("________________________________________________________________________________")
         print("PQ: ------")
-        print(f"{self.Pq}")       
+
+        # self.Pq = [(Node('Y'), Node('A1'))]
+        print(f"{self.Pq}")
         print("________________________________________________________________________________")
         print("PW: ------")
         print(f"{self.Pw}")
@@ -216,7 +221,6 @@ class SubProblem:
 
     def get_coef_from_objective_function(self, w_header: list, w_realization: list):
         coefw = 1
-        print("##############################################")
         print("_____________________________________")
         print("W")
         print(f"{w_header}")
@@ -234,9 +238,6 @@ class SubProblem:
             coefw *= curr
             
         if len(self.objective_function_vars_not_in_W) <= 0:
-            print(f"coefW: {coefw}")
-            print(f"NO q: coef: {coefw}")
-            print("----")
             return coefw
 
         coefq = 0
