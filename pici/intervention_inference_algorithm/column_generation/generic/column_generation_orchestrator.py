@@ -39,7 +39,7 @@ from pici.intervention_inference_algorithm.column_generation.generic.subproblem 
     SubProblem, get_node_list_realizations
 )
 from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
-    calculate_constraints_empirical_probabilities,
+    column_gen_calculate_constraints_empirical_probabilities,
     calculate_number_of_constraints,
     find_c_component_and_tail_set,
     get_c_component_in_reverse_topological_order,
@@ -150,7 +150,7 @@ class ColumnGenerationProblemOrchestrator:
         '''
 
         self.constraints_empirical_probabilities: list[float] = (
-            calculate_constraints_empirical_probabilities(
+            column_gen_calculate_constraints_empirical_probabilities(
                 data=dataFrame,
                 Wc=W,
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,

@@ -68,7 +68,7 @@ def generate_constraints(
         )
     )
 
-    probs = calculate_constraints_empirical_probabilities(
+    probs = linear_calculate_constraints_empirical_probabilities(
         data=data,
         Wc=Wc,
         symbolical_constraints_probabilities=symbolical_constraints_probabilities,
@@ -206,7 +206,53 @@ def calculate_decision_matrix(
     return decision_matrix
 
 
-def calculate_constraints_empirical_probabilities(
+def linear_calculate_constraints_empirical_probabilities(
+    data: pd.DataFrame,
+    Wc: list[Node],
+    symbolical_constraints_probabilities: list[dict[Node, list[Node]]],
+) -> list[float]:
+    """
+    Calculates the empirical probabilities for each constraint in the linear program.
+
+    Args:
+        data (pd.DataFrame): The dataset containing observed variable values.
+        Wc (list[Node]): Variables present in the constraints.
+        symbolical_constraints_probabilities (list[dict[Node, list[Node]]]):
+            List of dictionaries mapping each node to its conditioning variables.
+
+    Returns:
+        list[float]: List of empirical probabilities for each constraint.
+    """
+    probs: list[float] = [1]
+    spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
+    cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
+        list_spaces=spaces
+    )
+    for realization in cartesian_product:
+        prob = 1.0
+        for conditional_probability in symbolical_constraints_probabilities:
+            
+            target_realization_nodes: list[Node] = []
+            condition_realization_nodes: list[Node] = []
+            for target, conditioned_nodes in conditional_probability.items():
+                target.value = realization[Wc.index(target)]
+                target_realization_nodes.append(target)
+                for cVar in conditioned_nodes:
+                    cVar.value = realization[Wc.index(cVar)]
+                    condition_realization_nodes.append(cVar)
+            curr_prob = find_conditional_probability(
+                dataFrame=data,
+                target_realization=target_realization_nodes,
+                condition_realization=condition_realization_nodes,
+            )
+            prob *= curr_prob
+            target_realization_nodes.clear()
+            condition_realization_nodes.clear()
+        probs.append(prob)
+    return probs
+
+
+def column_gen_calculate_constraints_empirical_probabilities(
     data: pd.DataFrame,
     Wc: list[Node],
     symbolical_constraints_probabilities: list[dict[Node, list[Node]]],
