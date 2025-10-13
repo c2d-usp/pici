@@ -5,6 +5,7 @@ import gurobipy as gp
 from gurobipy import GRB, Var, tupledict
 from pandas import DataFrame
 
+from pici.graph.graph import Graph
 from pici.graph.node import Node
 from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
 from pici.utils.probabilities_helper import find_conditional_probability
@@ -25,16 +26,13 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self, intervention: Node, target: Node, df: DataFrame = None, pq = None):
+    def __init__(self, intervention: Node, target: Node, df: DataFrame = None):
         self.intervention = intervention
         self.target = target
         self.df = df
         self.model = gp.Model("subproblem")
         self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
         self.constr = None
-        self.Pq = pq
-        print("SELF PQ")
-        print(self.Pq)
 
     def setup(
         self,
@@ -65,11 +63,9 @@ class SubProblem:
 
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
 
-        self.Pw, _ = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
+        self.Pw, self.Pq = self.separate_objective_function_probabilities(symbolic_objective_function_probabilites, reversed_ordered_W)
         print("________________________________________________________________________________")
         print("PQ: ------")
-
-        # self.Pq = [(Node('Y'), Node('A1'))]
         print(f"{self.Pq}")
         print("________________________________________________________________________________")
         print("PW: ------")
@@ -229,11 +225,12 @@ class SubProblem:
             w_target, w_conditioned = w_conditional_probability
 
             w_target.value = w_realization[w_header.index(w_target.label)]
+            str_w = ""
             for node in w_conditioned:
                 node.value = w_realization[w_header.index(node.label)]
-
+                str_w += f"{node.label}={node.value}, "
             curr = find_conditional_probability(dataFrame=self.df, target_realization=[w_target], condition_realization=w_conditioned)
-            print(f"P({w_target}|{w_conditioned}) == {curr}")
+            print(f"P({w_target.label}={w_target.value}|{str_w[:len(str_w)-2]}) == {curr}")
 
             coefw *= curr
             
@@ -262,14 +259,16 @@ class SubProblem:
                 else:
                     q_target.value = q_realization[q_header.index(q_target.label)]
                 
+                str_q = ""
                 for node in q_conditioned:
                     if node in self.reversed_ordered_W:
                         node.value = w_realization[w_header.index(node.label)]
                     else:
                         node.value = q_realization[q_header.index(node.label)]
+                    str_q += f"{node.label}={node.value}, "
                 curr = find_conditional_probability(dataFrame=self.df, target_realization=[q_target],condition_realization=q_conditioned)
                 coef_parcial *= curr
-                print(f"P({q_target}|{q_conditioned}) == {curr}")
+                print(f"P({q_target.label}={q_target.value}|{str_q[:len(str_q)-2]}) == {curr}")
             print(f"Coef_Parcial: {coef_parcial}")
             coefq += coef_parcial
             print(f"coefW: {coefw}")
