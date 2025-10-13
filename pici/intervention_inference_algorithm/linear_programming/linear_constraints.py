@@ -254,8 +254,8 @@ def linear_calculate_constraints_empirical_probabilities(
 
 def column_gen_calculate_constraints_empirical_probabilities(
     data: pd.DataFrame,
-    Wc: list[Node],
     symbolical_constraints_probabilities: list[dict[Node, list[Node]]],
+    reversed_ordered_W_realizations: list[list] = None,
 ) -> list[float]:
     """
     Calculates the empirical probabilities for each constraint in the linear program.
@@ -270,21 +270,18 @@ def column_gen_calculate_constraints_empirical_probabilities(
         list[float]: List of empirical probabilities for each constraint.
     """
     probs: list[float] = []
-    spaces: list[list[int]] = [range(var.cardinality) for var in Wc]
-    cartesian_product: list[list[int]] = MechanismGenerator.generate_cross_products(
-        list_spaces=spaces
-    )
+    header = reversed_ordered_W_realizations[0]
+    cartesian_product = reversed_ordered_W_realizations[1:]
     for realization in cartesian_product:
         prob = 1.0
         for conditional_probability in symbolical_constraints_probabilities:
-            
             target_realization_nodes: list[Node] = []
             condition_realization_nodes: list[Node] = []
             for target, conditioned_nodes in conditional_probability.items():
-                target.value = realization[Wc.index(target)]
+                target.value = realization[header.index(target.label)]
                 target_realization_nodes.append(target)
                 for cVar in conditioned_nodes:
-                    cVar.value = realization[Wc.index(cVar)]
+                    cVar.value = realization[header.index(cVar.label)]
                     condition_realization_nodes.append(cVar)
             curr_prob = find_conditional_probability(
                 dataFrame=data,
