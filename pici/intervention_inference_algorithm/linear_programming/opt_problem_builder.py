@@ -2,6 +2,9 @@ import logging
 
 import pandas as pd
 
+from pici.intervention_inference_algorithm.column_generation.generic.subproblem import get_node_list_realizations
+from pici.utils.probabilities_helper import find_conditional_probability
+
 logger = logging.getLogger(__name__)
 
 from pici.graph.graph import Graph
@@ -33,6 +36,30 @@ def build_linear_problem(
         intervention=intervention,
         target=target,
     )
+    ##
+    # TODO: REMOVER APÓS A FINALIZAÇÃO
+    # symbolic = objFG.generate_symbolic_objective_function_probabilities()
+    # list_node = set()
+    # for s in symbolic:
+    #     list_node.add(s[0])
+    #     for n in s[1]:
+    #         list_node.add(n)
+    # list_node = list(list_node)
+    # cartesian_product = get_node_list_realizations(list_node)
+    # header = cartesian_product[0]
+    # cartesian_product =cartesian_product[1:]
+    
+    # for product in cartesian_product:
+    #     for s in symbolic:
+    #         s[0].value = product[header.index(s[0].label)]
+    #         str_p = ""
+    #         for node in s[1]:
+    #             node.value = product[header.index(node.label)]
+    #             str_p = f"{node.label}={node.value}, "
+    #         c = find_conditional_probability(dataFrame=df,target_realization=[s[0]], condition_realization=s[1])
+    #         print(f"P({s[0].label}={s[0].value} | {str_p}) = {c}")
+    # print("-------------------------")
+    
     mechanisms = objFG.get_mechanisms_pruned()
 
     interventionLatentParent = objFG.intervention.latent_parent
