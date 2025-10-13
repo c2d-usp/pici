@@ -67,7 +67,7 @@ class ColumnGenerationProblemOrchestrator:
         target: Node,
         minimizes_objective_function: bool
     ):
-
+        self.dag = dag
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
@@ -148,73 +148,72 @@ class ColumnGenerationProblemOrchestrator:
             intervention
         )
         '''
-
         self.constraints_empirical_probabilities: list[float] = (
             column_gen_calculate_constraints_empirical_probabilities(
                 data=dataFrame,
-                Wc=W,
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,
+                reversed_ordered_W_realizations=self.reversed_ordered_W_realizations
             )
         )
-
-        self.pq = [(dag.graph_nodes['Y'], [dag.graph_nodes['A1']])]
-            
-        y = dag.graph_nodes['Y']
-        x = dag.graph_nodes['X']
-        y.value = 1
-        x.value = 1
-
-        a1 = dag.graph_nodes['A1']
-        b1 = dag.graph_nodes['B1']
-        b2 = dag.graph_nodes['B2']
-        
-        print("________________________________________________________________________________")
-        print("A1 B1 B2")
-        for p in [[0,0,0], [0,0,1], [0,1,0], [0,1,1],[1,0,0], [1,0,1], [1,1,0], [1,1,1]]:
-            a1.value = p[0]
-            b1.value = p[1]
-            b2.value = p[2]
-            print(f"{a1.value} {b1.value} {b2.value}")
-        
-            c1 = find_conditional_probability(
-                dataFrame=dataFrame,
-                target_realization=[y],
-                condition_realization=[a1],
-            )
-
-            print(f"P(Y=1 | A1={a1.value}) = {c1}")
-
-            # c2 = find_conditional_probability(
-            #     dataFrame=dataFrame,
-            #     target_realization=[y],
-            #     condition_realization=[a1, x, b1, b2],
-            # )
-
-            # print(f"P(Y=1 | X=1,A1={a1.value},B1={b1.value},B2={b2.value}) = {c2}")
-
-            c3 = find_conditional_probability(
-                dataFrame=dataFrame,
-                target_realization=[b2],
-                condition_realization=[x, b1],
-            )
-
-            print(f"P(B2={b2.value} | X=1,B1={b1.value}) = {c3}")
-
-            c4 = find_conditional_probability(
-                dataFrame=dataFrame,
-                target_realization=[b1],
-                condition_realization=[x],
-            )
-            print(f"P(B1={b1.value} | X=1) = {c4}")
-
-            print(f"Produto = {c1*c3*c4}")
-            print("--------------------")
-        print("________________________________________________________________________________")
-
-
         self.transposed_columns_base = None
+
+        # def nm():
+        #     y = dag.graph_nodes['Y']
+        #     x = dag.graph_nodes['X']
+        #     y.value = 1
+        #     x.value = 1
+
+        #     a1 = dag.graph_nodes['A1']
+        #     b1 = dag.graph_nodes['B1']
+        #     b2 = dag.graph_nodes['B2']
+            
+        #     print("________________________________________________________________________________")
+        #     print("A1 B1 B2")
+        #     for p in [[0,0,0], [0,0,1], [0,1,0], [0,1,1],[1,0,0], [1,0,1], [1,1,0], [1,1,1]]:
+        #         a1.value = p[0]
+        #         b1.value = p[1]
+        #         b2.value = p[2]
+        #         print(f"{a1.value} {b1.value} {b2.value}")
+
+        #         c2 = find_conditional_probability(
+        #             dataFrame=self.dataFrame,
+        #             target_realization=[y],
+        #             condition_realization=[a1, x, b1, b2],
+        #         )
+
+        #         print(f"P(Y=1 | X=1,A1={a1.value},B1={b1.value},B2={b2.value}) = {c2}")
+            
+        #         c1 = find_conditional_probability(
+        #             dataFrame=self.dataFrame,
+        #             target_realization=[y],
+        #             condition_realization=[a1],
+        #         )
+
+        #         print(f"P(Y=1 | A1={a1.value}) = {c1}")
+
+
+        #         c3 = find_conditional_probability(
+        #             dataFrame=self.dataFrame,
+        #             target_realization=[b2],
+        #             condition_realization=[x, b1],
+        #         )
+
+        #         print(f"P(B2={b2.value} | X=1,B1={b1.value}) = {c3}")
+
+        #         c4 = find_conditional_probability(
+        #             dataFrame=self.dataFrame,
+        #             target_realization=[b1],
+        #             condition_realization=[x],
+        #         )
+        #         print(f"P(B1={b1.value} | X=1) = {c4}")
+
+        #         print(f"Produto = {c1*c3*c4}")
+        #         print("--------------------")
+        #     print("________________________________________________________________________________")
+        # nm()
+
         self.master = MasterProblem()
-        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target, pq=self.pq)
+        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
     
     def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
         '''
@@ -315,7 +314,7 @@ class ColumnGenerationProblemOrchestrator:
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             # logger.debug(f"Master Duals: {self.duals}")
-            self.master.model.write(f"bp_cgo_master_{iterations_counter}.lp")
+            self.master.model.write(f"sca_cgo_master_{iterations_counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -330,7 +329,7 @@ class ColumnGenerationProblemOrchestrator:
                 logger.error(
                     f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
                 )
-            self.subproblem.model.write(f"bp_cgo_subproblem_{iterations_counter}.lp")
+            self.subproblem.model.write(f"sca_cgo_subproblem_{iterations_counter}.lp")
 
             reduced_cost = self.subproblem.model.objVal
             logger.debug(f"Reduced Cost: {reduced_cost}")
@@ -390,8 +389,8 @@ class ColumnGenerationProblemOrchestrator:
         """
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
-        self.master.model.write("bp_cgo_model.lp")
-        self.master.model.write("bp_cgo_model.mps")
+        self.master.model.write("sca_cgo_model.lp")
+        self.master.model.write("sca_cgo_model.mps")
         return self.master.model.ObjVal
 
 def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, float]:
@@ -433,14 +432,29 @@ def exemplo_balke():
     dag = balke_model.graph
     intervention = balke_model.interventions[0]
     target = balke_model.target
-    minimizes_objective_function = 1
+    minimizes_objective_function = True
     problem = ColumnGenerationProblemOrchestrator(
         dataFrame,
         dag,
         intervention,
         target,
         minimizes_objective_function)
-    solve(problem)
+    min_bound, min_iter = solve(problem)
+
+    dataFrame = balke_df
+    dag = balke_model.graph
+    intervention = balke_model.interventions[0]
+    target = balke_model.target
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function=False)
+    max_bound, max_iter = solve(problem)
+
+    print(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {-max_bound}")
+
 
 def exemplo_n1_m2():
     n1_m2_input = "X -> A1, X -> B1, X -> B2, B1 -> A1, B2 -> A1, A1 -> Y, U1 -> X, U1 -> A1, U2 -> B1, U2 -> B2, U2 -> Y"
@@ -469,14 +483,27 @@ def exemplo_n1_m2():
     dag = n1_m2_model.graph
     intervention = n1_m2_model.interventions[0]
     target = n1_m2_model.target
-    minimizes_objective_function = 1
+    minimizes_objective_function = True
     problem = ColumnGenerationProblemOrchestrator(
         dataFrame,
         dag,
         intervention,
         target,
         minimizes_objective_function)
-    solve(problem)
+    min_bound, min_iter = solve(problem)
+
+    intervention = n1_m2_model.interventions[0]
+    target = n1_m2_model.target
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function=False
+    )
+    max_bound, max_iter = solve(problem)
+
+    print(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {-max_bound}")
 
 
 if __name__ == '__main__': 
