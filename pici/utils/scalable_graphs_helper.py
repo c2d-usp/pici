@@ -56,8 +56,8 @@ def get_scalable_dataframe(M: int, N: int):
     return pd.read_csv(scalable_csv_path)
 
 
-def generate_scalable_string_edges(N, M):
-    scalable_input: str = "U1 -> X, U3 -> Y, "
+def generate_scalable_string_edges(N, M) -> str:
+    scalable_input: str = "U1 -> X, U2 -> Y, "
     for i in range(1, N + 1):
         scalable_input += f"U1 -> A{i}, "
         if i == 1:
@@ -74,8 +74,16 @@ def generate_scalable_string_edges(N, M):
 
     return scalable_input[:-2]
 
+def generate_binary_scalable_cardinalities(N, M) -> dict:
+    cardinalities = {"U1":0, "U2":0}
+    for i in range(1, N + 1):
+        cardinalities[f"A{i}"] = 2
 
-def find_true_value_in_scalable_graphs(N, M, y0, x0, df):
+    for i in range(1, M + 1):
+        cardinalities[f"B{i}"] = 2
+    return cardinalities
+
+def find_true_value_in_scalable_graphs(N: int, M: int, y0: int, x0: int, df):
     prob = 0
     for rlt in list(product([0, 1], repeat=2)):
         term = 1

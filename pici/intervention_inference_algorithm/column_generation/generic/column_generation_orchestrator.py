@@ -48,7 +48,7 @@ from pici.intervention_inference_algorithm.linear_programming.linear_constraints
 from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )
-from pici.utils.scalable_graphs_helper import get_scalable_dataframe
+from pici.utils.scalable_graphs_helper import find_true_value_in_scalable_graphs, generate_binary_scalable_cardinalities, generate_scalable_string_edges, get_scalable_dataframe
 
 from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
     InitScalable,
@@ -505,7 +505,52 @@ def exemplo_n1_m2():
 
     print(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {-max_bound}")
 
+def example_scalable_n_m(N, M):
+    edges = generate_scalable_string_edges(N=N, M=M)
+    cardinalities = generate_binary_scalable_cardinalities(N=N, M=M)
+    unobs = ["U1", "U2"]
 
+    target = "Y"
+    target_value = 1
+    intervention = "X"
+    intervention_value = 1
+    df = get_scalable_dataframe(M=M, N=N)
+
+    model = CausalModel(
+        data=df,
+        edges=edges,
+        custom_cardinalities=cardinalities,
+        unobservables_labels=unobs,
+        interventions=(intervention, intervention_value),
+        target=(target, target_value),
+    )
+    dataFrame = df
+    dag = model.graph
+    intervention = model.interventions[0]
+    target = model.target
+    minimizes_objective_function = True
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame=dataFrame,
+        dag=dag,
+        intervention=intervention,
+        target=target,
+        minimizes_objective_function=True)
+    min_bound, min_iter = solve(problem)
+
+    intervention = model.interventions[0]
+    target = model.target
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function=False
+    )
+    max_bound, max_iter = solve(problem)
+
+    print(f"{min_bound} <= P({target.label}={target_value} | do({intervention.label}={intervention_value})) <= {-max_bound}")
+    print(f"True value: {find_true_value_in_scalable_graphs(N=N, M=M, y0=1, x0=1,df=df)}")
 if __name__ == '__main__': 
     # exemplo_balke()
-    exemplo_n1_m2()
+    # exemplo_n1_m2()
+    example_scalable_n_m(N=1,M=2)
