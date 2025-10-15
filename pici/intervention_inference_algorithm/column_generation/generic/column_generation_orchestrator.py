@@ -213,7 +213,7 @@ class ColumnGenerationProblemOrchestrator:
         # nm()
 
         self.master = MasterProblem()
-        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target)
+        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target, minimizes_objective_function=self.minimizes_objective_function)
     
     def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
         '''
@@ -453,7 +453,7 @@ def exemplo_balke():
         minimizes_objective_function=False)
     max_bound, max_iter = solve(problem)
 
-    print(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {-max_bound}")
+    print(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
 
 
 def exemplo_n1_m2():
@@ -548,9 +548,9 @@ def example_scalable_n_m(N, M):
     )
     max_bound, max_iter = solve(problem)
 
-    print(f"{min_bound} <= P({target.label}={target_value} | do({intervention.label}={intervention_value})) <= {-max_bound}")
+    print(f"{min_bound} <= P({target.label}={target_value} | do({intervention.label}={intervention_value})) <= {max_bound}")
     print(f"True value: {find_true_value_in_scalable_graphs(N=N, M=M, y0=1, x0=1,df=df)}")
 if __name__ == '__main__': 
-    # exemplo_balke()
+    exemplo_balke()
     # exemplo_n1_m2()
-    example_scalable_n_m(N=1,M=2)
+    # example_scalable_n_m(N=1,M=2)
