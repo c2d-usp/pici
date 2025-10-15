@@ -26,13 +26,14 @@ MAX_ITERACTIONS_ALLOWED = 2000
 
 
 class SubProblem:
-    def __init__(self, intervention: Node, target: Node, df: DataFrame = None):
+    def __init__(self, intervention: Node, target: Node, df: DataFrame = None, minimizes_objective_function=False):
         self.intervention = intervention
         self.target = target
         self.df = df
         self.model = gp.Model("subproblem")
         self.cluster_bits: dict[str, dict[str, tupledict[int, Var]]] = {}        
         self.constr = None
+        self.minimizes_objective_function=minimizes_objective_function
 
     def setup(
         self,
@@ -187,6 +188,8 @@ class SubProblem:
                 continue
 
             coef = self.get_coef_from_objective_function(header, realization)
+            if not self.minimizes_objective_function:
+                coef = -1*coef
             bit_product = BitProduct()
             bit_product.set_coef(coef)
 
