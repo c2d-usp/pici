@@ -81,15 +81,92 @@ def example_scalable_n_m(N, M):
     # print(f"        {lower} =< P(Y = {target_value}|X = {intervention_value}) <= {upper}")
     # print(f"        {itLower} iteracoes para lower e {itUpper} para upper")
 
+
+def scalable(N, M, intervention_value, target_value, df):
+    try:
+        scalarProblem = ScalarProblem.buildScalarProblem(
+            M=M,
+            N=N,
+            interventionValue=intervention_value,
+            targetValue=target_value,
+            df=df,
+            minimum=False,
+        )
+        upper, itUpper = scalarProblem.solve()
+        upper = -upper
+        scalarProblem = ScalarProblem.buildScalarProblem(
+            M=M,
+            N=N,
+            interventionValue=intervention_value,
+            targetValue=target_value,
+            df=df,
+            minimum=True,
+        )
+        lower, itLower = scalarProblem.solve()
+        return lower, itLower, upper, itUpper
+    except:
+        return None, None, None, None
+
+def generic(df, edges, cardinalities, unobs, intervention, target, intervention_value, target_value):
+    model = CausalModel(
+        data=df,
+        edges=edges,
+        custom_cardinalities=cardinalities,
+        unobservables_labels=unobs,
+        interventions=(intervention, intervention_value),
+        target=(target, target_value),
+    )
+    dataFrame = df
+    dag = model.graph
+    intervention = model.interventions[0]
+    target = model.target
+    try:
+        problem = ColumnGenerationProblemOrchestrator(
+            dataFrame=dataFrame,
+            dag=dag,
+            intervention=intervention,
+            target=target,
+            minimizes_objective_function=True)
+        min_bound, min_iter = solve(problem)
+
+        intervention = model.interventions[0]
+        target = model.target
+        problem = ColumnGenerationProblemOrchestrator(
+            dataFrame,
+            dag,
+            intervention,
+            target,
+            minimizes_objective_function=False
+        )
+        max_bound, max_iter = solve(problem)
+        return min_bound, min_iter, max_bound, max_iter
+    except:
+        return None, None, None, None
+
 def single_exec():
+    unobs = ["U1", "U2"]
+    target = "Y"
+    target_value = 1
+    intervention = "X"
+    intervention_value = 1
     i = 0
     for m in range(1,4):
         for n in range(1,6-i):
             print(f"Running M:{m}, N:{n}")
-            try:
-                example_scalable_n_m(N=n,M=m)
-            except:
-                continue
+            edges = generate_scalable_string_edges(N=n, M=m)
+            cardinalities = generate_binary_scalable_cardinalities(N=n, M=m)
+            df = get_scalable_dataframe(M=m, N=n)
+            lower, itLower, upper, itUpper = scalable(n,m, intervention_value, target_value, df)
+            min_bound, min_iter, max_bound, max_iter = generic(df, edges, cardinalities, unobs, intervention, target, intervention_value, target_value)
+            with open("cg_results.txt", "a") as f:
+                f.write("_____________________________________________________\n")
+                f.write(f"M:{m}, N:{n}\n")
+                f.write(f"    Generic CG:\n")
+                f.write(f"        {min_bound} <= P({target}={target_value} | do({intervention}={intervention_value})) <= {max_bound}\n")
+                f.write(f"        {min_iter} iteracoes para lower e {max_iter} para upper\n")
+                f.write(f"    Scalable CG:\n")
+                f.write(f"        {lower} =< P(Y = {target_value}|X = {intervention_value}) <= {upper}\n")
+                f.write(f"        {itLower} iteracoes para lower e {itUpper} para upper\n\n")
         i += 1
 if __name__ == "__main__":
     single_exec()
