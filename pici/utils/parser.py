@@ -30,7 +30,7 @@ class Parser:
             custom_cardinalities=custom_cardinalities,
         )
 
-        self.unobservables = [
+        self.unobservables: list[Node] = [
             self.graph.graph_nodes[unobservable_label]
             for unobservable_label in unobservables_labels
         ]
@@ -39,7 +39,7 @@ class Parser:
             interventions = convert_tuples_list_into_nodes_list(
                 _parse_tuples_str_int_list(interventions), self.graph
             )
-        self.interventions = interventions
+        self.interventions: list[Node] = interventions
 
         if target:
             target = convert_tuple_into_node(_parse_tuple_str_int(target), self.graph)
@@ -179,16 +179,16 @@ def _define_graph(
     custom_cardinalities: dict[str, int] = {},
 ):
     (
-        number_of_nodes,
-        children_labels,
-        node_cardinalities,
-        parents_labels,
-        node_labels_set,
-        dag,
+        number_of_nodes, # int
+        children_labels, # Dict[str, list[str]]
+        node_cardinalities, # Dict[str, int]
+        parents_labels, # Dict[str, list[str]]
+        node_labels_set, # set(Node)
+        dag, # nx.DiGraph
     ) = _parse_input_graph(
         edges, latents_label=unobservables, custom_cardinalities=custom_cardinalities
     )
-    order = list(nx.topological_sort(dag))
+    order = list(nx.topological_sort(dag)) # ordem topologica do dag # list[str]
 
     parent_latent_labels: dict[str, str] = {}
     graphNodes: dict[str, Node] = {}
@@ -196,6 +196,7 @@ def _define_graph(
 
     parent_latent_label: str = None
     for node_label in node_labels_set:
+        # Se é latente
         if node_cardinalities[node_label] == 0:
             parent_latent_label = None
             new_node = Node(
@@ -243,6 +244,7 @@ def _define_graph(
             endogenous.append(node)
             node.children = _get_node_list(graphNodes, children_labels[node.label])
             node.parents = _get_node_list(graphNodes, parents_labels[node.label])
+        # errado
         topologicalOrderIndexes[node] = i
 
     topological_order_nodes: list[Node] = []
@@ -250,14 +252,14 @@ def _define_graph(
         topological_order_nodes.append(graphNodes[node_label])
 
     return Graph(
-        numberOfNodes=number_of_nodes,
-        exogenous=exogenous,
-        endogenous=endogenous,
-        topological_order=topological_order_nodes,
-        DAG=dag,
-        graph_nodes=graphNodes,
-        node_set=node_set,
-        topological_order_indexes=topologicalOrderIndexes,
+        numberOfNodes=number_of_nodes, # int
+        exogenous=exogenous, # list[Node]
+        endogenous=endogenous, # list[Node]
+        topological_order=topological_order_nodes, # list[Node]
+        DAG=dag, # nx.DiGraph
+        graph_nodes=graphNodes, # dict[str, Node]
+        node_set=node_set, # set(Node) unique Node
+        topological_order_indexes=topologicalOrderIndexes,# dict[Node, int]
         current_nodes=[],
         dag_components=[],
         c_component_to_unob={},
