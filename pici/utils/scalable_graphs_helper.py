@@ -57,7 +57,7 @@ def get_scalable_dataframe(M: int, N: int):
 
 
 def generate_scalable_string_edges(N, M) -> str:
-    scalable_input: str = "U1 -> X, U2 -> Y, "
+    scalable_input: str = "U1 -> X, U3 -> Y, "
     for i in range(1, N + 1):
         scalable_input += f"U1 -> A{i}, "
         if i == 1:
@@ -75,7 +75,7 @@ def generate_scalable_string_edges(N, M) -> str:
     return scalable_input[:-2]
 
 def generate_binary_scalable_cardinalities(N, M) -> dict:
-    cardinalities = {"U1":0, "U2":0}
+    cardinalities = {"U1":0, "U2":0, "U3":0}
     for i in range(1, N + 1):
         cardinalities[f"A{i}"] = 2
 
