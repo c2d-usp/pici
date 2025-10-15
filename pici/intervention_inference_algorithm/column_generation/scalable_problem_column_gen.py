@@ -4,6 +4,8 @@ import logging
 import gurobipy as gp
 from gurobipy import GRB
 
+from pici.utils._enum import ColumnGenerationParameters
+
 logger = logging.getLogger(__name__)
 
 
@@ -536,9 +538,9 @@ class ScalarProblem:
             )
             self.columns_base.append(newColumn)
             counter += 1
-            if counter >= MAX_ITERACTIONS_ALLOWED:
+            if counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
                 raise TimeoutError(
-                    f"Too many iterations (MAX:{MAX_ITERACTIONS_ALLOWED})"
+                    f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {counter}")
 
