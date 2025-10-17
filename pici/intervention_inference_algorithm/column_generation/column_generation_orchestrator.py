@@ -281,13 +281,13 @@ class ColumnGenerationProblemOrchestrator:
                     str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
                 gamma_coef += bit_product.coef * var_gurobi.X
             
-            logger.debug(f"BitProduct List: {str_bit}")
-            logger.debug(f"{iterations_counter} gamma_coef: {gamma_coef}")
-            logger.debug("-------------------------------------------------------------------------------")
+            logger.info(f"BitProduct List: {str_bit}")
+            logger.info(f"{iterations_counter} gamma_coef: {gamma_coef}")
+            logger.info("-------------------------------------------------------------------------------")
             for k, v in self.subproblem.cluster_bits.items():
-                for kk,vv in v.items():
-                    logger.debug(f"{vv.VarName} value: {vv.X}")
-            logger.debug("-------------------------------------------------------------------------------")
+                for vv in v:
+                    logger.info(f"----{vv}")
+            logger.info("-------------------------------------------------------------------------------")
 
             self.master.update(
                 new_column=new_column,
@@ -340,7 +340,53 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
     bound = problem.optimize_master()
     return bound, number_of_iterations
 
-def exemplo_balke():
+def exemplo_discrete_balke():
+    balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
+    balke_cardinalities = {"Z": 4, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+    balke_unobs = ["U1", "U2"]
+    balke_target = "Y"
+    balke_target_value = 1
+    balke_intervention = "X"
+    balke_intervention_value = 1
+    balke_csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
+    balke_df = pd.read_csv(balke_csv_path)
+
+    balke_model = CausalModel(
+        data=balke_df,
+        edges=balke_input,
+        custom_cardinalities=balke_cardinalities,
+        unobservables_labels=balke_unobs,
+        interventions=(balke_intervention, balke_intervention_value),
+        target=(balke_target, balke_target_value),
+    )
+    dataFrame = balke_df
+    dag = balke_model.graph
+    intervention = balke_model.interventions[0]
+    target = balke_model.target
+    minimizes_objective_function = True
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function)
+    min_bound, min_iter = solve(problem)
+
+    dataFrame = balke_df
+    dag = balke_model.graph
+    intervention = balke_model.interventions[0]
+    target = balke_model.target
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function=False)
+    max_bound, max_iter = solve(problem)
+
+    logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
+
+def exemplo_binary_balke():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
     balke_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
     balke_unobs = ["U1", "U2"]
@@ -399,7 +445,7 @@ def exemplo_n1_m2():
     n1_m2_target_value = 1
     n1_m2_intervention = "X"
     n1_m2_intervention_value = 1
-    n1_m2_csv_path = DataExamplesPaths.CSV_N1M2.value
+    n1_m2_csv_path = DataExamplesPaths.CSV_3_LATENTS_N1M2.value
     n1_m2_df = pd.read_csv(n1_m2_csv_path)
 
     n1_m2_model = CausalModel(
@@ -434,9 +480,10 @@ def exemplo_n1_m2():
     )
     max_bound, max_iter = solve(problem)
 
-    logger.debug(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {-max_bound}")
+    logger.info(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {max_bound}")
 
 
 if __name__ == '__main__': 
-    exemplo_balke()
+    exemplo_discrete_balke()
+    # exemplo_binary_balke()
     # exemplo_n1_m2()

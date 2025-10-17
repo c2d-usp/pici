@@ -1,5 +1,6 @@
 from itertools import product
 import logging
+import math
 
 import gurobipy as gp
 from gurobipy import GRB, Var, tupledict
@@ -125,13 +126,14 @@ class SubProblem:
             header = reversed_ordered_node_parents_realizations[0]
             print(f"{header}")
             reversed_ordered_node_parents_realizations = reversed_ordered_node_parents_realizations[1:]
+            node_number_of_bits = math.ceil(math.log2(node.cardinality))
             self.cluster_bits[node.label] = {}
             for i, realization in enumerate(reversed_ordered_node_parents_realizations):
                 realization_key: str = self.get_realization_key(header, realization)
                 print(f"    {j}th - Node {node.label} Realization key: {realization_key}--{realization}")
                 j+=1
-                self.cluster_bits[node.label][realization_key] = self.model.addVar(
-                    obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
+                self.cluster_bits[node.label][realization_key] = self.model.addVars(
+                    node_number_of_bits, obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
 
     def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
@@ -195,31 +197,10 @@ class SubProblem:
             coef = self.get_coef_from_objective_function(header, realization)
             if not self.minimizes_objective_function:
                 coef = -1*coef
-            bit_product = BitProduct()
+            bit_product: BitProduct = self.generate_bit_product(node_list=reversed_ordered_considered_c_comp, header=header, realization=realization, consider_intervention=True)
             bit_product.set_coef(coef)
-
-            for node in reversed_ordered_considered_c_comp:
-                if node.label == self.intervention.label:
-                    continue
-                bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
-                node_idx = header.index(node.label)
-                # AQUI SE TRATA APENAS BINÁRIO
-                sign = 1
-                if realization[node_idx] == 0:
-                    sign = -1
-                new_bit = Bit(bit_gurobi_var, sign)
-                bit_product.add_bit(new_bit)
-            
             # TODO: Add variable name
             gamma_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(obj=coef, vtype=GRB.BINARY)
-        
-        '''
-        TODO: Pode ser que o gurobi sabe linearizar o produtório.
-        Basicamente teriamos uma lista de produtórios ao inveés de um dicionário mapeando uma nova variável.
-        Para cada produtório:
-            addConstr(0 <= produtorio <= 1)
-        '''
-
         return gamma_u_map_bit_product_to_linearized_variable
 
 
@@ -285,8 +266,7 @@ class SubProblem:
             print("----")
         return coefq * coefw
 
-
-    def _get_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> Var:
+    def _get_cluster_node_bit_variable_given_parents_realization(self, node: Node, w_realization: list[int], w_header: list[str]) -> list[Var]:
         # Garantir que a ordem da realization_key está em ordem topologica reversa, a fim de acessar o dicionário
         parents_labels = [parent.label for parent in node.parents if not parent.is_latent]
         parents_realization = [w_realization[w_header.index(parent_label)] for parent_label in parents_labels]
@@ -297,23 +277,34 @@ class SubProblem:
         header = total_w_realization[0]
         total_w_realization = total_w_realization[1:]
         for i, realization in enumerate(total_w_realization):
-            bit_product = BitProduct()
-            for node in considered_c_component_in_topological_order:
-                bit_gurobi_var = self._get_node_bit_variable_given_parents_realization(node, realization, header)
-                node_realization = realization[header.index(node.label)]
-                sign = 1
-                if node_realization == 0:
-                    sign = -1
-                new_bit = Bit(bit_gurobi_var, sign)
-                bit_product.add_bit(new_bit)
+            bit_product: BitProduct = self.generate_bit_product(node_list=considered_c_component_in_topological_order, header=header, realization=realization)
             self.w_u_map_bit_product_to_linearized_variable[bit_product] = self.model.addVar(vtype=GRB.BINARY)
             self.coluna_parametrizada[i] = self.w_u_map_bit_product_to_linearized_variable[bit_product]
+
+    def generate_bit_product(self, node_list: list[Node], header: list[str], realization: list[int], consider_intervention=False):
+            bit_product = BitProduct()
+            for node in node_list:
+                if consider_intervention and node.label == self.intervention.label:
+                    continue
+                cluster_bit_gurobi_var = self._get_cluster_node_bit_variable_given_parents_realization(node, realization, header)
+                node_idx = header.index(node.label)
+                node_value = realization[node_idx]
+                binary_node_value = bin(node_value)[2:]
+
+                for i in range(len(binary_node_value)):
+                    sign = 1
+                    if int(binary_node_value[i]) == 0:
+                        sign = -1
+                    new_bit = Bit(cluster_bit_gurobi_var[i], sign)
+                    bit_product.add_bit(new_bit)
+            return bit_product
 
     def generate_linearized_bit_products_constraints(self, map_bit_product_to_linearized_variable: dict[BitProduct, Var], name="") -> None:
         i = 0
         for bit_product, variable in map_bit_product_to_linearized_variable.items():
             self.add_linearized_bit_products_constraints(variable, bit_product.bit_list, name=name, ith=i)
             i += 1
+
     def add_linearized_bit_products_constraints(self, variable: Var, bit_list: list[Bit], name="", ith=-1) -> None:
         self.model.addConstr(variable >= 0, name=f"{name}_{ith}th_more_than_zero")
         self.model.addConstr(variable <= 1, name=f"{name}_{ith}th_less_than_one")
