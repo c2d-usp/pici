@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 from pici.graph.graph import Graph
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct, count_endogenous_parent_configurations
+from pici.intervention_inference_algorithm.column_generation.bits import Bit, BitProduct, count_endogenous_parent_configurations
 from pici.utils.probabilities_helper import find_conditional_probability
 
 
@@ -17,8 +17,13 @@ logger = logging.getLogger(__name__)
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
 
 BIG_M = 1e4
 DBG = False

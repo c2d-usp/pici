@@ -12,30 +12,24 @@ import networkx as nx
 
 from pici.causal_model import CausalModel
 from pici.utils.probabilities_helper import find_conditional_probability
-# THIS_DIR = os.getcwd()
-# PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
-# import sys
-# if PROJECT_ROOT not in sys.path:
-#     sys.path.insert(0, PROJECT_ROOT)
+
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-if not logger.hasHandlers():
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
 
 from pici.graph.graph import Graph, order_list_in_reversed_topological_order
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic import bits
-from pici.intervention_inference_algorithm.column_generation.generic.master_problem import (
+from pici.intervention_inference_algorithm.column_generation import bits
+from pici.intervention_inference_algorithm.column_generation.master_problem import (
     MasterProblem,
 )
-from pici.intervention_inference_algorithm.column_generation.generic.subproblem import (
+from pici.intervention_inference_algorithm.column_generation.subproblem import (
     SubProblem, get_node_list_realizations
 )
 from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
@@ -47,11 +41,6 @@ from pici.intervention_inference_algorithm.linear_programming.linear_constraints
 )
 from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
-)
-from pici.utils.scalable_graphs_helper import find_true_value_in_scalable_graphs, generate_binary_scalable_cardinalities, generate_scalable_string_edges, get_scalable_dataframe
-
-from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
-    InitScalable,
 )
 from pici.utils._enum import ColumnGenerationParameters, DataExamplesPaths
 
@@ -132,9 +121,6 @@ class ColumnGenerationProblemOrchestrator:
         self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
 
         self.duals = {}
-        # for i in range(self.number_of_constraints):
-        #     self.duals[i] = ColumnGenerationParameters.BIG_M.value
-
         self.symbolic_objective_function_probabilites: list[tuple] = (
             objective_function.generate_symbolic_objective_function_probabilities()
         )
@@ -156,61 +142,6 @@ class ColumnGenerationProblemOrchestrator:
             )
         )
         self.transposed_columns_base = None
-
-        # def nm():
-        #     y = dag.graph_nodes['Y']
-        #     x = dag.graph_nodes['X']
-        #     y.value = 1
-        #     x.value = 1
-
-        #     a1 = dag.graph_nodes['A1']
-        #     b1 = dag.graph_nodes['B1']
-        #     b2 = dag.graph_nodes['B2']
-            
-        #     print("________________________________________________________________________________")
-        #     print("A1 B1 B2")
-        #     for p in [[0,0,0], [0,0,1], [0,1,0], [0,1,1],[1,0,0], [1,0,1], [1,1,0], [1,1,1]]:
-        #         a1.value = p[0]
-        #         b1.value = p[1]
-        #         b2.value = p[2]
-        #         print(f"{a1.value} {b1.value} {b2.value}")
-
-        #         c2 = find_conditional_probability(
-        #             dataFrame=self.dataFrame,
-        #             target_realization=[y],
-        #             condition_realization=[a1, x, b1, b2],
-        #         )
-
-        #         print(f"P(Y=1 | X=1,A1={a1.value},B1={b1.value},B2={b2.value}) = {c2}")
-            
-        #         c1 = find_conditional_probability(
-        #             dataFrame=self.dataFrame,
-        #             target_realization=[y],
-        #             condition_realization=[a1],
-        #         )
-
-        #         print(f"P(Y=1 | A1={a1.value}) = {c1}")
-
-
-        #         c3 = find_conditional_probability(
-        #             dataFrame=self.dataFrame,
-        #             target_realization=[b2],
-        #             condition_realization=[x, b1],
-        #         )
-
-        #         print(f"P(B2={b2.value} | X=1,B1={b1.value}) = {c3}")
-
-        #         c4 = find_conditional_probability(
-        #             dataFrame=self.dataFrame,
-        #             target_realization=[b1],
-        #             condition_realization=[x],
-        #         )
-        #         print(f"P(B1={b1.value} | X=1) = {c4}")
-
-        #         print(f"Produto = {c1*c3*c4}")
-        #         print("--------------------")
-        #     print("________________________________________________________________________________")
-        # nm()
 
         self.master = MasterProblem()
         self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target, minimizes_objective_function=self.minimizes_objective_function)
@@ -313,7 +244,7 @@ class ColumnGenerationProblemOrchestrator:
                     f"--------->>  Master solution not found. Gurobi status code: {self.master.model.Status}"
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
-            # logger.debug(f"Master Duals: {self.duals}")
+            logger.debug(f"Master Duals: {self.duals}")
             self.master.model.write(f"sca_cgo_master_{iterations_counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
@@ -341,7 +272,7 @@ class ColumnGenerationProblemOrchestrator:
 
             # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
             new_column.append(1)
-            # logger.debug(f"New Column: {newColumn}")
+            logger.debug(f"New Column: {new_column}")
 
             gamma_coef: float = 0.0
             for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
@@ -350,13 +281,13 @@ class ColumnGenerationProblemOrchestrator:
                     str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
                 gamma_coef += bit_product.coef * var_gurobi.X
             
-            # print(f"BitProduct List: {str_bit}")
-            print(f"{iterations_counter} gamma_coef: {gamma_coef}")
-            # print("-------------------------------------------------------------------------------")
-            # for k, v in self.subproblem.cluster_bits.items():
-            #     for kk,vv in v.items():
-            #         print(f"{vv.VarName} value: {vv.X}")
-            # print("-------------------------------------------------------------------------------")
+            logger.debug(f"BitProduct List: {str_bit}")
+            logger.debug(f"{iterations_counter} gamma_coef: {gamma_coef}")
+            logger.debug("-------------------------------------------------------------------------------")
+            for k, v in self.subproblem.cluster_bits.items():
+                for kk,vv in v.items():
+                    logger.debug(f"{vv.VarName} value: {vv.X}")
+            logger.debug("-------------------------------------------------------------------------------")
 
             self.master.update(
                 new_column=new_column,
@@ -371,7 +302,7 @@ class ColumnGenerationProblemOrchestrator:
                     f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {iterations_counter}")
-            print("_________________________________________________________________")
+            logger.debug("_________________________________________________________________")
 
         return iterations_counter
     
@@ -453,7 +384,7 @@ def exemplo_balke():
         minimizes_objective_function=False)
     max_bound, max_iter = solve(problem)
 
-    print(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
+    logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
 
 
 def exemplo_n1_m2():
@@ -503,54 +434,9 @@ def exemplo_n1_m2():
     )
     max_bound, max_iter = solve(problem)
 
-    print(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {-max_bound}")
+    logger.debug(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {-max_bound}")
 
-def example_scalable_n_m(N, M):
-    edges = generate_scalable_string_edges(N=N, M=M)
-    cardinalities = generate_binary_scalable_cardinalities(N=N, M=M)
-    unobs = ["U1", "U2"]
 
-    target = "Y"
-    target_value = 1
-    intervention = "X"
-    intervention_value = 1
-    df = get_scalable_dataframe(M=M, N=N)
-
-    model = CausalModel(
-        data=df,
-        edges=edges,
-        custom_cardinalities=cardinalities,
-        unobservables_labels=unobs,
-        interventions=(intervention, intervention_value),
-        target=(target, target_value),
-    )
-    dataFrame = df
-    dag = model.graph
-    intervention = model.interventions[0]
-    target = model.target
-    minimizes_objective_function = True
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame=dataFrame,
-        dag=dag,
-        intervention=intervention,
-        target=target,
-        minimizes_objective_function=True)
-    min_bound, min_iter = solve(problem)
-
-    intervention = model.interventions[0]
-    target = model.target
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function=False
-    )
-    max_bound, max_iter = solve(problem)
-
-    print(f"{min_bound} <= P({target.label}={target_value} | do({intervention.label}={intervention_value})) <= {max_bound}")
-    print(f"True value: {find_true_value_in_scalable_graphs(N=N, M=M, y0=1, x0=1,df=df)}")
 if __name__ == '__main__': 
-    # exemplo_balke()
+    exemplo_balke()
     # exemplo_n1_m2()
-    example_scalable_n_m(N=1,M=2)
