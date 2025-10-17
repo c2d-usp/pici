@@ -135,6 +135,13 @@ class SubProblem:
                 self.cluster_bits[node.label][realization_key] = self.model.addVars(
                     node_number_of_bits, obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
+                # TODO: SHOULD BE VALIDATED
+                expr = 0
+                for i, var in enumerate(self.cluster_bits[node.label][realization_key]):
+                    # 0 -- k-1
+                    expr += 2**i * var
+                self.model.addConstr(expr <= node.cardinality)
+
 
     def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
         objective_function_vars_not_in_W = set()
