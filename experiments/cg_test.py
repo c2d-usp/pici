@@ -1,19 +1,22 @@
-from pici.causal_model import CausalModel
-from pici.intervention_inference_algorithm.column_generation.generic.column_generation_orchestrator import ColumnGenerationProblemOrchestrator, solve
-from pici.intervention_inference_algorithm.column_generation.scalable_problem_column_gen import ScalarProblem
-from pici.utils.scalable_graphs_helper import generate_binary_scalable_cardinalities, generate_scalable_string_edges, get_scalable_dataframe
+import logging
 
+from pici.causal_model import CausalModel
+from pici.intervention_inference_algorithm.column_generation.column_generation_orchestrator import ColumnGenerationProblemOrchestrator, solve
+from experiments.three_latents_scalables.scalable_problem_column_gen import ScalarProblem
+from experiments.utils.scalable_graphs_helper import find_true_value_in_three_latents_scalable_graphs, generate_three_latents_binary_scalable_cardinalities, generate_three_latents_scalable_string_edges, get_three_latents_scalable_dataframe
+
+logger = logging.getLogger(__name__)
 
 def example_scalable_n_m(N, M):
-    edges = generate_scalable_string_edges(N=N, M=M)
-    cardinalities = generate_binary_scalable_cardinalities(N=N, M=M)
+    edges = generate_three_latents_scalable_string_edges(N=N, M=M)
+    cardinalities = generate_three_latents_binary_scalable_cardinalities(N=N, M=M)
     unobs = ["U1", "U2"]
 
     target = "Y"
     target_value = 1
     intervention = "X"
     intervention_value = 1
-    df = get_scalable_dataframe(M=M, N=N)
+    df = get_three_latents_scalable_dataframe(M=M, N=N)
 
     model = CausalModel(
         data=df,
@@ -153,9 +156,9 @@ def single_exec():
     for m in range(1,4):
         for n in range(1,6-i):
             print(f"Running M:{m}, N:{n}")
-            edges = generate_scalable_string_edges(N=n, M=m)
-            cardinalities = generate_binary_scalable_cardinalities(N=n, M=m)
-            df = get_scalable_dataframe(M=m, N=n)
+            edges = generate_three_latents_scalable_string_edges(N=n, M=m)
+            cardinalities = generate_three_latents_binary_scalable_cardinalities(N=n, M=m)
+            df = get_three_latents_scalable_dataframe(M=m, N=n)
             lower, itLower, upper, itUpper = scalable(n,m, intervention_value, target_value, df)
             min_bound, min_iter, max_bound, max_iter = generic(df, edges, cardinalities, unobs, intervention, target, intervention_value, target_value)
             with open("cg_results.txt", "a") as f:
@@ -170,3 +173,50 @@ def single_exec():
         i += 1
 if __name__ == "__main__":
     single_exec()
+
+
+def example_scalable_n_m(N, M):
+    edges = generate_three_latents_scalable_string_edges(N=N, M=M)
+    cardinalities = generate_three_latents_binary_scalable_cardinalities(N=N, M=M)
+    unobs = ["U1", "U2"]
+
+    target = "Y"
+    target_value = 1
+    intervention = "X"
+    intervention_value = 1
+    df = get_three_latents_scalable_dataframe(M=M, N=N)
+
+    model = CausalModel(
+        data=df,
+        edges=edges,
+        custom_cardinalities=cardinalities,
+        unobservables_labels=unobs,
+        interventions=(intervention, intervention_value),
+        target=(target, target_value),
+    )
+    dataFrame = df
+    dag = model.graph
+    intervention = model.interventions[0]
+    target = model.target
+    minimizes_objective_function = True
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame=dataFrame,
+        dag=dag,
+        intervention=intervention,
+        target=target,
+        minimizes_objective_function=True)
+    min_bound, min_iter = solve(problem)
+
+    intervention = model.interventions[0]
+    target = model.target
+    problem = ColumnGenerationProblemOrchestrator(
+        dataFrame,
+        dag,
+        intervention,
+        target,
+        minimizes_objective_function=False
+    )
+    max_bound, max_iter = solve(problem)
+
+    logger.debug(f"{min_bound} <= P({target.label}={target_value} | do({intervention.label}={intervention_value})) <= {max_bound}")
+    logger.debug(f"True value: {find_true_value_in_three_latents_scalable_graphs(N=N, M=M, y0=1, x0=1,df=df)}")

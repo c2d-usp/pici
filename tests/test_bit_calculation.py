@@ -11,7 +11,7 @@ if PROJECT_ROOT not in sys.path:
 logging.disable(logging.INFO)
 
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic.bits import (
+from pici.intervention_inference_algorithm.column_generation.bits import (
     generate_optimization_problem_bit_list,
 )
 

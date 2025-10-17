@@ -6,7 +6,14 @@ import gurobipy as gp
 from gurobipy import GRB
 
 logger = logging.getLogger(__name__)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
 
 from pici.utils._enum import ColumnGenerationParameters
 

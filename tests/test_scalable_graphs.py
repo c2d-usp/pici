@@ -15,7 +15,7 @@ logging.disable(logging.INFO)
 
 from pici.causal_model import CausalModel
 from pici.utils._enum import DataExamplesPaths
-from pici.utils.scalable_graphs_helper import generate_scalable_string_edges
+from experiments.utils.scalable_graphs_helper import generate_three_latents_scalable_string_edges
 
 
 class TestMNCases(unittest.TestCase):
@@ -24,11 +24,11 @@ class TestMNCases(unittest.TestCase):
         Test partially identifiable intervention queries via subtests, using the scalable graph
         """
         cases = [
-            (1, 1, DataExamplesPaths.CSV_N1M1),
-            (2, 1, DataExamplesPaths.CSV_N2M1),
-            (3, 1, DataExamplesPaths.CSV_N3M1),
-            (4, 1, DataExamplesPaths.CSV_N4M1),
-            (1, 2, DataExamplesPaths.CSV_N1M2),
+            (1, 1, DataExamplesPaths.CSV_3_LATENTS_N1M1),
+            (2, 1, DataExamplesPaths.CSV_3_LATENTS_N2M1),
+            (3, 1, DataExamplesPaths.CSV_3_LATENTS_N3M1),
+            (4, 1, DataExamplesPaths.CSV_3_LATENTS_N4M1),
+            (1, 2, DataExamplesPaths.CSV_3_LATENTS_N1M2),
         ]
         # Skip cases that are too long to run
         skip_cases = {(3, 1), (4, 1), (1, 2)}
@@ -39,7 +39,7 @@ class TestMNCases(unittest.TestCase):
             with self.subTest(N=N, M=M):
                 if (N, M) in skip_cases:
                     self.skipTest(f"Skipping N={N}, M={M} (too long to run)")
-                edges = generate_scalable_string_edges(N=N, M=M)
+                edges = generate_three_latents_scalable_string_edges(N=N, M=M)
                 df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 

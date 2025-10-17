@@ -4,7 +4,6 @@ import logging
 import gurobipy as gp
 from gurobipy import GRB
 
-from pici.utils._enum import ColumnGenerationParameters
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +11,20 @@ logger = logging.getLogger(__name__)
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from pici.intervention_inference_algorithm.column_generation.scalable_problem_init import (
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
+
+from experiments.three_latents_scalables.scalable_problem_init import (
     InitScalable,
 )
-from pici.utils.scalable_graphs_helper import get_scalable_dataframe
+from experiments.utils.scalable_graphs_helper import get_three_latents_scalable_dataframe
+from pici.utils._enum import ColumnGenerationParameters
 
 BIG_M = 1e4
 DBG = False
@@ -627,7 +634,7 @@ class ScalarProblem:
 def single_exec():
     N = 1
     M = 2
-    scalable_df = get_scalable_dataframe(M=M, N=N)
+    scalable_df = get_three_latents_scalable_dataframe(M=M, N=N)
     interventionValue = 1
     targetValue = 1
 

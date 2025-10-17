@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 from pici.graph.graph import Graph
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic import bits
+from pici.intervention_inference_algorithm.column_generation import bits
 from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
     ObjFunctionGenerator,
 )

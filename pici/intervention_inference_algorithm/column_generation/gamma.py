@@ -1,6 +1,6 @@
 from gurobipy import GRB, Var
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation.generic.bits import Bit, BitProduct
+from pici.intervention_inference_algorithm.column_generation.bits import Bit, BitProduct
 from pici.utils.probabilities_helper import find_conditional_probability
 
 
