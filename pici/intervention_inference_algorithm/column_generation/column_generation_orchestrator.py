@@ -11,7 +11,6 @@ from pandas import DataFrame
 import networkx as nx
 
 from pici.causal_model import CausalModel
-from pici.utils.probabilities_helper import find_conditional_probability
 
 THIS_DIR = os.getcwd()
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
@@ -283,11 +282,11 @@ class ColumnGenerationProblemOrchestrator:
             
             logger.info(f"BitProduct List: {str_bit}")
             logger.info(f"{iterations_counter} gamma_coef: {gamma_coef}")
-            logger.info("-------------------------------------------------------------------------------")
+            logger.debug("-------------------------------------------------------------------------------")
             for k, v in self.subproblem.cluster_bits.items():
                 for vv in v:
-                    logger.info(f"----{vv}")
-            logger.info("-------------------------------------------------------------------------------")
+                    logger.debug(f"----{vv}")
+            logger.debug("-------------------------------------------------------------------------------")
 
             self.master.update(
                 new_column=new_column,
@@ -342,13 +341,13 @@ def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, 
 
 def exemplo_discrete_balke():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-    balke_cardinalities = {"Z": 4, "X": 2, "Y": 2, "U1": 0, "U2": 0}
+    balke_cardinalities = {"Z": 4, "X": 3, "Y": 2, "U1": 0, "U2": 0}
     balke_unobs = ["U1", "U2"]
     balke_target = "Y"
     balke_target_value = 1
     balke_intervention = "X"
     balke_intervention_value = 1
-    balke_csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
+    balke_csv_path = DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
     balke_df = pd.read_csv(balke_csv_path)
 
     balke_model = CausalModel(

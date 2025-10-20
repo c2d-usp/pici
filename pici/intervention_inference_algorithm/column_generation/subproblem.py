@@ -67,6 +67,7 @@ class SubProblem:
 
         realizacao_conjunto_estranho = get_node_list_realizations(conjunto_estranho)
         self._create_cluster_bits(reversed_ordered_considered_c_comp)
+        self._add_constraints_cluster_bits(reversed_ordered_considered_c_comp)
 
         self.objective_function_vars_not_in_W = self.get_objective_function_vars_not_in_W(symbolic_objective_function_probabilites, reversed_ordered_W)
 
@@ -135,12 +136,30 @@ class SubProblem:
                 self.cluster_bits[node.label][realization_key] = self.model.addVars(
                     node_number_of_bits, obj=0, vtype=GRB.BINARY, name=f"bit_realization_{i}th_of_node_{node.label}_{realization_key}"
                 )
-                # TODO: SHOULD BE VALIDATED
+
+    def _add_constraints_cluster_bits(self, considered_c_comp: list[Node]):
+        """
+        Each node in the considered c-component has a series of bits that represents each realization.
+        """
+        j = 0
+        logger.debug(f"Constraints fot the Cluster Bits of :{considered_c_comp}")
+        for node in considered_c_comp:
+            parents_without_latent = [parent for parent in node.parents if not parent.is_latent]
+            reversed_ordered_node_parents_realizations: list[list] = get_node_list_realizations(parents_without_latent)
+            header = reversed_ordered_node_parents_realizations[0]
+            logger.debug(f"{header}")
+            reversed_ordered_node_parents_realizations = reversed_ordered_node_parents_realizations[1:]
+            node_number_of_bits = math.ceil(math.log2(node.cardinality))
+
+            for i, realization in enumerate(reversed_ordered_node_parents_realizations):
+                realization_key: str = self.get_realization_key(header, realization)
+                logger.debug(f"    {j}th - Constraint of Node {node.label} Realization key: {realization_key}--{realization}")
+                j+=1
                 expr = 0
-                for i, var in enumerate(self.cluster_bits[node.label][realization_key]):
-                    # 0 -- k-1
-                    expr += 2**i * var
-                self.model.addConstr(expr <= node.cardinality)
+                for i in range(node_number_of_bits-1, -1, -1):
+                    variable_index = node_number_of_bits-i-1
+                    expr += 2**variable_index * self.cluster_bits[node.label][realization_key][variable_index]
+                self.model.addConstr(expr <= node.cardinality-1, name=f"discrete_constraint_of_node_{node.label}_{realization_key}")
 
 
     def get_objective_function_vars_not_in_W(self, symbolic_objective_function_probabilites, W) -> list[Node]:
@@ -297,12 +316,19 @@ class SubProblem:
                 node_idx = header.index(node.label)
                 node_value = realization[node_idx]
                 binary_node_value = bin(node_value)[2:]
+                k = math.ceil(math.log2(node.cardinality))
 
-                for i in range(len(binary_node_value)):
+                if len(binary_node_value) > k:
+                    raise Exception(f"Binary number of node {node.label} is greater than its cardinality")
+                else:
+                    binary_node_value = (k-len(binary_node_value))*"0" + binary_node_value
+
+                for i in range(k-1, -1, -1):
                     sign = 1
                     if int(binary_node_value[i]) == 0:
                         sign = -1
-                    new_bit = Bit(cluster_bit_gurobi_var[i], sign)
+                    variable_index = k-i-1
+                    new_bit = Bit(cluster_bit_gurobi_var[variable_index], sign)
                     bit_product.add_bit(new_bit)
             return bit_product
 
