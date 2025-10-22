@@ -18,9 +18,34 @@ PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-logger = logging.getLogger(__name__)
+def configure_logging(debug: bool = True) -> None:
+    """
+    Configure root logger so all imported modules inherit the desired level/handler.
 
-sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
+    This function:
+    - sets the root logger level to DEBUG (if debug=True) or INFO,
+    - ensures a StreamHandler is present,
+    - overrides any prior basicConfig handlers (uses force if available, otherwise removes handlers).
+    Call this before importing/initializing other project modules so they inherit the configuration.
+    """
+    level = logging.DEBUG if debug else logging.INFO
+    root = logging.getLogger()
+
+    # remove existing handlers for deterministic configuration (for Python <3.8)
+    if root.handlers:
+        for h in list(root.handlers):
+            root.removeHandler(h)
+    try:
+        # Python 3.8+ supports force=True to replace existing handlers
+        logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s", force=True)
+    except TypeError:
+        logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    root.setLevel(level)
+
+configure_logging(debug=True)
+
+logger = logging.getLogger(__name__)
+logger.debug("Logging configured to DEBUG for orchestrator and imported modules")
 
 from pici.graph.graph import Graph, order_list_in_reversed_topological_order
 from pici.graph.node import Node
@@ -266,8 +291,8 @@ class ColumnGenerationProblemOrchestrator:
             if reduced_cost >= 0:
                 break
             new_column: list[int] = []
-            for index in range(len(self.subproblem.coluna_parametrizada)):
-                new_column.append(self.subproblem.coluna_parametrizada[index].X)
+            for index in range(len(self.subproblem.parameterized_column)):
+                new_column.append(self.subproblem.parameterized_column[index].X)
 
             # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
             new_column.append(1)
@@ -280,8 +305,8 @@ class ColumnGenerationProblemOrchestrator:
                     str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
                 gamma_coef += bit_product.coef * var_gurobi.X
             
-            logger.info(f"BitProduct List: {str_bit}")
-            logger.info(f"{iterations_counter} gamma_coef: {gamma_coef}")
+            logger.debug(f"BitProduct List: {str_bit}")
+            logger.debug(f"{iterations_counter} gamma_coef: {gamma_coef}")
             logger.debug("-------------------------------------------------------------------------------")
             for k, v in self.subproblem.cluster_bits.items():
                 for vv in v:
@@ -370,7 +395,7 @@ def exemplo_discrete_balke():
         target,
         minimizes_objective_function)
     min_bound, min_iter = solve(problem)
-
+    # logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value}))")
     dataFrame = balke_df
     dag = balke_model.graph
     intervention = balke_model.interventions[0]
@@ -382,7 +407,7 @@ def exemplo_discrete_balke():
         target,
         minimizes_objective_function=False)
     max_bound, max_iter = solve(problem)
-
+    # logger.info(f"P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
     logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
 
 def exemplo_binary_balke():
@@ -482,7 +507,7 @@ def exemplo_n1_m2():
     logger.info(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {max_bound}")
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     exemplo_discrete_balke()
     # exemplo_binary_balke()
     # exemplo_n1_m2()
