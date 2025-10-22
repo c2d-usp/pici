@@ -84,11 +84,6 @@ class GurobiOptimizer(Optimizer):
         self.setup_variables_and_constraints(A_eq, b_eq)
         self.configure_objective(obj_coeffs)
         self.configure_solver_params(model_sense)
-        
-        # TODO: REMOVE PRINT
-        for c in self.model.getConstrs():
-            print(f"{self.model.getRow(c)} {c.Sense} {c.RHS}")
-
         self.model.optimize()
 
         if self.model.Status == GRB.OPTIMAL:
