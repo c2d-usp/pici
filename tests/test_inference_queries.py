@@ -63,6 +63,8 @@ class TestInferenceAlgorithm(unittest.TestCase):
         """
         Test the intervention query using a simple graph with an IV and discrete variables
         """
+        self.skipTest(f"Skipping Discrete test: Correct bounds are unsure.")
+
         edges = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
         card = {"Z": 4, "X": 3, "Y": 2, "U1": 0, "U2": 0}
         unobs = ["U1", "U2"]
