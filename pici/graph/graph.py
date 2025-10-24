@@ -93,3 +93,13 @@ def order_list_in_reversed_topological_order(topological_order: list[Node], node
             reversed_list.append(node)
     reversed_list.reverse()
     return reversed_list
+
+def update_parents_to_reversed_topological_order(node_list: list[Node], topological_order: list[Node]) -> None:
+    for node in node_list:
+        ordered_parents = []
+        for ordered_node in topological_order:
+            if ordered_node in node.parents:
+                ordered_parents.append(ordered_node)
+        ordered_parents.reverse()
+        node.parents = ordered_parents
+    return node_list
