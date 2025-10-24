@@ -1,3 +1,4 @@
+from itertools import product
 import logging
 import os
 import sys
@@ -13,12 +14,9 @@ if PROJECT_ROOT not in sys.path:
 
 logging.disable(logging.INFO)
 
+from experiments.utils.scalable_graphs_helper import find_true_value_in_three_latents_scalable_graphs, generate_three_latents_scalable_string_edges
 from pici.causal_model import CausalModel
 from pici.utils._enum import DataExamplesPaths
-from experiments.utils.scalable_graphs_helper import (
-    find_true_value_in_three_latents_scalable_graphs,
-    generate_three_latents_scalable_string_edges,
-)
 
 
 class TestIsIdentifiableIntervention(unittest.TestCase):

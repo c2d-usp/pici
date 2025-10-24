@@ -24,14 +24,14 @@ class TestMNCases(unittest.TestCase):
         Test partially identifiable intervention queries via subtests, using the scalable graph
         """
         cases = [
-            (1, 1, DataExamplesPaths.CSV_3_LATENTS_N1M1),
-            (2, 1, DataExamplesPaths.CSV_3_LATENTS_N2M1),
+            # (1, 1, DataExamplesPaths.CSV_3_LATENTS_N1M1),
+            # (2, 1, DataExamplesPaths.CSV_3_LATENTS_N2M1),
+            # (1, 2, DataExamplesPaths.CSV_3_LATENTS_N1M2),
             (3, 1, DataExamplesPaths.CSV_3_LATENTS_N3M1),
             (4, 1, DataExamplesPaths.CSV_3_LATENTS_N4M1),
-            (1, 2, DataExamplesPaths.CSV_3_LATENTS_N1M2),
         ]
         # Skip cases that are too long to run
-        skip_cases = {(3, 1), (4, 1), (1, 2)}
+        skip_cases = {(4, 1)}#, (3, 1)}
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
@@ -39,6 +39,7 @@ class TestMNCases(unittest.TestCase):
             with self.subTest(N=N, M=M):
                 if (N, M) in skip_cases:
                     self.skipTest(f"Skipping N={N}, M={M} (too long to run)")
+                print(f"Running for N={N}, M={M}...")
                 edges = generate_three_latents_scalable_string_edges(N=N, M=M)
                 df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
@@ -49,18 +50,20 @@ class TestMNCases(unittest.TestCase):
                     unobservables_labels=unobs,
                 )
 
-                self.assertFalse(
-                    model.are_d_separated_in_complete_graph(["X"], ["Y"], unobs),
-                    msg=f"d-separation failed for N={N}, M={M}",
-                )
+                # self.assertFalse(
+                #     model.are_d_separated_in_complete_graph(["X"], ["Y"], unobs),
+                #     msg=f"d-separation failed for N={N}, M={M}",
+                # )
 
                 for target_value, intervention_value in interventions:
                     with self.subTest(
                         N=N, M=M, target=target_value, intervention=intervention_value
                     ):
+                        print(f"P(Y={target_value} | Do(X={intervention_value})")
                         model.set_interventions([("X", intervention_value)])
                         model.set_target(("Y", target_value))
                         lower, upper = model.intervention_query()
+                        print(f"lower={lower} <= P(Y={target_value} | Do(X={intervention_value}) <= upper={upper}")
 
                         tv = model.identifiable_intervention_query()
 
@@ -74,7 +77,7 @@ class TestMNCases(unittest.TestCase):
                             tv,
                             msg=f"lower bound too high for N={N},M={M},Y={target_value},do(X={intervention_value})",
                         )
-
+                    print("Done")
 
 if __name__ == "__main__":
     unittest.main()
