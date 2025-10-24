@@ -84,10 +84,7 @@ class SubProblem:
                 symbolic_objective_function_probabilites, reversed_ordered_W
             )
         )
-        """
-        Pw: são todas as probabilidades condicionais na FO em que todas as variáveis estão em W
-        Pq: são todas as probabilidades condicionais na FO menos as de Pw
-        """
+
         self.Pw, self.Pq = self.separate_objective_function_probabilities(
             symbolic_objective_function_probabilites, reversed_ordered_W
         )
@@ -151,7 +148,7 @@ class SubProblem:
             We've three clusters. Cluster A with 3 bits, Cluster B with one bit, and Cluster C with two bits.
 
         """
-        j = 0
+        cluster_bits_counter = 0
         logger.debug(f"Cluster Bits of :{considered_c_comp}")
         for node in considered_c_comp:
             parents_without_latent = [
@@ -170,9 +167,9 @@ class SubProblem:
             for i, realization in enumerate(reversed_ordered_node_parents_realizations):
                 realization_key: str = self.get_realization_key(header, realization)
                 logger.debug(
-                    f"    {j}th - Node {node.label} Realization key: {realization_key}--{realization} ==> {node_number_of_bits} bits"
+                    f"    {cluster_bits_counter}th - Node {node.label} Realization key: {realization_key}--{realization} ==> {node_number_of_bits} bits"
                 )
-                j += 1
+                cluster_bits_counter += 1
                 self.cluster_bits[node.label][realization_key] = self.model.addVars(
                     node_number_of_bits,
                     obj=0,
@@ -184,7 +181,7 @@ class SubProblem:
         """
         Each node in the considered c-component has a series of bits that represents each realization.
         """
-        j = 0
+        cluster_bits_counter = 0
         logger.debug(f"Constraints fot the Cluster Bits of :{considered_c_comp}")
         for node in considered_c_comp:
             parents_without_latent = [
@@ -203,9 +200,9 @@ class SubProblem:
             for realization in reversed_ordered_node_parents_realizations:
                 realization_key: str = self.get_realization_key(header, realization)
                 logger.debug(
-                    f"    {j}th - Constraint of Node {node.label} Realization key: {realization_key}--{realization}"
+                    f"    {cluster_bits_counter}th - Constraint of Node {node.label} Realization key: {realization_key}--{realization}"
                 )
-                j += 1
+                cluster_bits_counter += 1
                 debug_expr_str = ""
                 expr = 0
                 for variable_index in range(node_number_of_bits):
@@ -237,8 +234,8 @@ class SubProblem:
         self, symbolic_objective_function_probabilites, W
     ) -> tuple[list[tuple], list[tuple]]:
         """
-        Pw todo mundo está em W
-        Pq: P - Pw
+        Pw: it's the set of all conditional probabilities in the Objective Function that every variables is in the W set.
+        Pq:  it's the set of all conditional probabilities in the Objective Function except the ones in Pw
         """
         P_Q = []
         P_W = []
@@ -276,8 +273,8 @@ class SubProblem:
         realization_objective_function_vars_not_in_W: list,
     ) -> dict:
         """
-        Gera o Yu (Gamma U): gamma_u_map_bit_product_to_linearized_variable
-        Mapeia o produtório de bits e seu coef a uma linearização
+        Generate Gamma U: gamma_u_map_bit_product_to_linearized_variable
+        Maps the Bit Product and its coefficient into a linearization variable.
         """
         gamma_u_map_bit_product_to_linearized_variable: dict[BitProduct, Var] = {}
         header = realization_reversed_ordered_considered_c_comp_plus_adapted_tail[0]
@@ -371,7 +368,7 @@ class SubProblem:
             logger.debug("--------------------")
             logger.debug(f"{q_header}")
             logger.debug(f"{q_realization}")
-            coef_parcial = 1
+            partial_coef = 1
             for q_conditional_probability in self.Pq:
                 q_target, q_conditioned = q_conditional_probability
 
@@ -392,12 +389,12 @@ class SubProblem:
                     target_realization=[q_target],
                     condition_realization=q_conditioned,
                 )
-                coef_parcial *= curr
+                partial_coef *= curr
                 logger.debug(
                     f"P({q_target.label}={q_target.value}|{str_q[:len(str_q)-2]}) == {curr}"
                 )
-            logger.debug(f"Coef_Parcial: {coef_parcial}")
-            coefq += coef_parcial
+            logger.debug(f"Coef_Parcial: {partial_coef}")
+            coefq += partial_coef
             logger.debug(f"coefW: {coefw}")
             logger.debug(f"coefq: {coefq}")
             logger.debug(f"coef: {coefw*coefq}")
@@ -467,7 +464,7 @@ class SubProblem:
                     node_number_of_bits - len(binary_node_value)
                 ) * "0" + binary_node_value
             logger.debug(
-                f"Node: {node.label} Card: {node.cardinality} | K: {node_number_of_bits} | Binario: {binary_node_value} | Valor: {node_value}"
+                f"Node: {node.label} Cardinality: {node.cardinality} | log2(Cardinality): {node_number_of_bits} | Binary: {binary_node_value} | Value: {node_value}"
             )
 
             for str_index in range(node_number_of_bits):
