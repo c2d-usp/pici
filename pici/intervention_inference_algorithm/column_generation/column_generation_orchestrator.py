@@ -100,7 +100,6 @@ class ColumnGenerationProblemOrchestrator:
             raise Exception("dag.topological_order is None")
         self.topological_order: list[Node] = dag.topological_order
 
-        # TODO: fazer um get_considered_graph_nodes
         objective_function = ObjFunctionGenerator(
             graph=dag,
             dataFrame=dataFrame,
