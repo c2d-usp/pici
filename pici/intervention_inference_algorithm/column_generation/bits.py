@@ -1,4 +1,5 @@
 from gurobipy import Var
+
 from pici.graph.node import Node
 
 
@@ -6,7 +7,7 @@ class Bit:
     def __init__(self, gurobi_var: Var, sign: bool) -> None:
         self.gurobi_var = gurobi_var
         self.sign = sign
-    
+
     def __eq__(self, other):
         if not isinstance(other, Node):
             raise TypeError(f"Cannot compare Bit with {type(other)}")
@@ -23,10 +24,10 @@ class BitProduct:
     def __init__(self) -> None:
         self.bit_list: list[Bit] = []
         self.coef: float = 0
-    
+
     def add_bit(self, bit: Bit):
         self.bit_list.append(bit)
-    
+
     def set_coef(self, coef: float):
         self.coef = coef
 
@@ -83,6 +84,5 @@ def count_endogenous_parent_configurations(node: Node) -> int:
     for parent in node.parents:
         if parent.is_latent:
             continue
-        node_bit_length *= parent.cardinality    
+        node_bit_length *= parent.cardinality
     return node_bit_length
-

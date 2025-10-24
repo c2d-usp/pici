@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 
 import gurobipy as gp
 from gurobipy import GRB
@@ -41,11 +41,16 @@ class MasterProblem:
         for minimization. Gurobi output is suppressed for iterative procedures.
         """
         num_columns_base = len(transposed_columns_base)
-        self.vars = self.model.addVars(num_columns_base, obj=ColumnGenerationParameters.BIG_M.value, name="BaseColumns")
+        self.vars = self.model.addVars(
+            num_columns_base,
+            obj=ColumnGenerationParameters.BIG_M.value,
+            name="BaseColumns",
+        )
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
-                    transposed_columns_base[column_id][realization_id] * self.vars[column_id]
+                    transposed_columns_base[column_id][realization_id]
+                    * self.vars[column_id]
                     for column_id in range(num_columns_base)
                 )
                 == constraints_empirical_probabilities[realization_id]
@@ -59,7 +64,11 @@ class MasterProblem:
         self.model.update()
 
     def update(
-        self, new_column: list[float], index: int, obj_coeff: list[float], minimizes_objective_function: bool
+        self,
+        new_column: list[float],
+        index: int,
+        obj_coeff: list[float],
+        minimizes_objective_function: bool,
     ):
         """
         Adds a new column (variable) to the constraints in the master problem and updates the model.
@@ -74,11 +83,9 @@ class MasterProblem:
         adds it to the model, and updates the model structure.
         """
         if not minimizes_objective_function:
-            obj_coeff = -1*obj_coeff
+            obj_coeff = -1 * obj_coeff
 
-        new_col = gp.Column(
-            coeffs=new_column, constrs=self.constrs.values()
-        )
+        new_col = gp.Column(coeffs=new_column, constrs=self.constrs.values())
 
         logger.debug(f"Obj coeff: {obj_coeff}")
 

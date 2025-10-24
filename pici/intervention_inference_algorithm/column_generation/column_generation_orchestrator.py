@@ -1,22 +1,19 @@
-
-from itertools import product
+import logging
 import os
 import sys
-import copy
-import logging
-import pandas as pd
+
 import gurobipy as gp
 from gurobipy import GRB
+import pandas as pd
 from pandas import DataFrame
-import networkx as nx
 
-from pici.causal_model import CausalModel
 
 THIS_DIR = os.getcwd()
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
 
 def configure_logging(debug: bool = True) -> None:
     """
@@ -37,28 +34,40 @@ def configure_logging(debug: bool = True) -> None:
             root.removeHandler(h)
     try:
         # Python 3.8+ supports force=True to replace existing handlers
-        logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s", force=True)
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+            force=True,
+        )
     except TypeError:
-        logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+        logging.basicConfig(
+            level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+        )
     root.setLevel(level)
+
 
 configure_logging(debug=True)
 
 logger = logging.getLogger(__name__)
 logger.debug("Logging configured to DEBUG for orchestrator and imported modules")
 
-from pici.graph.graph import Graph, order_list_in_reversed_topological_order
+from pici.causal_model import CausalModel
+from pici.graph.graph import (
+    Graph,
+    order_list_in_reversed_topological_order,
+    update_parents_to_reversed_topological_order,
+)
 from pici.graph.node import Node
-from pici.intervention_inference_algorithm.column_generation import bits
 from pici.intervention_inference_algorithm.column_generation.master_problem import (
     MasterProblem,
 )
 from pici.intervention_inference_algorithm.column_generation.subproblem import (
-    SubProblem, get_node_list_realizations
+    SubProblem,
+    get_node_list_realizations,
 )
 from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
-    column_gen_calculate_constraints_empirical_probabilities,
     calculate_number_of_constraints,
+    column_gen_calculate_constraints_empirical_probabilities,
     find_c_component_and_tail_set,
     get_c_component_in_reverse_topological_order,
     get_symbolical_constraints_probabilities_and_wc,
@@ -78,16 +87,20 @@ class ColumnGenerationProblemOrchestrator:
         dag: Graph,
         intervention: Node,
         target: Node,
-        minimizes_objective_function: bool
+        minimizes_objective_function: bool,
     ):
         self.dag = dag
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
         self.minimizes_objective_function = minimizes_objective_function
+        self.duals = {}
 
+        if dag.topological_order is None or len(dag.topological_order) == 0:
+            raise Exception("dag.topological_order is None")
         self.topological_order: list[Node] = dag.topological_order
 
+        # TODO: fazer um get_considered_graph_nodes
         objective_function = ObjFunctionGenerator(
             graph=dag,
             dataFrame=dataFrame,
@@ -95,21 +108,28 @@ class ColumnGenerationProblemOrchestrator:
             target=target,
         )
 
-        intervention_latent_parent = objective_function.intervention.latent_parent
-        c_component_endogenous_nodes = intervention_latent_parent.children
-        considered_c_comp = list(
-            (set(c_component_endogenous_nodes) & set(objective_function.considered_graph_nodes))
-            | {objective_function.intervention}
+        self.symbolic_objective_function_probabilites: list[tuple] = (
+            objective_function.generate_symbolic_objective_function_probabilities()
         )
 
-        self.reversed_ordered_considered_c_comp = get_c_component_in_reverse_topological_order(
-            topo_order=self.topological_order,
-            unob=intervention.latent_parent,
-            considered_c_comp=considered_c_comp,
+        considered_graph_nodes = objective_function.considered_graph_nodes
+        intervention_latent_parent = self.intervention.latent_parent
+        c_component_endogenous_nodes = intervention_latent_parent.children
+        considered_c_comp = list(
+            (set(c_component_endogenous_nodes) & set(considered_graph_nodes))
+            | {self.intervention}
+        )
+
+        self.reversed_ordered_considered_c_comp = (
+            get_c_component_in_reverse_topological_order(
+                topo_order=self.topological_order,
+                unob=self.intervention.latent_parent,
+                considered_c_comp=considered_c_comp,
+            )
         )
 
         c_component_and_tail: list[Node] = find_c_component_and_tail_set(
-            intervention.latent_parent, self.reversed_ordered_considered_c_comp
+            self.intervention.latent_parent, self.reversed_ordered_considered_c_comp
         )
 
         symbolical_constraints_probabilities, W = (
@@ -120,77 +140,74 @@ class ColumnGenerationProblemOrchestrator:
             )
         )
 
-        if W is None:
-            raise Exception("W is None")
-        
-        if dag.topological_order is None or len(dag.topological_order) == 0:
-            raise Exception("dag.topological_order is None")
-        
         W_ordered = []
-        for i, node in enumerate(dag.topological_order):
+        for node in self.topological_order:
             if node in W:
                 W_ordered.append(node)
 
         W_ordered.reverse()
         self.reversed_ordered_W = W_ordered
 
-        if self.reversed_ordered_W is not None:
-            self.reversed_ordered_W_realizations = get_node_list_realizations(self.reversed_ordered_W)
-        else:
-            raise Exception("reversed is None")
-
-        self.number_of_constraints = calculate_number_of_constraints(W=W)        
-
-        # TODO: COLOCAR ISSO NA CONSTRUÇÃO DO OBJETO GRAPH
-        self.update_parents_to_reversed_topological_order(self.reversed_ordered_W)
-
-        self.duals = {}
-        self.symbolic_objective_function_probabilites: list[tuple] = (
-            objective_function.generate_symbolic_objective_function_probabilities()
-        )
-        '''
-        NÃO USADAS. FORAM CRIADAS ANTES DE INICIAR A CONSTRUÇÃO DO CG.
-        self.symbolic_decision_function: dict[tuple, int] = (
-            objective_function.generate_symbolic_decision_function()
+        self.reversed_ordered_W_realizations = get_node_list_realizations(
+            self.reversed_ordered_W
         )
 
-        self.bits_list: list[int] = bits.generate_optimization_problem_bit_list(
-            intervention
+        update_parents_to_reversed_topological_order(
+            self.reversed_ordered_W, self.topological_order
         )
-        '''
+
         self.constraints_empirical_probabilities: list[float] = (
             column_gen_calculate_constraints_empirical_probabilities(
                 data=dataFrame,
                 symbolical_constraints_probabilities=symbolical_constraints_probabilities,
-                reversed_ordered_W_realizations=self.reversed_ordered_W_realizations
+                reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             )
         )
+
+        considered_c_comp_plus_adapted_tail = (
+            self.get_considered_c_comp_plus_adapted_tail(
+                self.reversed_ordered_considered_c_comp, self.intervention
+            )
+        )
+        self.reversed_ordered_considered_c_comp_plus_adapted_tail = (
+            order_list_in_reversed_topological_order(
+                self.topological_order, considered_c_comp_plus_adapted_tail
+            )
+        )
+
+        self.number_of_constraints = calculate_number_of_constraints(W=W)
         self.transposed_columns_base = None
 
-        self.master = MasterProblem()
-        self.subproblem = SubProblem(df=dataFrame, intervention=intervention, target=target, minimizes_objective_function=self.minimizes_objective_function)
-    
-    def get_conjunto_estranho(self, reversed_ordered_considered_c_comp, intervention):
-        '''
-        Conjunto estranho é o considered_c-comp + os pais de (considered_c-comp - X)
-        
-        '''
-        conjunto_estranho = set()
+    def get_considered_c_comp_plus_adapted_tail(
+        self, reversed_ordered_considered_c_comp, intervention
+    ):
+        """
+        Considered_c_comp_plus_adapted_tail = considered_c-comp + parents of every node in considered_c-comp except the parents of the intervention.
+        """
+        considered_c_comp_plus_adapted_tail = set()
         for node in reversed_ordered_considered_c_comp:
-            conjunto_estranho.add(node)
+            considered_c_comp_plus_adapted_tail.add(node)
             if node != intervention:
-                conjunto_estranho.update([parent for parent in node.parents if not parent.is_latent])
-        return list(conjunto_estranho)
+                considered_c_comp_plus_adapted_tail.update(
+                    [parent for parent in node.parents if not parent.is_latent]
+                )
+        return list(considered_c_comp_plus_adapted_tail)
 
-    def update_parents_to_reversed_topological_order(self, node_list: list[Node]) -> None:
-        for node in node_list:
-            ordered_parents = []
-            for ordered_node in self.topological_order:
-                if ordered_node in node.parents:
-                    ordered_parents.append(ordered_node)
-            ordered_parents.reverse()
-            node.parents = ordered_parents
-        return node_list
+    def solve(self, method=1) -> tuple[int, float]:
+        """
+        Solves the column generation problem using the BIG_M approach.
+
+        Args:
+            problem (ColumnGenerationProblemBuilder): The column generation problem instance.
+            method (int, optional): The Gurobi solving method to use. Defaults to 1.
+
+        Returns:
+            tuple[int, float]: A tuple containing the final objective bound and the number of iterations performed.
+        """
+        self.setup(method)
+        number_of_iterations = self.column_generation()
+        bound = self.optimize_master()
+        return bound, number_of_iterations
 
     def setup(self, method=1):
         """
@@ -205,24 +222,35 @@ class ColumnGenerationProblemOrchestrator:
             method (int, optional): The Gurobi solving method to use. Defaults to 1 (barrier and dual simplex).
         """
         # Define gurobi running method
+        self.master = MasterProblem()
+        self.subproblem = SubProblem(
+            df=self.dataFrame,
+            intervention=self.intervention,
+            target=self.target,
+            minimizes_objective_function=self.minimizes_objective_function,
+        )
+
         self.master.model.setParam(GRB.Param.Method, method)
         self.subproblem.model.setParam(GRB.Param.Method, method)
 
-        self.transposed_columns_base = self._generate_initial_column_base()
-        self.master.setup(self.transposed_columns_base, self.constraints_empirical_probabilities)
-
-        conjunto_estranho = self.get_conjunto_estranho(self.reversed_ordered_considered_c_comp, self.intervention)
-        reversed_ordered_conjunto_estranho = order_list_in_reversed_topological_order(self.topological_order, conjunto_estranho)
+        self.transposed_columns_base = self._generate_initial_column_base(
+            number_of_constraints=self.number_of_constraints
+        )
+        self.master.setup(
+            self.transposed_columns_base, self.constraints_empirical_probabilities
+        )
 
         self.subproblem.setup(
             reversed_ordered_considered_c_comp=self.reversed_ordered_considered_c_comp,
             reversed_ordered_W_realizations=self.reversed_ordered_W_realizations,
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
-            conjunto_estranho=reversed_ordered_conjunto_estranho,
+            reversed_ordered_considered_c_comp_plus_adapted_tail=self.reversed_ordered_considered_c_comp_plus_adapted_tail,
         )
 
-    def _generate_initial_column_base(self) -> list[list[int]]:
+    def _generate_initial_column_base(
+        self, number_of_constraints: int
+    ) -> list[list[int]]:
         """
         Generate an initial base columns for the master problem as an identity matrix.
 
@@ -234,8 +262,8 @@ class ColumnGenerationProblemOrchestrator:
             list[list[int]]: The identity matrix.
         """
         transposed_columns_base: list[list[int]] = []
-        for index in range(self.number_of_constraints + 1):
-            new_column = [0] * (self.number_of_constraints + 1)
+        for index in range(number_of_constraints + 1):
+            new_column = [0] * (number_of_constraints + 1)
             new_column[index] = 1
             transposed_columns_base.append(new_column)
         return transposed_columns_base
@@ -299,19 +327,40 @@ class ColumnGenerationProblemOrchestrator:
             logger.debug(f"New Column: {new_column}")
 
             gamma_coef: float = 0.0
-            for bit_product, var_gurobi in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
+            for (
+                bit_product,
+                var_gurobi,
+            ) in self.subproblem.gamma_u_map_bit_product_to_linearized_variable.items():
                 str_bit = ""
                 for bit in bit_product.bit_list:
-                    str_bit += f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
+                    str_bit += (
+                        f"({bit.sign}*[{bit.gurobi_var.VarName}:{bit.gurobi_var.X}]), "
+                    )
                 gamma_coef += bit_product.coef * var_gurobi.X
-            
+
             logger.debug(f"BitProduct List: {str_bit}")
             logger.debug(f"{iterations_counter} gamma_coef: {gamma_coef}")
-            logger.debug("-------------------------------------------------------------------------------")
-            for k, v in self.subproblem.cluster_bits.items():
-                for vv in v:
-                    logger.debug(f"----{vv}")
-            logger.debug("-------------------------------------------------------------------------------")
+            logger.debug(
+                "-------------------------------------------------------------------------------"
+            )
+            logger.debug("Cluster Bits:")
+            for (
+                node_label,
+                dict_parents_realization,
+            ) in self.subproblem.cluster_bits.items():
+                logger.debug(f"-- Node: {node_label}")
+                for (
+                    parents_realization_key,
+                    cluster_gurobi_var,
+                ) in dict_parents_realization.items():
+                    logger.debug(f"---- Parents Realization: {parents_realization_key}")
+                    for idx, var in cluster_gurobi_var.items():
+                        logger.debug(
+                            f"-------- {idx}-ith Gurobi Var Name: {var.VarName}"
+                        )
+            logger.debug(
+                "-------------------------------------------------------------------------------"
+            )
 
             self.master.update(
                 new_column=new_column,
@@ -321,15 +370,19 @@ class ColumnGenerationProblemOrchestrator:
             )
             self.transposed_columns_base.append(new_column)
             iterations_counter += 1
-            if iterations_counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
+            if (
+                iterations_counter
+                >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value
+            ):
                 raise TimeoutError(
                     f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {iterations_counter}")
-            logger.debug("_________________________________________________________________")
-
+            logger.debug(
+                "_________________________________________________________________"
+            )
         return iterations_counter
-    
+
     def optimize_master(self) -> float:
         """
         Optimizes the master problem with continuous variables and writes the model to disk.
@@ -348,21 +401,6 @@ class ColumnGenerationProblemOrchestrator:
         self.master.model.write("sca_cgo_model.mps")
         return self.master.model.ObjVal
 
-def solve(problem: ColumnGenerationProblemOrchestrator, method=1) -> tuple[int, float]:
-    """
-    Solves the column generation problem using the BIG_M approach.
-
-    Args:
-        problem (ColumnGenerationProblemBuilder): The column generation problem instance.
-        method (int, optional): The Gurobi solving method to use. Defaults to 1.
-
-    Returns:
-        tuple[int, float]: A tuple containing the final objective bound and the number of iterations performed.
-    """
-    problem.setup(method)
-    number_of_iterations = problem.column_generation()
-    bound = problem.optimize_master()
-    return bound, number_of_iterations
 
 def exemplo_discrete_balke():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
@@ -389,26 +427,23 @@ def exemplo_discrete_balke():
     target = balke_model.target
     minimizes_objective_function = True
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function)
-    min_bound, min_iter = solve(problem)
+        dataFrame, dag, intervention, target, minimizes_objective_function
+    )
+    min_bound, min_iter = problem.solve()
     # logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value}))")
     dataFrame = balke_df
     dag = balke_model.graph
     intervention = balke_model.interventions[0]
     target = balke_model.target
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function=False)
-    max_bound, max_iter = solve(problem)
+        dataFrame, dag, intervention, target, minimizes_objective_function=False
+    )
+    max_bound, max_iter = problem.solve()
     # logger.info(f"P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
-    logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
+    logger.info(
+        f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}"
+    )
+
 
 def exemplo_binary_balke():
     balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
@@ -435,26 +470,22 @@ def exemplo_binary_balke():
     target = balke_model.target
     minimizes_objective_function = True
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function)
-    min_bound, min_iter = solve(problem)
+        dataFrame, dag, intervention, target, minimizes_objective_function
+    )
+    min_bound, min_iter = problem.solve()
 
     dataFrame = balke_df
     dag = balke_model.graph
     intervention = balke_model.interventions[0]
     target = balke_model.target
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function=False)
-    max_bound, max_iter = solve(problem)
+        dataFrame, dag, intervention, target, minimizes_objective_function=False
+    )
+    max_bound, max_iter = problem.solve()
 
-    logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
+    logger.info(
+        f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}"
+    )
 
 
 def exemplo_n1_m2():
@@ -486,28 +517,23 @@ def exemplo_n1_m2():
     target = n1_m2_model.target
     minimizes_objective_function = True
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function)
-    min_bound, min_iter = solve(problem)
+        dataFrame, dag, intervention, target, minimizes_objective_function
+    )
+    min_bound, min_iter = problem.solve()
 
     intervention = n1_m2_model.interventions[0]
     target = n1_m2_model.target
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame,
-        dag,
-        intervention,
-        target,
-        minimizes_objective_function=False
+        dataFrame, dag, intervention, target, minimizes_objective_function=False
     )
-    max_bound, max_iter = solve(problem)
+    max_bound, max_iter = problem.solve()
 
-    logger.info(f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {max_bound}")
+    logger.info(
+        f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {max_bound}"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exemplo_discrete_balke()
     # exemplo_binary_balke()
     # exemplo_n1_m2()
