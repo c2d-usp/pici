@@ -158,6 +158,10 @@ def get_symbolical_constraints_probabilities_and_wc(
                     Wc.append(cond)
         symbolical_constraints_probabilities.append({node: cond_vars.copy()})
         cond_vars.clear()
+    
+    if Wc is None:
+        raise Exception("W is None")
+    
     return symbolical_constraints_probabilities, Wc
 
 
