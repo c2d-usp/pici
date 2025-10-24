@@ -8,7 +8,7 @@ services:
     image: column_generation
     command: python3 experiment.py
     volumes:
-      - /home/danlawand/.gurobi/gurobi.lic:/opt/gurobi/gurobi.lic:ro
-      - /home/danlawand/causal-reasoning/resultados:/code/outputs
+      - /~/.gurobi/gurobi.lic:/opt/gurobi/gurobi.lic:ro
+      - /~/pici/results:/code/outputs
     # restart: unless-stopped
     container_name: experiment_container
