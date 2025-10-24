@@ -130,13 +130,13 @@ class SubProblem:
         logger.debug(
             "________________________________________________________________________________"
         )
-        print("Au: ------")
+        logger.debug("Au: ------")
         for bit_product, _ in self.a_u_map_bit_product_to_linearized_variable.items():
             str_prod_bit = ""
             for b in bit_product.bit_list:
                 str_prod_bit += f"({b.sign} * {b.gurobi_var.VarName}) * "
 
-            print(f"{str_prod_bit[:len(str_prod_bit)-3]}, ")
+            logger.debug(f"{str_prod_bit[:len(str_prod_bit)-3]}, ")
 
     def _create_cluster_bits(self, considered_c_comp: list[Node]):
         """

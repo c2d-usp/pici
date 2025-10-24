@@ -1,0 +1,57 @@
+--------------------------------------------------------------------------------------------
+--M:1, N:1
+    Generic CG:
+        0.10151984693207608 <= P(Y=1 | do(X=1)) <= 0.12336442358796713
+        6 iteracoes para lower e 6 para upper
+    Scalable CG:
+        0.10151984693207608 =< P(Y = 1|X = 1) <= 0.12336442358796712
+        7 iteracoes para lower e 6 para upper
+
+--M:1, N:3
+    Generic CG:
+        0.10355837657883706 <= P(Y=1 | do(X=1)) <= 0.12378102210025967
+        39 iteracoes para lower e 40 para upper
+    Scalable CG:
+        0.10355837657883706 =< P(Y = 1|X = 1) <= 0.12378102210025968
+        48 iteracoes para lower e 34 para upper
+
+--M:1, N:4
+    Generic CG:
+        0.5351128708645817 <= P(Y=1 | do(X=1)) <= 0.7650154552404694
+        94 iteracoes para lower e 159 para upper
+    Scalable CG:
+        0.5351128708645817 =< P(Y = 1|X = 1) <= 0.7650154552404691
+        77 iteracoes para lower e 120 para upper
+
+--M:2, N:1
+    Generic CG:
+        0.10887082613903278 <= P(Y=1 | do(X=1)) <= 0.12843300175004513
+        16 iteracoes para lower e 12 para upper
+    Scalable CG:
+        0.10887082613903279 =< P(Y = 1|X = 1) <= 0.12843300175004513
+        16 iteracoes para lower e 11 para upper
+
+--M:2, N:2
+    Generic CG:
+        0.5519973583443177 <= P(Y=1 | do(X=1)) <= 0.617712297494013
+        122 iteracoes para lower e 50 para upper
+    Scalable CG:
+        0.5519973583443178 =< P(Y = 1|X = 1) <= 0.6177122974940128
+        40 iteracoes para lower e 36 para upper
+
+--M:2, N:3
+    Generic CG:
+        0.0956569519218699 <= P(Y=1 | do(X=1)) <= 0.11745583660967587
+        188 iteracoes para lower e 100 para upper
+    Scalable CG:
+        0.09565695192186989 =< P(Y = 1|X = 1) <= 0.1174558366096759
+        181 iteracoes para lower e 175 para upper
+
+--M:3, N:1
+    Generic CG:
+        0.10041001225430644 <= P(Y=1 | do(X=1)) <= 0.11853259002408682
+        87 iteracoes para lower e 74 para upper
+    Scalable CG:
+        0.10041001225430643 =< P(Y = 1|X = 1) <= 0.11853259002408682
+        54 iteracoes para lower e 28 para upper
+

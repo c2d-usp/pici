@@ -4,7 +4,6 @@ import sys
 
 import gurobipy as gp
 from gurobipy import GRB
-import pandas as pd
 from pandas import DataFrame
 
 
@@ -14,44 +13,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-
-def configure_logging(debug: bool = True) -> None:
-    """
-    Configure root logger so all imported modules inherit the desired level/handler.
-
-    This function:
-    - sets the root logger level to DEBUG (if debug=True) or INFO,
-    - ensures a StreamHandler is present,
-    - overrides any prior basicConfig handlers (uses force if available, otherwise removes handlers).
-    Call this before importing/initializing other project modules so they inherit the configuration.
-    """
-    level = logging.DEBUG if debug else logging.INFO
-    root = logging.getLogger()
-
-    # remove existing handlers for deterministic configuration (for Python <3.8)
-    if root.handlers:
-        for h in list(root.handlers):
-            root.removeHandler(h)
-    try:
-        # Python 3.8+ supports force=True to replace existing handlers
-        logging.basicConfig(
-            level=level,
-            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-            force=True,
-        )
-    except TypeError:
-        logging.basicConfig(
-            level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
-        )
-    root.setLevel(level)
-
-
-configure_logging(debug=True)
-
 logger = logging.getLogger(__name__)
 logger.debug("Logging configured to DEBUG for orchestrator and imported modules")
 
-from pici.causal_model import CausalModel
 from pici.graph.graph import (
     Graph,
     order_list_in_reversed_topological_order,
@@ -65,14 +29,14 @@ from pici.intervention_inference_algorithm.column_generation.subproblem import (
     SubProblem,
     get_node_list_realizations,
 )
-from pici.intervention_inference_algorithm.linear_programming.linear_constraints import (
+from pici.intervention_inference_algorithm.column_generation.colum_gen_constraints import (
     calculate_number_of_constraints,
     column_gen_calculate_constraints_empirical_probabilities,
     find_c_component_and_tail_set,
     get_c_component_in_reverse_topological_order,
     get_symbolical_constraints_probabilities_and_wc,
 )
-from pici.intervention_inference_algorithm.linear_programming.obj_function_generator import (
+from pici.intervention_inference_algorithm.column_generation.column_gen_obj_function_generator import (
     ObjFunctionGenerator,
 )
 from pici.utils._enum import ColumnGenerationParameters, DataExamplesPaths
@@ -296,7 +260,7 @@ class ColumnGenerationProblemOrchestrator:
                 )
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             logger.debug(f"Master Duals: {self.duals}")
-            self.master.model.write(f"sca_cgo_master_{iterations_counter}.lp")
+            # self.master.model.write(f"sca_cgo_master_{iterations_counter}.lp")
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -311,7 +275,7 @@ class ColumnGenerationProblemOrchestrator:
                 logger.error(
                     f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
                 )
-            self.subproblem.model.write(f"sca_cgo_subproblem_{iterations_counter}.lp")
+            # self.subproblem.model.write(f"sca_cgo_subproblem_{iterations_counter}.lp")
 
             reduced_cost = self.subproblem.model.objVal
             logger.debug(f"Reduced Cost: {reduced_cost}")
@@ -396,143 +360,6 @@ class ColumnGenerationProblemOrchestrator:
         """
         self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
         self.master.model.optimize()
-        self.master.model.write("sca_cgo_model.lp")
-        self.master.model.write("sca_cgo_model.mps")
+        # self.master.model.write("sca_cgo_model.lp")
+        # self.master.model.write("sca_cgo_model.mps")
         return self.master.model.ObjVal
-
-
-def exemplo_discrete_balke():
-    balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-    balke_cardinalities = {"Z": 4, "X": 3, "Y": 2, "U1": 0, "U2": 0}
-    balke_unobs = ["U1", "U2"]
-    balke_target = "Y"
-    balke_target_value = 1
-    balke_intervention = "X"
-    balke_intervention_value = 1
-    balke_csv_path = DataExamplesPaths.CSV_DISCRETE_IV_RANDOM_EXAMPLE.value
-    balke_df = pd.read_csv(balke_csv_path)
-
-    balke_model = CausalModel(
-        data=balke_df,
-        edges=balke_input,
-        custom_cardinalities=balke_cardinalities,
-        unobservables_labels=balke_unobs,
-        interventions=(balke_intervention, balke_intervention_value),
-        target=(balke_target, balke_target_value),
-    )
-    dataFrame = balke_df
-    dag = balke_model.graph
-    intervention = balke_model.interventions[0]
-    target = balke_model.target
-    minimizes_objective_function = True
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function
-    )
-    min_bound, min_iter = problem.solve()
-    # logger.info(f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value}))")
-    dataFrame = balke_df
-    dag = balke_model.graph
-    intervention = balke_model.interventions[0]
-    target = balke_model.target
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function=False
-    )
-    max_bound, max_iter = problem.solve()
-    # logger.info(f"P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}")
-    logger.info(
-        f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}"
-    )
-
-
-def exemplo_binary_balke():
-    balke_input = "Z -> X, X -> Y, U1 -> X, U1 -> Y, U2 -> Z"
-    balke_cardinalities = {"Z": 2, "X": 2, "Y": 2, "U1": 0, "U2": 0}
-    balke_unobs = ["U1", "U2"]
-    balke_target = "Y"
-    balke_target_value = 1
-    balke_intervention = "X"
-    balke_intervention_value = 1
-    balke_csv_path = DataExamplesPaths.CSV_BALKE_PEARL_EXAMPLE.value
-    balke_df = pd.read_csv(balke_csv_path)
-
-    balke_model = CausalModel(
-        data=balke_df,
-        edges=balke_input,
-        custom_cardinalities=balke_cardinalities,
-        unobservables_labels=balke_unobs,
-        interventions=(balke_intervention, balke_intervention_value),
-        target=(balke_target, balke_target_value),
-    )
-    dataFrame = balke_df
-    dag = balke_model.graph
-    intervention = balke_model.interventions[0]
-    target = balke_model.target
-    minimizes_objective_function = True
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function
-    )
-    min_bound, min_iter = problem.solve()
-
-    dataFrame = balke_df
-    dag = balke_model.graph
-    intervention = balke_model.interventions[0]
-    target = balke_model.target
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function=False
-    )
-    max_bound, max_iter = problem.solve()
-
-    logger.info(
-        f"{min_bound} <= P({target.label}={balke_target_value} | do({intervention.label}={balke_intervention_value})) <= {max_bound}"
-    )
-
-
-def exemplo_n1_m2():
-    n1_m2_input = "X -> A1, X -> B1, X -> B2, B1 -> A1, B2 -> A1, A1 -> Y, U1 -> X, U1 -> A1, U2 -> B1, U2 -> B2, U2 -> Y"
-    n1_m2_cardinalities = {"X": 2, "Y": 2, "B1": 2, "B2": 2, "A1": 2, "U1": 0, "U2": 0}
-
-    # n2m1 n1_m2_input = "X -> A1, A1 -> A2, X -> B1, A2 -> Y, U1 -> X, U1 -> A1, U1 -> A2, U2 -> B1, U2 -> Y"
-    # n2m1 n1_m2_cardinalities = {"X": 2, "Y": 2, "B1": 2, "A2": 2, "A1": 2, "U1": 0, "U2": 0}
-
-    n1_m2_unobs = ["U1", "U2"]
-    n1_m2_target = "Y"
-    n1_m2_target_value = 1
-    n1_m2_intervention = "X"
-    n1_m2_intervention_value = 1
-    n1_m2_csv_path = DataExamplesPaths.CSV_3_LATENTS_N1M2.value
-    n1_m2_df = pd.read_csv(n1_m2_csv_path)
-
-    n1_m2_model = CausalModel(
-        data=n1_m2_df,
-        edges=n1_m2_input,
-        custom_cardinalities=n1_m2_cardinalities,
-        unobservables_labels=n1_m2_unobs,
-        interventions=(n1_m2_intervention, n1_m2_intervention_value),
-        target=(n1_m2_target, n1_m2_target_value),
-    )
-    dataFrame = n1_m2_df
-    dag = n1_m2_model.graph
-    intervention = n1_m2_model.interventions[0]
-    target = n1_m2_model.target
-    minimizes_objective_function = True
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function
-    )
-    min_bound, min_iter = problem.solve()
-
-    intervention = n1_m2_model.interventions[0]
-    target = n1_m2_model.target
-    problem = ColumnGenerationProblemOrchestrator(
-        dataFrame, dag, intervention, target, minimizes_objective_function=False
-    )
-    max_bound, max_iter = problem.solve()
-
-    logger.info(
-        f"{min_bound} <= P({target.label}={n1_m2_target_value} | do({intervention.label}={n1_m2_intervention_value})) <= {max_bound}"
-    )
-
-
-if __name__ == "__main__":
-    exemplo_discrete_balke()
-    # exemplo_binary_balke()
-    # exemplo_n1_m2()

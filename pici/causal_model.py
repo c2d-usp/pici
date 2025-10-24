@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 import networkx as nx
 from pandas import DataFrame
 
+
 logger = logging.getLogger(__name__)
 logging.getLogger("pgmpy").setLevel(logging.WARNING)
 logging.getLogger("dowhy.causal_model").setLevel(logging.ERROR)
@@ -18,6 +19,7 @@ from pici.graph.node import Node
 from pici.intervention_inference_algorithm.linear_programming.opt_problem_builder import (
     build_linear_problem,
 )
+from pici.intervention_inference_algorithm.column_generation.column_gen_opt_problem_builder import build_column_generation_problem
 from pici.utils._enum import OptimizersLabels
 from pici.utils.graph_plotter import plot_graph_image
 from pici.utils.parser import (
@@ -192,12 +194,11 @@ class CausalModel:
         """
         Calculate the intervention query for a single intervention partially identifiable case.
         """
-        return build_linear_problem(
+        return build_column_generation_problem( #build_linear_problem(
             graph=self.graph,
             df=self.data,
             intervention=self.interventions[0],
             target=self.target,
-            optimizer_label=OptimizersLabels.GUROBI.value,
         )
 
     def multi_intervention_query(self):
