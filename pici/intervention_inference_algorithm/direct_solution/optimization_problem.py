@@ -37,6 +37,7 @@ class OptimizationProblem:
             num_constraints: int,
             df: DataFrame = None,
             minimizes_objective_function=False,
+            max_time=1200,
         ):
         self.model = gp.Model("opt_problem")
         self.intervention = intervention
@@ -46,6 +47,7 @@ class OptimizationProblem:
         self.cluster_bits: list[dict[str, dict[str, tupledict[int, Var]]]] = []
         self.minimizes_objective_function = minimizes_objective_function
         self.vars = None
+        self.max_time = max_time
 
     def setup(
         self,
@@ -171,9 +173,24 @@ class OptimizationProblem:
            name="EmpiricalRestrictions",
         )
 
-        self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
-        self.model.setParam(GRB.Param.OutputFlag, 0)
-        self.model.setParam(GRB.Param.MIPGap, 0.05)
+        #self.model.setParam(GRB.Param.OutputFlag, 0)
+        self.model.setParam(GRB.Param.TimeLimit, self.max_time)
+        self.model.setParam(GRB.Param.MIPGap, 0.1)
+        self.model.setParam(GRB.Param.MIPFocus, 3)
+        self.model.setParam(GRB.Param.VarBranch, 2)
+        self.model.setParam(GRB.Param.PreQLinearize, 1)
+        self.model.setParam(GRB.Param.Presolve, 2)
+        self.model.setParam(GRB.Param.PreSparsify, 2)
+        self.model.setParam(GRB.Param.ScaleFlag, 2)
+        self.model.setParam(GRB.Param.NormAdjust, 1)
+        self.model.setParam(GRB.Param.BranchDir, -1)
+        self.model.setParam(GRB.Param.FeasibilityTol, 1e-3)
+        self.model.setParam(GRB.Param.DegenMoves, 0)
+        self.model.setParam(GRB.Param.Heuristics, 1)
+        self.model.setParam(GRB.Param.Cuts, 3)
+        self.model.setParam(GRB.Param.RINS, 100)
+        self.model.setParam(GRB.Param.Aggregate, 0)
+        self.model.setParam(GRB.Param.InfProofCuts, 0)
         self.model.update()
     
     def _create_cluster_bits(self, considered_c_comp: list[Node]):

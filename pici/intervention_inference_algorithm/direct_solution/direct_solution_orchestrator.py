@@ -47,13 +47,14 @@ class DirectSolutionOrchestrator:
         intervention: Node,
         target: Node,
         minimizes_objective_function: bool,
+        max_time=1200,
     ):
         self.dag = dag
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
         self.minimizes_objective_function = minimizes_objective_function
-        self.duals = {}
+        self.max_time = max_time
 
         if dag.topological_order is None or len(dag.topological_order) == 0:
             raise Exception("dag.topological_order is None")
@@ -150,7 +151,7 @@ class DirectSolutionOrchestrator:
                 )
         return list(considered_c_comp_plus_adapted_tail)
 
-    def solve(self, method=1) -> tuple[int, float]:
+    def solve(self, method=-1) -> tuple[int, float]:
         """
         Solves the column generation problem using the BIG_M approach.
 
@@ -162,8 +163,6 @@ class DirectSolutionOrchestrator:
             tuple[int, float]: A tuple containing the final objective bound and the number of iterations performed.
         """
         self.setup(method)
-        #print(self.opt_problem.model.getConstrs())
-        #print(self.opt_problem.model.getVars())
         self.opt_problem.model.optimize()
 
         if self.opt_problem.model.status == GRB.OPTIMAL:
@@ -173,14 +172,10 @@ class DirectSolutionOrchestrator:
             logger.error(
                     f"--------->> Solution not found. Gurobi status code: {self.opt_problem.model.Status}"
                 )
-
-        #for v in self.opt_problem.model.getVars():
-        #    print(f"{v}")
-        #print(self.opt_problem.model.Status)
         bound = self.opt_problem.model.ObjVal
         return bound
 
-    def setup(self, method=1):
+    def setup(self, method=-1):
         """
         Sets up the master and subproblem models for column generation.
 
@@ -199,6 +194,7 @@ class DirectSolutionOrchestrator:
             target=self.target,
             num_constraints=self.number_of_constraints,
             minimizes_objective_function=self.minimizes_objective_function,
+            max_time=self.max_time
         )
         self.opt_problem.model.setParam(GRB.Param.Method, method)
         self.opt_problem.setup(

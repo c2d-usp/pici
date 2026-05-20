@@ -6,7 +6,6 @@ import gurobipy as gp
 from gurobipy import GRB
 from pandas import DataFrame
 
-
 THIS_DIR = os.getcwd()
 PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 
@@ -156,7 +155,7 @@ class ColumnGenerationProblemOrchestrator:
                 )
         return list(considered_c_comp_plus_adapted_tail)
 
-    def solve(self, method=1) -> tuple[int, float]:
+    def solve(self, method=0) -> tuple[int, float]:
         """
         Solves the column generation problem using the BIG_M approach.
 
@@ -172,7 +171,7 @@ class ColumnGenerationProblemOrchestrator:
         bound = self.optimize_master()
         return bound, number_of_iterations
 
-    def setup(self, method=1):
+    def setup(self, method=0):
         """
         Sets up the master and subproblem models for column generation.
 
@@ -244,10 +243,14 @@ class ColumnGenerationProblemOrchestrator:
             TimeoutError: If the maximum number of allowed iterations is exceeded.
         """
         iterations_counter = 0
+        already_added_columns = []
+        data = []
+        start = 0
         while True:
             self.master.model.optimize()
             if self.master.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
                 b = self.master.model.objVal
+                current_master_solution = b
                 logger.info(f"--------->> Master solution found: {b}")
             elif self.master.model.Status == gp.GRB.USER_OBJ_LIMIT:
                 b = self.master.model.objVal
@@ -261,6 +264,7 @@ class ColumnGenerationProblemOrchestrator:
             self.duals = self.master.model.getAttr("pi", self.master.constrs)
             logger.debug(f"Master Duals: {self.duals}")
             # self.master.model.write(f"sca_cgo_master_{iterations_counter}.lp")
+            self.duals = {k: float(round(x)) for k, x in self.duals.items()}
             self.subproblem.update(self.duals)
             self.subproblem.model.optimize()
             if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
@@ -287,6 +291,7 @@ class ColumnGenerationProblemOrchestrator:
 
             # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
             new_column.append(1)
+            new_column = [float(round(x)) for x in new_column]
             logger.debug(f"New Column: {new_column}")
 
             gamma_coef: float = 0.0
@@ -324,14 +329,19 @@ class ColumnGenerationProblemOrchestrator:
             logger.debug(
                 "-------------------------------------------------------------------------------"
             )
-
-            self.master.update(
-                new_column=new_column,
-                index=len(self.transposed_columns_base),
-                obj_coeff=gamma_coef,
-                minimizes_objective_function=self.minimizes_objective_function,
-            )
-            self.transposed_columns_base.append(new_column)
+            if str(new_column) not in already_added_columns:
+                self.master.update(
+                    new_column=new_column,
+                    index=len(self.transposed_columns_base),
+                    obj_coeff=gamma_coef,
+                    minimizes_objective_function=self.minimizes_objective_function,
+                )
+                self.transposed_columns_base.append(new_column)
+                already_added_columns.append(str(new_column))
+            else:
+                print("Repeated column")
+                print(f"--------->> Subproblem solution found!: {self.subproblem.model.objVal}")
+                pass
             iterations_counter += 1
             if (
                 iterations_counter
@@ -341,9 +351,6 @@ class ColumnGenerationProblemOrchestrator:
                     f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
                 )
             logger.info(f"Iteration Number = {iterations_counter}")
-            logger.debug(
-                "_________________________________________________________________"
-            )
         return iterations_counter
 
     def optimize_master(self) -> float:

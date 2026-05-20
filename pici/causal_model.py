@@ -44,6 +44,7 @@ class CausalModel:
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
         optimization_algorithm = "linear",
+        max_time=1200,
     ) -> None:
         self.data = data
 
@@ -56,6 +57,7 @@ class CausalModel:
         self.interventions: list[Node] = parser.get_interventions()
         self.target: Node = parser.get_target()
         self.optimization_algorithm = optimization_algorithm
+        self.max_time = max_time
 
         del parser
 
@@ -210,6 +212,7 @@ class CausalModel:
                 df=self.data,
                 intervention=self.interventions[0],
                 target=self.target,
+                max_time=self.max_time,
             )
         
         return build_linear_problem(

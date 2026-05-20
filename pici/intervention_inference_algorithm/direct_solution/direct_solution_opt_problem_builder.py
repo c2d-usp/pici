@@ -13,16 +13,17 @@ def build_direct_solution_problem(
     graph: Graph,
     df: pd.DataFrame,
     intervention: Node,
-    target: Node
+    target: Node,
+    max_time: int,
 ) -> tuple[str, str]:
 
     problem = DirectSolutionOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=True
+        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=True, max_time=max_time
     )
     min_bound = problem.solve()
     
     problem = DirectSolutionOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=False
+        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=False, max_time=max_time
     )    
     max_bound = problem.solve()
 

@@ -53,9 +53,15 @@ class SubProblem:
         reversed_ordered_considered_c_comp_plus_adapted_tail: list[Node],
     ):
         self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
-        self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
+        self.model.setParam(GRB.Param.FeasibilityTol, 1e-3)
+        self.model.setParam(GRB.Param.IntFeasTol, 1e-3)
         self.model.setParam(GRB.Param.OutputFlag, 0)
+        self.model.setParam(GRB.Param.DualReductions, 0)
+        self.model.setParam(GRB.Param.NumericFocus, 3)
         self.model.setParam(GRB.Param.BestBdStop, 1)
+        self.model.setParam(GRB.Param.OptimalityTol, 1e-3)
+        self.model.setParam(GRB.Param.MIPFocus, 3)
+        self.model.setParam(GRB.Param.ScaleFlag, 0)
 
         self.parameterized_column = {}
 
