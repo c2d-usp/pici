@@ -51,6 +51,8 @@ class ColumnGenerationProblemOrchestrator:
         intervention: Node,
         target: Node,
         minimizes_objective_function: bool,
+        gurobi_params: dict,
+        column_gen_max_iter: int,
     ):
         self.dag = dag
         self.intervention = intervention
@@ -58,6 +60,8 @@ class ColumnGenerationProblemOrchestrator:
         self.dataFrame = dataFrame
         self.minimizes_objective_function = minimizes_objective_function
         self.duals = {}
+        self.gurobi_params = gurobi_params
+        self.column_gen_max_iter = column_gen_max_iter
 
         if dag.topological_order is None or len(dag.topological_order) == 0:
             raise Exception("dag.topological_order is None")
@@ -199,7 +203,7 @@ class ColumnGenerationProblemOrchestrator:
             number_of_constraints=self.number_of_constraints
         )
         self.master.setup(
-            self.transposed_columns_base, self.constraints_empirical_probabilities
+            self.transposed_columns_base, self.constraints_empirical_probabilities, self.gurobi_params
         )
 
         self.subproblem.setup(
@@ -208,6 +212,7 @@ class ColumnGenerationProblemOrchestrator:
             reversed_ordered_W=self.reversed_ordered_W,
             symbolic_objective_function_probabilites=self.symbolic_objective_function_probabilites,
             reversed_ordered_considered_c_comp_plus_adapted_tail=self.reversed_ordered_considered_c_comp_plus_adapted_tail,
+            gurobi_params=self.gurobi_params,
         )
 
     def _generate_initial_column_base(
@@ -339,17 +344,16 @@ class ColumnGenerationProblemOrchestrator:
                 self.transposed_columns_base.append(new_column)
                 already_added_columns.append(str(new_column))
             else:
-                print("Repeated column")
-                print(f"--------->> Subproblem solution found!: {self.subproblem.model.objVal}")
-                pass
+                logger.info("This problem cannot be futher optimized!")
+                logger.info("Returning current optimization value")
+                return iterations_counter
             iterations_counter += 1
             if (
-                iterations_counter
-                >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value
+                iterations_counter >= self.column_gen_max_iter
             ):
-                raise TimeoutError(
-                    f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
-                )
+                logger.info(f"Too many iterations (MAX:{self.column_gen_max_iter})")
+                logger.info("Returning current optimization value")
+                return iterations_counter
             logger.info(f"Iteration Number = {iterations_counter}")
         return iterations_counter
 

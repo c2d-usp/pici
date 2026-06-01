@@ -13,15 +13,29 @@ def build_column_generation_problem(
     graph: Graph,
     df: pd.DataFrame,
     intervention: Node,
-    target: Node
+    target: Node,
+    gurobi_params: dict,
+    column_gen_max_iter: int,
 ) -> tuple[str, str]:
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=True
+        dataFrame=df, 
+        dag=graph, 
+        intervention=intervention, 
+        target=target, 
+        minimizes_objective_function=True, 
+        gurobi_params=gurobi_params,
+        column_gen_max_iter=column_gen_max_iter,
     )
     min_bound, min_iter = problem.solve()
     
     problem = ColumnGenerationProblemOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=False
+        dataFrame=df,
+        dag=graph, 
+        intervention=intervention, 
+        target=target, 
+        minimizes_objective_function=False, 
+        gurobi_params=gurobi_params,
+        column_gen_max_iter=column_gen_max_iter,
     )    
     max_bound, max_iter = problem.solve()
 

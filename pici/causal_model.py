@@ -43,8 +43,9 @@ class CausalModel:
         custom_cardinalities: dict[T, int] | None = {},
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
-        optimization_algorithm = "linear",
-        max_time=1200,
+        optimization_algorithm: str = "linear",
+        gurobi_params: dict = None,
+        column_gen_max_iter: int = 2000,
     ) -> None:
         self.data = data
 
@@ -57,8 +58,8 @@ class CausalModel:
         self.interventions: list[Node] = parser.get_interventions()
         self.target: Node = parser.get_target()
         self.optimization_algorithm = optimization_algorithm
-        self.max_time = max_time
-
+        self.gurobi_params = gurobi_params
+        self.column_gen_max_iter = column_gen_max_iter
         del parser
 
     def intervention_query(
@@ -205,6 +206,8 @@ class CausalModel:
                 df=self.data,
                 intervention=self.interventions[0],
                 target=self.target,
+                gurobi_params=self.gurobi_params,
+                column_gen_max_iter=self.column_gen_max_iter,
             )
         elif self.optimization_algorithm == "bit_solution":
             return build_direct_solution_problem(
@@ -212,7 +215,7 @@ class CausalModel:
                 df=self.data,
                 intervention=self.interventions[0],
                 target=self.target,
-                max_time=self.max_time,
+                gurobi_params=self.gurobi_params,
             )
         
         return build_linear_problem(
@@ -220,6 +223,7 @@ class CausalModel:
             df=self.data,
             intervention=self.interventions[0],
             target=self.target,
+            gurobi_params=self.gurobi_params,
         )
 
     def multi_intervention_query(self):

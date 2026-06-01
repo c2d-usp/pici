@@ -32,6 +32,11 @@ intervention_value = 1
 csv_path = f"data/csv/n{n}_m{m}_scaling_case.csv"
 df = pd.read_csv(csv_path)
 
+
+#gurobi_params = {
+#    "TimeLimit": 200,
+#}
+
 # Create Causal Model
 model = CausalModel(
     data=df,
@@ -40,9 +45,9 @@ model = CausalModel(
     unobservables_labels=unobs_vars,
     interventions=(intervention, intervention_value),
     target=(target, target_value),
-    #optimization_algorithm="column_gen" # Caso precise testar a solução II
+    #optimization_algorithm="column_gen", # Caso precise testar a solução II
     optimization_algorithm="bit_solution", # "bit_solution" é solução III
-    #max_time=2000
+    #gurobi_params=gurobi_params,
 )
 
 # Calculating the interventions

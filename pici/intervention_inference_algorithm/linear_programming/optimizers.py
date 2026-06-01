@@ -65,12 +65,14 @@ class GurobiOptimizer(Optimizer):
         probs: List[float],
         decision_matrix: List[List[int]],
         obj_function_coefficients: List[float],
+        gurobi_params: dict,
     ) -> None:
         super().__init__(probs, decision_matrix, obj_function_coefficients)
 
         self.model = Model("linear")
         self.vars = None
         self.constrs = None
+        self.gurobi_params = gurobi_params
 
     def run_optimizer(self, direction: OptimizationDirection) -> str:
         if direction == OptimizationDirection.MINIMIZE:
@@ -120,6 +122,9 @@ class GurobiOptimizer(Optimizer):
     def configure_solver_params(self, model_sense):
         self.model.model_sense = model_sense
         self.model.params.outputFlag = GurobiParameters.OUTPUT_SUPRESSED.value
+        if self.gurobi_params:
+            for key, value in self.gurobi_params.items():
+                self.model.setParam(key, value)
         self.model.update()
 
 
@@ -169,10 +174,11 @@ def choose_optimizer(
     probs: List[float],
     decision_matrix: List[List[int]],
     obj_function_coefficients: List[float],
+    gurobi_params: dict,
 ) -> Optimizer:
 
     if optimizer_label == OptimizersLabels.GUROBI.value:
-        return GurobiOptimizer(probs, decision_matrix, obj_function_coefficients)
+        return GurobiOptimizer(probs, decision_matrix, obj_function_coefficients, gurobi_params)
 
     if optimizer_label == OptimizersLabels.SCIPY.value:
         return ScipyOptimizer(probs, decision_matrix, obj_function_coefficients)

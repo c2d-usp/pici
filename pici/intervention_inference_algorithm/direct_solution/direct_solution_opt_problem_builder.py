@@ -14,16 +14,16 @@ def build_direct_solution_problem(
     df: pd.DataFrame,
     intervention: Node,
     target: Node,
-    max_time: int,
+    gurobi_params: dict,
 ) -> tuple[str, str]:
 
     problem = DirectSolutionOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=True, max_time=max_time
+        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=True, gurobi_params=gurobi_params,
     )
     min_bound = problem.solve()
     
     problem = DirectSolutionOrchestrator(
-        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=False, max_time=max_time
+        dataFrame=df, dag=graph, intervention=intervention, target=target, minimizes_objective_function=False, gurobi_params=gurobi_params,
     )    
     max_bound = problem.solve()
 

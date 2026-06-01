@@ -47,14 +47,14 @@ class DirectSolutionOrchestrator:
         intervention: Node,
         target: Node,
         minimizes_objective_function: bool,
-        max_time=1200,
+        gurobi_params: dict,
     ):
         self.dag = dag
         self.intervention = intervention
         self.target = target
         self.dataFrame = dataFrame
         self.minimizes_objective_function = minimizes_objective_function
-        self.max_time = max_time
+        self.gurobi_params = gurobi_params
 
         if dag.topological_order is None or len(dag.topological_order) == 0:
             raise Exception("dag.topological_order is None")
@@ -194,7 +194,6 @@ class DirectSolutionOrchestrator:
             target=self.target,
             num_constraints=self.number_of_constraints,
             minimizes_objective_function=self.minimizes_objective_function,
-            max_time=self.max_time
         )
         self.opt_problem.model.setParam(GRB.Param.Method, method)
         self.opt_problem.setup(
@@ -204,4 +203,5 @@ class DirectSolutionOrchestrator:
             self.reversed_ordered_W,
             self.symbolic_objective_function_probabilites,
             self.reversed_ordered_considered_c_comp_plus_adapted_tail,
+            self.gurobi_params,
         )

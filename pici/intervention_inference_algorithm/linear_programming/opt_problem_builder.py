@@ -28,6 +28,7 @@ def build_linear_problem(
     df: pd.DataFrame,
     intervention: Node,
     target: Node,
+    gurobi_params: dict,
     optimizer_label: str = OptimizersLabels.GUROBI.value,
 ) -> tuple[str, str]:
     objFG = ObjFunctionGenerator(
@@ -72,6 +73,7 @@ def build_linear_problem(
         probs=probs,
         decision_matrix=decision_matrix,
         obj_function_coefficients=obj_function_coefficients,
+        gurobi_params=gurobi_params,
     )
 
     lowerBound, upperBound = compute_bounds(optimizer)
