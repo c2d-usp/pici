@@ -28,6 +28,7 @@ class MasterProblem:
         self,
         transposed_columns_base: list[list[int]],
         constraints_empirical_probabilities: list[float],
+        gurobi_params: dict,
     ):
         """
         Initializes the master problem with base columns and empirical probability constraints.
@@ -59,8 +60,16 @@ class MasterProblem:
             name="EmpiricalRestrictions",
         )
         self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
-        self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
+        self.model.setParam(GRB.Param.FeasibilityTol, 1e-3)
+        self.model.setParam(GRB.Param.IntFeasTol, 1e-3)
+        self.model.setParam(GRB.Param.NumericFocus, 3)
+        self.model.setParam(GRB.Param.OptimalityTol, 1e-3)
         self.model.setParam(GRB.Param.OutputFlag, 0)
+        self.model.setParam(GRB.Param.MIPFocus, 3)
+        self.model.setParam(GRB.Param.ScaleFlag, 0)
+        if gurobi_params:
+            for key, value in gurobi_params.items():
+                self.model.setParam(key, value)
         self.model.update()
 
     def update(

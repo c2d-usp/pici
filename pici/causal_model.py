@@ -20,6 +20,7 @@ from pici.intervention_inference_algorithm.linear_programming.opt_problem_builde
     build_linear_problem,
 )
 from pici.intervention_inference_algorithm.column_generation.column_gen_opt_problem_builder import build_column_generation_problem
+from pici.intervention_inference_algorithm.direct_solution.direct_solution_opt_problem_builder import build_direct_solution_problem
 from pici.utils._enum import OptimizersLabels
 from pici.utils.graph_plotter import plot_graph_image
 from pici.utils.parser import (
@@ -42,6 +43,9 @@ class CausalModel:
         custom_cardinalities: dict[T, int] | None = {},
         interventions: list[tuple[T, int]] | tuple[T, int] = [],
         target: tuple[T, int] = None,
+        optimization_algorithm: str = "linear",
+        gurobi_params: dict = None,
+        column_gen_max_iter: int = 2000,
     ) -> None:
         self.data = data
 
@@ -53,7 +57,9 @@ class CausalModel:
         self.unobservables: list[Node] = parser.get_unobservables()
         self.interventions: list[Node] = parser.get_interventions()
         self.target: Node = parser.get_target()
-
+        self.optimization_algorithm = optimization_algorithm
+        self.gurobi_params = gurobi_params
+        self.column_gen_max_iter = column_gen_max_iter
         del parser
 
     def intervention_query(
@@ -194,11 +200,30 @@ class CausalModel:
         """
         Calculate the intervention query for a single intervention partially identifiable case.
         """
-        return build_column_generation_problem( #build_linear_problem(
+        if self.optimization_algorithm == "column_gen":
+            return build_column_generation_problem(
+                graph=self.graph,
+                df=self.data,
+                intervention=self.interventions[0],
+                target=self.target,
+                gurobi_params=self.gurobi_params,
+                column_gen_max_iter=self.column_gen_max_iter,
+            )
+        elif self.optimization_algorithm == "bit_solution":
+            return build_direct_solution_problem(
+                graph=self.graph,
+                df=self.data,
+                intervention=self.interventions[0],
+                target=self.target,
+                gurobi_params=self.gurobi_params,
+            )
+        
+        return build_linear_problem(
             graph=self.graph,
             df=self.data,
             intervention=self.interventions[0],
             target=self.target,
+            gurobi_params=self.gurobi_params,
         )
 
     def multi_intervention_query(self):

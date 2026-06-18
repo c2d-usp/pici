@@ -58,6 +58,8 @@ model = pici.CausalModel(
   unobservables_labels=unobservable_variables,
   interventions=interventions,    # Optional in the model creation
   target=target,                  # Optional in the model creation
+  optimization_algorithm="column_gen", #Optional argument that defines optimization ("linear", "column_gen", "bit_solution)
+  gurobi_params={"TimeLimit":  0,}, #Optional argument to control any gurobi parameter for the optimization
 )
 ```
 
@@ -109,6 +111,12 @@ is_identifiable, identifiable_method, additional_detail = model.is_identifiable_
     interventions=[("X", 0)], target=("Y", 1)
 )
 ```
+### Optimization Approaches
+
+- The package supports three different optimization solutions to the lower and upper bounds of the inference problem:
+  - "linear": is the default approach. It simply builds the optimization problem and uses gurobi to solve it;
+  - "column_gen": applies the column generation method for optimzation problems. It is usually the faster approach;
+  - "bit_solution": applies some of the column generation insights to solve a single linear-integer program. It is usually the second faster solution.
 
 ### PN and PS approximations
 
