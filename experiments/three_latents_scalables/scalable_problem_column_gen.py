@@ -1,3 +1,4 @@
+import copy
 import logging
 
 import gurobipy as gp
@@ -10,12 +11,72 @@ logger = logging.getLogger(__name__)
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
+
+from experiments.three_latents_scalables.scalable_problem_init import (
+    InitScalable,
+)
+from experiments.utils.scalable_graphs_helper import get_three_latents_scalable_dataframe
+from pici.utils._enum import ColumnGenerationParameters
 
 BIG_M = 1e4
 DBG = False
 MAX_ITERACTIONS_ALLOWED = 2000
+
+
+class MasterProblem:
+    def __init__(self):
+        self.model = gp.Model("master")
+        self.vars = None
+        self.constrs = None
+
+    def setup(self, columns_base: list[list[int]], empiricalProbabilities: list[float]):
+        num_columns_base = len(columns_base)
+        self.vars = self.model.addVars(num_columns_base, obj=BIG_M, name="BaseColumns")
+        self.constrs = self.model.addConstrs(
+            (
+                gp.quicksum(
+                    columns_base[column_id][realization_id] * self.vars[column_id]
+                    for column_id in range(num_columns_base)
+                )
+                == empiricalProbabilities[realization_id]
+                for realization_id in range(len(empiricalProbabilities))
+            ),
+            name="EmpiricalRestrictions",
+        )
+        self.model.modelSense = GRB.MINIMIZE
+        # Turning off output because of the iterative procedure
+        self.model.params.outputFlag = 0
+        # self.model.setParam('FeasibilityTol', 1e-9)
+        self.model.update()
+
+    def update(
+        self, newColumn: list[float], index: int, objCoeff: list[float], minimun: bool
+    ):
+        new_col = gp.Column(
+            coeffs=newColumn, constrs=self.constrs.values()
+        )  # Includes the new variable in the constraints
+        logger.debug(f"Obj coeff: {objCoeff}")
+        if minimun:
+            self.vars[index] = self.model.addVar(
+                obj=objCoeff,
+                column=new_col,  # Adds the new variable
+                name=f"Variable[{index}]",
+            )
+        else:
+            self.vars[index] = self.model.addVar(
+                obj=-objCoeff,
+                column=new_col,  # Adds the new variable
+                name=f"Variable[{index}]",
+            )
+        self.model.update()
 
 
 class SubProblem:
@@ -345,3 +406,264 @@ class SubProblem:
             "obj", self.bitsParametric, [-duals[dualKey] for dualKey in duals]
         )
         self.model.update()
+
+
+class ScalarProblem:
+    def __init__(
+        self,
+        dataFrame,
+        empiricalProbabilities: list[float],
+        parametric_columns: dict[str, tuple[list[int]]],
+        N: int,
+        M: int,
+        betaVarsCost: list[float],
+        betaVarsBitsX0: list[tuple[str]],
+        betaVarsBitsX1: list[tuple[str]],
+        interventionValue: int,
+        minimum: bool,
+    ):
+
+        self.M = M
+        self.N = N
+        self.amountNonTrivialRestrictions = 1 << (M + N + 1)
+        self.amountBitsPerCluster = 1 << (M + 1)
+        self.amountBetaVarsPerX = 1 << (M + N)
+        self.columns_base = None
+
+        # Order parametric_columns (XA1A2..AnB1...Bm)
+        self.empiricalProbabilities: list[float] = empiricalProbabilities
+        self.parametric_columns: dict[str, tuple[list[int]]] = parametric_columns
+        self.dataFrame = dataFrame
+        self.betaVarsBitsX0 = betaVarsBitsX0
+        self.betaVarsBitsX1 = betaVarsBitsX1
+        self.betaVarsCost = betaVarsCost
+        self.interventionValue = interventionValue  # X = x in {0, 1}
+        self.minimum = minimum
+        auxDict = {}
+        for i in range(self.amountNonTrivialRestrictions):
+            auxDict[i] = BIG_M
+        self.duals = auxDict.copy()
+
+        self.solution = {}
+        self.master = MasterProblem()
+        self.subproblem = SubProblem(N=N, M=M)
+
+    def _initialize_column_base(self):
+        # Initialize big-M problem with the identity block of size
+        # equal to the amount of restrictions.
+        columns_base: list[list[int]] = []
+        for index in range(self.amountNonTrivialRestrictions + 1):
+            new_column = [0] * (self.amountNonTrivialRestrictions + 1)
+            new_column[index] = 1
+            columns_base.append(new_column)
+        self.columns_base = columns_base
+
+    def _generate_patterns(self):
+        self._initialize_column_base()
+        self.master.setup(self.columns_base, self.empiricalProbabilities)
+        self.subproblem.setup(
+            amountBitsPerCluster=self.amountBitsPerCluster,
+            amountBetaVarsPerX=self.amountBetaVarsPerX,
+            duals=self.duals,
+            amountNonTrivialRestrictions=self.amountNonTrivialRestrictions,
+            betaVarsCost=self.betaVarsCost,
+            parametric_column=self.parametric_columns,
+            betaVarsBitsX0=self.betaVarsBitsX0,
+            betaVarsBitsX1=self.betaVarsBitsX1,
+            N=self.N,
+            M=self.M,
+            interventionValue=self.interventionValue,
+            minimum=self.minimum,
+        )
+
+        counter = 0
+        while True:
+            self.master.model.optimize()
+            if self.master.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
+                b = self.master.model.objVal
+                logger.info(f"--------->> Master solution found: {b}")
+            elif self.master.model.Status == gp.GRB.USER_OBJ_LIMIT:
+                b = self.master.model.objVal
+                logger.info(
+                    f"--------->> BIG_M Limit reached! Master solution found: {b}"
+                )
+            else:
+                logger.error(
+                    f"--------->>  Master solution not found. Gurobi status code: {self.master.model.Status}"
+                )
+            self.duals = self.master.model.getAttr("pi", self.master.constrs)
+            logger.debug(f"Master Duals: {self.duals}")
+            self.master.model.write(f"sca_master_{counter}.lp")
+            self.subproblem.update(self.duals)
+            self.subproblem.model.optimize()
+            if self.subproblem.model.Status == gp.GRB.OPTIMAL:  # OPTIMAL
+                b = self.subproblem.model.objVal
+                logger.info(f"--------->> Subproblem solution found!: {b}")
+            elif self.subproblem.model.Status == gp.GRB.USER_OBJ_LIMIT:
+                b = self.subproblem.model.objVal
+                logger.info(
+                    f"--------->> BIG_M Limit reached! Subproblem solution found: {b}"
+                )
+            else:
+                logger.error(
+                    f"--------->>  Subproblem solution not found. Gurobi status code: {self.subproblem.model.Status}"
+                )
+            self.subproblem.model.write(f"sca_subproblem_{counter}.lp")
+
+            reduced_cost = self.subproblem.model.objVal
+            logger.debug(f"Reduced Cost: {reduced_cost}")
+            if reduced_cost >= 0:
+                break
+
+            newColumn: list[int] = []
+            for index in range(len(self.subproblem.bitsParametric)):
+                newColumn.append(self.subproblem.bitsParametric[index].X)
+
+            newColumn.append(
+                1
+            )  # For the equation sum(pi) = 1. This restriction is used in the MASTER problem.
+            logger.debug(f"New Column: {newColumn}")
+
+            objCoeff: float = 0.0
+            for betaIndex in range(self.amountBetaVarsPerX):
+                if self.interventionValue == 0:
+                    objCoeff += (
+                        self.betaVarsCost[betaIndex]
+                        * self.subproblem.beta_varsX0[betaIndex].X
+                    )
+                else:
+                    objCoeff += (
+                        self.betaVarsCost[betaIndex]
+                        * self.subproblem.beta_varsX1[betaIndex].X
+                    )
+
+            self.master.update(
+                newColumn=newColumn,
+                index=len(self.columns_base),
+                objCoeff=objCoeff,
+                minimun=self.minimum,
+            )
+            self.columns_base.append(newColumn)
+            counter += 1
+            if counter >= ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value:
+                raise TimeoutError(
+                    f"Too many iterations (MAX:{ColumnGenerationParameters.MAX_ITERACTIONS_ALLOWED.value})"
+                )
+            logger.info(f"Iteration Number = {counter}")
+
+        return counter
+
+    def buildScalarProblem(
+        M: int, N: int, interventionValue: int, targetValue: int, df, minimum: bool
+    ):
+        # Calculate the empirical probs (RHS of the restrictions, so b in Ax=b)
+        empiricalProbabilities: list[float] = InitScalable.calculateEmpiricals(
+            N=N, M=M, df=df, DBG=DBG
+        )
+        # Auxiliary Gamma U variables (beta): calculate the obj coeff in the subproblem and the relation to the bit variables that compose them
+        betaVarsCoeffObjSubproblem: list[float] = []
+        betaVarsBitsX0, betaVarsCoeffObjSubproblemX0 = (
+            InitScalable.defineGammaUAuxiliaryVariables(
+                M=M, N=N, df=df, targetValue=targetValue, XValue=0, DBG=DBG
+            )
+        )
+        betaVarsBitsX1, betaVarsCoeffObjSubproblemX1 = (
+            InitScalable.defineGammaUAuxiliaryVariables(
+                M=M, N=N, df=df, targetValue=targetValue, XValue=1, DBG=DBG
+            )
+        )
+        if interventionValue == 1:
+            betaVarsCoeffObjSubproblem = copy.deepcopy(betaVarsCoeffObjSubproblemX1)
+        else:
+            betaVarsCoeffObjSubproblem = copy.deepcopy(betaVarsCoeffObjSubproblemX0)
+
+        # Parametric_columns:
+        parametric_columns: list[tuple[list[str]]] = (
+            InitScalable.defineParametricColumn(M=M, N=N)
+        )
+        return ScalarProblem(
+            dataFrame=df,
+            empiricalProbabilities=empiricalProbabilities,
+            parametric_columns=parametric_columns,
+            N=N,
+            M=M,
+            betaVarsCost=betaVarsCoeffObjSubproblem,
+            betaVarsBitsX0=betaVarsBitsX0,
+            betaVarsBitsX1=betaVarsBitsX1,
+            interventionValue=interventionValue,
+            minimum=minimum,
+        )
+
+    def solve(self, method=1, presolve=-1, numeric_focus=-1, opt_tol=-1, fea_tol=-1):
+        """
+        Gurobi does not support branch-and-price, as this requires to add columns
+        at local nodes of the search tree. A heuristic is used instead, where the
+        integrality constraints for the variables of the final root LP relaxation
+        are installed and the resulting MIP is solved. Note that the optimal
+        solution could be overlooked, as additional columns are not generated at
+        the local nodes of the search tree.
+        """
+        self.master.model.params.Method = method
+        self.subproblem.model.params.Method = method
+
+        if presolve != -1:
+            self.master.model.Params.Presolve = presolve
+            self.subproblem.model.Params.Presolve = presolve
+        if numeric_focus != -1:
+            self.master.model.Params.NumericFocus = numeric_focus
+            self.subproblem.model.Params.NumericFocus = numeric_focus
+
+        if opt_tol != -1:
+            self.master.model.Params.OptimalityTol = opt_tol
+            self.subproblem.model.Params.OptimalityTol = opt_tol
+
+        if fea_tol != -1:
+            self.master.model.Params.FeasibilityTol = fea_tol
+            self.subproblem.model.Params.FeasibilityTol = fea_tol
+
+        numberIterations = self._generate_patterns()
+        self.master.model.setAttr("vType", self.master.vars, GRB.CONTINUOUS)
+        self.master.model.optimize()
+        self.master.model.write("sca_model.lp")
+        self.master.model.write("sca_model.mps")
+        bound = self.master.model.ObjVal
+        itBound = numberIterations
+        return bound, itBound
+
+
+def single_exec():
+    N = 1
+    M = 2
+    scalable_df = get_three_latents_scalable_dataframe(M=M, N=N)
+    interventionValue = 1
+    targetValue = 1
+
+    scalarProblem = ScalarProblem.buildScalarProblem(
+        M=M,
+        N=N,
+        interventionValue=interventionValue,
+        targetValue=targetValue,
+        df=scalable_df,
+        minimum=False,
+    )
+    upper, itUpper = scalarProblem.solve()
+    upper = -upper
+    scalarProblem = ScalarProblem.buildScalarProblem(
+        M=M,
+        N=N,
+        interventionValue=interventionValue,
+        targetValue=targetValue,
+        df=scalable_df,
+        minimum=True,
+    )
+    lower, itLower = scalarProblem.solve()
+    logger.info(f"{lower} =< P(Y = {targetValue}|X = {interventionValue}) <= {upper}")
+    logger.info(f"{itLower} iteracoes para lower e {itUpper} para upper")
+
+
+def main():
+    return single_exec()
+
+
+if __name__ == "__main__":
+    main()

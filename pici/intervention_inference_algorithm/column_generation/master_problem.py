@@ -1,19 +1,21 @@
 import logging
+import os
+import sys
 
 import gurobipy as gp
 from gurobipy import GRB
 
 logger = logging.getLogger(__name__)
 
+THIS_DIR = os.getcwd()
+PROJECT_ROOT = os.path.abspath(os.path.join(THIS_DIR, "../.."))
 
-import os
-import sys
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(os.path.join(THIS_DIR, PROJECT_ROOT)))
 
-BIG_M = 1e4
-DBG = False
-MAX_ITERACTIONS_ALLOWED = 2000
+from pici.utils._enum import ColumnGenerationParameters
 
 
 class MasterProblem:
@@ -24,26 +26,31 @@ class MasterProblem:
 
     def setup(
         self,
-        columns_base: list[list[int]],
+        transposed_columns_base: list[list[int]],
         constraints_empirical_probabilities: list[float],
     ):
         """
         Initializes the master problem with base columns and empirical probability constraints.
 
         Args:
-            columns_base (list[list[int]]): The base columns is an identity matrix for the initial variables.
+            transposed_columns_base (list[list[int]]): The base columns is an identity matrix for the initial variables.
             constraints_empirical_probabilities (list[float]): The right-hand side values for the empirical probability constraints.
 
         This method creates variables for each base column, sets up the constraints so that the
         linear combination of columns matches the empirical probabilities, and configures the model
         for minimization. Gurobi output is suppressed for iterative procedures.
         """
-        num_columns_base = len(columns_base)
-        self.vars = self.model.addVars(num_columns_base, obj=BIG_M, name="BaseColumns")
+        num_columns_base = len(transposed_columns_base)
+        self.vars = self.model.addVars(
+            num_columns_base,
+            obj=ColumnGenerationParameters.BIG_M.value,
+            name="BaseColumns",
+        )
         self.constrs = self.model.addConstrs(
             (
                 gp.quicksum(
-                    columns_base[column_id][realization_id] * self.vars[column_id]
+                    transposed_columns_base[column_id][realization_id]
+                    * self.vars[column_id]
                     for column_id in range(num_columns_base)
                 )
                 == constraints_empirical_probabilities[realization_id]
@@ -51,14 +58,17 @@ class MasterProblem:
             ),
             name="EmpiricalRestrictions",
         )
-        self.model.modelSense = GRB.MINIMIZE
-        # Turning off output because of the iterative procedure
-        self.model.params.outputFlag = 0
-        # self.model.setParam('FeasibilityTol', 1e-9)
+        self.model.setAttr(GRB.Attr.ModelSense, GRB.MINIMIZE)
+        self.model.setParam(GRB.Param.FeasibilityTol, 1e-9)
+        self.model.setParam(GRB.Param.OutputFlag, 0)
         self.model.update()
 
     def update(
-        self, new_column: list[float], index: int, obj_coeff: list[float], minimun: bool
+        self,
+        new_column: list[float],
+        index: int,
+        obj_coeff: list[float],
+        minimizes_objective_function: bool,
     ):
         """
         Adds a new column (variable) to the constraints in the master problem and updates the model.
@@ -67,25 +77,21 @@ class MasterProblem:
             new_column (list[float]): The coefficients of the new variable for each constraint.
             index (int): The index at which to add the new variable.
             obj_coeff (list[float]): The objective coefficient(s) in the objective function for the new variable.
-            minimun (bool): If True, the objective is minimized; if False, the coefficient is negated for maximization.
+            minimizes_objective_function (bool): If True, the objective is minimized; if False, the coefficient is negated for maximization.
 
         This method constructs a new Gurobi variable with the specified column and objective coefficient,
         adds it to the model, and updates the model structure.
         """
-        new_col = gp.Column(
-            coeffs=new_column, constrs=self.constrs.values()
-        )  # Includes the new variable in the constraints
+        if not minimizes_objective_function:
+            obj_coeff = -1 * obj_coeff
+
+        new_col = gp.Column(coeffs=new_column, constrs=self.constrs.values())
+
         logger.debug(f"Obj coeff: {obj_coeff}")
-        if minimun:
-            self.vars[index] = self.model.addVar(
-                obj=obj_coeff,
-                column=new_col,  # Adds the new variable
-                name=f"Variable[{index}]",
-            )
-        else:
-            self.vars[index] = self.model.addVar(
-                obj=-obj_coeff,
-                column=new_col,  # Adds the new variable
-                name=f"Variable[{index}]",
-            )
+
+        self.vars[index] = self.model.addVar(
+            obj=obj_coeff,
+            column=new_col,
+            name=f"Variable[{index}]",
+        )
         self.model.update()

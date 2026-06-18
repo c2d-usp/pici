@@ -2,6 +2,9 @@ import logging
 
 import pandas as pd
 
+from pici.intervention_inference_algorithm.column_generation.subproblem import get_node_list_realizations
+from pici.utils.probabilities_helper import find_conditional_probability
+
 logger = logging.getLogger(__name__)
 
 from pici.graph.graph import Graph
@@ -33,12 +36,13 @@ def build_linear_problem(
         intervention=intervention,
         target=target,
     )
+    
     mechanisms = objFG.get_mechanisms_pruned()
 
     interventionLatentParent = objFG.intervention.latent_parent
     cComponentEndogenous = interventionLatentParent.children
     consideredEndogenousNodes = list(
-        (set(cComponentEndogenous) & set(objFG.consideredGraphNodes))
+        (set(cComponentEndogenous) & set(objFG.considered_graph_nodes))
         | {objFG.intervention}
     )
 

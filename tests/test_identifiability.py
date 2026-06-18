@@ -1,3 +1,4 @@
+from itertools import product
 import logging
 import os
 import sys
@@ -13,12 +14,9 @@ if PROJECT_ROOT not in sys.path:
 
 logging.disable(logging.INFO)
 
+from experiments.utils.scalable_graphs_helper import find_true_value_in_three_latents_scalable_graphs, generate_three_latents_scalable_string_edges
 from pici.causal_model import CausalModel
 from pici.utils._enum import DataExamplesPaths
-from pici.utils.scalable_graphs_helper import (
-    find_true_value_in_scalable_graphs,
-    generate_scalable_string_edges,
-)
 
 
 class TestIsIdentifiableIntervention(unittest.TestCase):
@@ -85,15 +83,15 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
         Test identifiable intervention queries via subtests, using the scalable graph
         """
         cases = [
-            (1, 1, DataExamplesPaths.CSV_N1M1),
-            (2, 1, DataExamplesPaths.CSV_N2M1),
+            (1, 1, DataExamplesPaths.CSV_3_LATENTS_N1M1),
+            (2, 1, DataExamplesPaths.CSV_3_LATENTS_N2M1),
         ]
         unobs = ["U1", "U2", "U3"]
         interventions = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
         for N, M, csv_example in cases:
             with self.subTest(N=N, M=M):
-                edges = generate_scalable_string_edges(N=N, M=M)
+                edges = generate_three_latents_scalable_string_edges(N=N, M=M)
                 df = pd.read_csv(os.path.join(PROJECT_ROOT, csv_example.value))
                 df["U3"] = np.random.binomial(1, 0.5, size=len(df))
 
@@ -112,7 +110,7 @@ class TestIdentifiableInterventionQueries(unittest.TestCase):
 
                         identifiable_value = model.identifiable_intervention_query()
 
-                        tv = find_true_value_in_scalable_graphs(
+                        tv = find_true_value_in_three_latents_scalable_graphs(
                             N, M, target_value, intervention_value, df
                         )
 
